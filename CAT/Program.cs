@@ -1,4 +1,6 @@
+using CAT.EF;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,6 +8,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
+
+var connectionString = builder.Configuration.GetConnectionString("PostgresDB");
+builder.Services.AddDbContext<PostgresContext>(options =>
+    options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
