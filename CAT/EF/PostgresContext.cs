@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CAT.EF.DAL;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace CAT.EF;
@@ -243,8 +244,23 @@ public partial class PostgresContext : DbContext
                 .HasConstraintName("users_role_id_fkey");
         });
 
+        modelBuilder.Entity<UserInfo>(entity =>
+        {
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
+            entity.Property(e => e.OrganizationName).HasColumnName("organization_name");
+            entity.Property(e => e.PermissionId).HasColumnName("permission_id");
+            entity.ToView(null);
+        });
+
+        modelBuilder.HasDbFunction(() => GetUserInfo(default, default))
+            .HasName("get_user_info");
+
         OnModelCreatingPartial(modelBuilder);
     }
+
+    public IQueryable<UserInfo> GetUserInfo(string login, string hashedPass) => FromExpression(() => GetUserInfo(login, hashedPass));
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
