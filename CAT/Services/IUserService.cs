@@ -6,6 +6,6 @@ namespace CAT.Services
 {
     public interface IUserService
     {
-        UserInfoDTO GetUserInfo(string login, string hashedPass);
+        UserInfoDTO? GetUserInfo(string login, string hashedPass);
     }
 }

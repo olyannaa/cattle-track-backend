@@ -244,13 +244,13 @@ public partial class PostgresContext : DbContext
                 .HasConstraintName("users_role_id_fkey");
         });
 
-        modelBuilder.HasDbFunction(() => GetUserInfo(default, default))
-            .HasName("get_user_info");
-
         OnModelCreatingPartial(modelBuilder);
     }
 
-    public string GetUserInfo(string login, string hashedPass) => throw new NotImplementedException();
+    public string? GetUserInfo(string login, string hashedPass)
+    {
+        return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
+    }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

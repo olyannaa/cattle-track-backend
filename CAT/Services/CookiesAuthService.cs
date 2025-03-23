@@ -43,7 +43,6 @@ namespace CAT.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userInfo.Id),
-                new Claim("Permissions", String.Join(";", userInfo.PermissionIds))
             };
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         }
