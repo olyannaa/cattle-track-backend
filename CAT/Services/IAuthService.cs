@@ -1,11 +1,11 @@
 ﻿
-using CAT.Models;
+using CAT.Controllers.DTO;
 
 namespace CAT.Services
 {
     public interface IAuthService
     {
-        UserInfo LogIn(string username, string password);
+        UserInfoDTO LogIn(string username, string password);
         void LogOut();
     }
 }

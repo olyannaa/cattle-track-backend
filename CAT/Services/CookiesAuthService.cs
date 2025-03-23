@@ -1,5 +1,5 @@
 ﻿
-using CAT.Models;
+using CAT.Controllers.DTO;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
@@ -20,7 +20,7 @@ namespace CAT.Services
             _userService = userService;
         }
 
-        public UserInfo LogIn(string login, string password)
+        public UserInfoDTO LogIn(string login, string password)
         {
             var userInfo = _userService.GetUserInfo(login, CalculateSHA256(password));
             if (userInfo is null) throw new NullReferenceException();
@@ -38,12 +38,12 @@ namespace CAT.Services
             await _contextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
-        private ClaimsPrincipal GetUserPrincipal(UserInfo userInfo)
+        private ClaimsPrincipal GetUserPrincipal(UserInfoDTO userInfo)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userInfo.Id.ToString()),
-                new Claim("Permissions", String.Join(" ", userInfo.PermissionIds.Select(x => x.ToString())))
+                new Claim(ClaimTypes.NameIdentifier, userInfo.Id),
+                new Claim("Permissions", String.Join(";", userInfo.PermissionIds))
             };
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         }

@@ -1,11 +1,11 @@
 ﻿
-using CAT.Models;
+using CAT.Controllers.DTO;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace CAT.Services
 {
     public interface IUserService
     {
-        UserInfo? GetUserInfo(string login, string hashedPass);
+        UserInfoDTO GetUserInfo(string login, string hashedPass);
     }
 }
