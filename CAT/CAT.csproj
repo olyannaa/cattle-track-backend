@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DocumentationFile>C:\Users\Mink\Documents\GitHub\cattle-track-backend\CAT\CATAPI.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

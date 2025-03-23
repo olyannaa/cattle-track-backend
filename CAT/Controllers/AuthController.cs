@@ -18,6 +18,13 @@ namespace CAT.Controllers
             _authService = authService;
         }
 
+        /// <summary>
+        /// Авторизация по логину и паролю на куках
+        /// </summary>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Неправльно введённые данные</response>
         [HttpPost, Route("login")]
         [AuthExceptionFilter]
         public ActionResult Login([FromBody] LoginDTO body)
@@ -26,6 +33,12 @@ namespace CAT.Controllers
             return Ok(userInfo);
         }
 
+        /// <summary>
+        /// Отзыв кук с токеном
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="401">Не авторизован</response>
         [HttpPost, Route("logout"), Authorize]
         public ActionResult LogOut()
         {

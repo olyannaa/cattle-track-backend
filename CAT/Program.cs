@@ -4,13 +4,21 @@ using CAT.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var basePath = AppContext.BaseDirectory;
+
+    var xmlPath = Path.Combine(basePath, "CATAPI.xml");
+    options.IncludeXmlComments(xmlPath);
+});
 builder.Services.AddCors();
+
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAuthService, CookiesAuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
