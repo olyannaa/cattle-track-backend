@@ -50,6 +50,7 @@ app.UseCors(builder =>
          .AllowAnyHeader()
          .AllowAnyMethod()
          .WithExposedHeaders("Content-Disposition")
+         .AllowCredentials()
 );
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
