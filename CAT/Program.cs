@@ -46,7 +46,7 @@ builder.Services.AddDbContext<PostgresContext>(options =>
 var app = builder.Build();
 
 app.UseCors(builder =>
-     builder.AllowAnyOrigin()
+     builder.WithOrigins("http://localhost:3000")
          .AllowAnyHeader()
          .AllowAnyMethod()
          .WithExposedHeaders("Content-Disposition")
