@@ -1,5 +1,6 @@
 ﻿
 using CAT.Controllers.DTO;
+using CAT.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;

@@ -1,5 +1,6 @@
 using CAT.Controllers.DTO;
 using CAT.EF;
+using CAT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CAT.Services

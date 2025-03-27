@@ -1,8 +1,7 @@
-﻿
-using CAT.Controllers.DTO;
+﻿using CAT.Controllers.DTO;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
-namespace CAT.Services
+namespace CAT.Services.Interfaces
 {
     public interface IUserService
     {
