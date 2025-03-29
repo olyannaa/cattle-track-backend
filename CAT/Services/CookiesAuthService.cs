@@ -39,11 +39,17 @@ namespace CAT.Services
             await _contextAccessor.HttpContext!.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         }
 
+        public List<Claim> GetUserClaims()
+        {
+            return _contextAccessor?.HttpContext?.User.Claims.ToList() ?? new List<Claim>();
+        }
+            
         private ClaimsPrincipal GetUserPrincipal(UserInfoDTO userInfo)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userInfo.Id),
+                new Claim("Organization", userInfo.OrganizationId ?? String.Empty)
             };
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         }

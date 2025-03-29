@@ -252,5 +252,15 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
+    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid OrganizationId, string type)
+    {
+        return Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({OrganizationId},{type})");
+    }
+
+    public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
+    {
+        return Database.ExecuteSql($"SELECT update_animal({id},{tag},{type},{groupId},{birthDate},{status})");
+    }
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

@@ -1,6 +1,7 @@
 using CAT.EF;
 using CAT.Events;
 using CAT.Services;
+using CAT.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,8 @@ builder.Services.AddCors();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAuthService, CookiesAuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICSVService, CSVService>();
+builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddSingleton<CustomCookieAuthenticationEvents>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
