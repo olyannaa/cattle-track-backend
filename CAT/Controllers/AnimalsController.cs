@@ -38,13 +38,9 @@ namespace CAT.Controllers
             return Ok(census);
         }
 
-        [HttpPut, Route("{id}")]
+        [HttpPut, Route("{id}"), Authorize]
         public IActionResult EditCattleEntry([FromRoute] Guid id, [FromBody] UpdateAnimalDTO dto)
         {
-            var userOrg = _authService.GetUserClaims().Find(x => x.Type == "Organization")?.Value;
-            if (Guid.Parse(userOrg) != id)
-               return Forbid();
-
             var x = _db.UpdateAnimal(id, dto.TagNumber, dto.Type, dto.GroupID, dto.BirthDate, dto.Status);
             return Ok();
         }
