@@ -1,4 +1,8 @@
 using CAT.EF;
+using CAT.EF.DAL;
+using CAT.Services;
+using CAT.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,8 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.EnableAnnotations();
+});
 builder.Services.AddCors();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<YandexS3Service>();
+builder.Services.AddScoped<IAnimalService, AnimalService>();
+builder.Services.AddScoped<ICSVService, CSVService>();
+
+builder.Services.AddAuthorization();
 
 var connectionString = builder.Configuration.GetConnectionString("PostgresDB");
 builder.Services.AddDbContext<PostgresContext>(options =>
@@ -34,7 +47,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
