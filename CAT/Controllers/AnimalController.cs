@@ -30,9 +30,6 @@ namespace CAT.Controllers
         /// <param name="body">Данные для регистрации животного, включая фото.</param>
         /// <returns>Сообщение об успешной регистрации и URL загруженного фото.</returns>
         [HttpPost, Route("registration")]
-        [SwaggerOperation(Summary = "Регистрация животного", Description = "Регистрирует животное с фото и сохраняет информацию в базе данных.")]
-        [SwaggerResponse(200, "Успешная регистрация", typeof(object))]
-        [SwaggerResponse(400, "Некорректные входные данные")]
         public async Task<IActionResult> RegistrationAnimal([FromForm] AnimalRegistrationDTO body)
         {
             var photoUrl = await UploadFileInS3Async(body.Photo);
@@ -44,8 +41,6 @@ namespace CAT.Controllers
         /// Регистрирует нетеля в системе.
         /// </summary>
         [HttpPost, Route("registration/netel")]
-        [SwaggerOperation(Summary = "Регистрация нетеля", Description = "Регистрирует нетеля с фото и сохраняет информацию в базе данных.")]
-        [SwaggerResponse(200, "Успешная регистрация", typeof(object))]
         public async Task<IActionResult> RegistrationNetel([FromForm] NetelRegistrationDTO body)
         {
             var photoUrl = await UploadFileInS3Async(body.Photo);
@@ -57,9 +52,6 @@ namespace CAT.Controllers
         /// Импортирует данные о животных из CSV-файла.
         /// </summary>
         [HttpPost, Route("registration/import/csv")]
-        [SwaggerOperation(Summary = "Импорт животных из CSV", Description = "Принимает CSV-файл и добавляет животных в базу данных.")]
-        [SwaggerResponse(200, "Импорт успешен", typeof(object))]
-        [SwaggerResponse(400, "Некорректный файл или формат")]
         public ActionResult ImportAnimalsFromCSV(IFormFile file, Guid org_id)
         {
             if (file == null || !IsFileExtensionAllowed(file, new string[] { ".csv" }))
@@ -88,7 +80,7 @@ namespace CAT.Controllers
         /// Получает информацию о группах животных.
         /// </summary>
         [HttpGet, Route("groups")]
-        [SwaggerOperation(Summary = "Получение групп животных", Description = "Возвращает список групп животных для указанной организации.")]
+      
         public IActionResult GetGroups([FromQuery] Guid orgatization_id)
         {
             return Ok(_animalService.GetGroupsInfo(orgatization_id));
@@ -98,7 +90,7 @@ namespace CAT.Controllers
         /// Получает идентификационные поля для животных.
         /// </summary>
         [HttpGet, Route("identifications")]
-        [SwaggerOperation(Summary = "Получение полей идентификации", Description = "Возвращает список полей для идентификации животных.")]
+       
         public IActionResult GetIdentificationsFields([FromQuery] Guid orgatization_id)
         {
             return Ok(_animalService.GetIdentificationsFields(orgatization_id));
@@ -128,16 +120,5 @@ namespace CAT.Controllers
             return null;
         }
 
-        /// <summary>
-        /// Проверяет доступ к Yandex S3.
-        /// </summary>
-        [HttpGet("check-s3-access")]
-        [SwaggerOperation(Summary = "Проверка доступа к S3", Description = "Отправляет тестовый запрос в Yandex Object Storage.")]
-        [SwaggerResponse(200, "Доступ есть", typeof(string))]
-        public async Task<IActionResult> CheckS3Access()
-        {
-            await _s3Service.CheckS3AccessAsync();
-            return Ok("Доступ к S3 есть!");
-        }
     }
 }
