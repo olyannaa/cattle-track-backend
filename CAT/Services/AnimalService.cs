@@ -37,13 +37,13 @@ namespace CAT.Services
             var fatherId = GetAnimalIdByTag(dto.FatherTag);
             var motherId = GetAnimalIdByTag(dto.MotherTag);
 
-            if (_db.Groups.Find(dto.GroupId) == null) dto.GroupId = null;
             var animal = new Animal
             {
                 Id = animalId,
                 OrganizationId = dto.OrganizationId,
                 TagNumber = dto.TagNumber,
                 BirthDate = dto.BirthDate,
+                Type = dto.Type,
                 Breed = dto.Breed,
                 MotherId = motherId,
                 FatherId = fatherId,
@@ -52,7 +52,12 @@ namespace CAT.Services
                 Origin = dto.Origin,
                 OriginLocation = dto.OriginLocation,
             };
+            var beforeCount = _db.Animals.Count();
             _db.InsertAnimal(animal);
+            _db.SaveChanges();
+            var afterCount = _db.Animals.Count();
+            Console.WriteLine($"Количество записей в Animals: до = {beforeCount}, после = {afterCount}");
+
             if (dto.Type == "Нетель")
                 _db.IfNetelInsertReproduction( animalId, dto.InseminationDate, dto.ExpectedCalvingDate,
                                     dto.InseminationType, dto.SpermBatch, dto.Technician, dto.Notes);

@@ -36,8 +36,11 @@ namespace CAT.Controllers
             if (body.Photo != null &&
                 new string[] { ".png", ".jpg", ".jpeg" }.Contains(Path.GetExtension(body.Photo.FileName)))
                 photoUrl = await _s3Service.UploadFileInS3Async(body.Photo);
+            if (body.Type == "Нетель" && (body.InseminationDate == default || body.ExpectedCalvingDate == default
+                || body.SpermBatch == default || body.InseminationType == default))
+                return BadRequest(new ErrorDTO("Не все обязательные поля заполнены!"));
             _animalService.RegisterAnimal(body);
-            return Ok(new { Message = "ok", PhotoUrl = photoUrl });
+            return Ok(new { Message = "Животное успешно зарегистрировано!"});
         }
 
         /// <summary>

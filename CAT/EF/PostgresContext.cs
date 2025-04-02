@@ -266,7 +266,7 @@ public partial class PostgresContext : DbContext
                                           DateOnly expectedCalvingDate, string inseminationType,
                                           string spermBatch, string technician, string notes)
     {
-        Database.ExecuteSqlRaw($@"SELECT if_netel_insert_reproduction({animalId},
+        Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},
                                 {inseminationDate}, {expectedCalvingDate}, {inseminationType},
                                 {spermBatch}, {technician}, {notes})");
     }
