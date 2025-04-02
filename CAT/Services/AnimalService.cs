@@ -1,4 +1,5 @@
-﻿using CAT.Controllers.DTO;
+﻿using Amazon.Runtime.Telemetry;
+using CAT.Controllers.DTO;
 using CAT.EF;
 using CAT.EF.DAL;
 using CAT.Models;
@@ -16,42 +17,48 @@ namespace CAT.Services
             _db = postgresContext;
         }
 
-        public IEnumerable<GroupInfoDTO>? GetGroupsInfo(Guid org_id)
+        public List<GroupInfoDTO>? GetGroupsInfo(Guid org_id)
         {
-            return _db.Groups
-                .FromSqlRaw("SELECT * FROM get_groups({0})", org_id)
+            return _db.GetOrgGroups(org_id)
                 .Select(x => new GroupInfoDTO() { Id = x.Id, Name = x.Name})
                 .ToList();
 
         }
 
-        public IEnumerable<IdentificationInfoDTO>? GetIdentificationsFields(Guid org_id)
+        public List<IdentificationInfoDTO>? GetIdentificationsFields(Guid org_id)
         {
-            return _db.IdentificationFields
-                .FromSqlRaw("SELECT * FROM get_identification_fields({0})", org_id)
-                .Select(x => new IdentificationInfoDTO{ Id = x.Id, Name = x.FieldName, Order = x.FieldOrder })
+            return _db.GetOrgIdentifications(org_id)
+                .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.FieldName, Order = x.FieldOrder })
                 .ToList();
         }
 
-        public void RegistrationAnimal(AnimalRegistrationDTO animal, string? photoUrl)
+        public void RegisterAnimal(AnimalRegistrationDTO dto)
         {
             var animalId = Guid.NewGuid();
-            var fatherId = GetAnimalIdByTag(animal.FatherTag);
-            var motherId = GetAnimalIdByTag(animal.MotherTag);
+            var fatherId = GetAnimalIdByTag(dto.FatherTag);
+            var motherId = GetAnimalIdByTag(dto.MotherTag);
 
-            if (_db.Groups.Find(animal.GroupId) == null) animal.GroupId = null;
-            _db.Database.ExecuteSqlInterpolated($@"
-                                                SELECT insert_animal(
-                                                    {animalId}, {animal.OrganizationId}, {animal.TagNumber},
-                                                    {animal.BirthDate}, {animal.Type},
-                                                    {animal.Breed}, {motherId}, {fatherId}, {animal.Status},
-                                                    {animal.GroupId}, {animal.Origin}, {animal.OriginLocation}
-                                                )");
-            foreach (var animalField in animal.AdditionalFields)
-                _db.Database.ExecuteSqlInterpolated($@"
-                                                SELECT insert_animal_identification(
-                                                    {animalId}, {animalField.Key}, {animalField.Value}
-                                                )");
+            if (_db.Groups.Find(dto.GroupId) == null) dto.GroupId = null;
+            var animal = new Animal
+            {
+                Id = animalId,
+                OrganizationId = dto.OrganizationId,
+                TagNumber = dto.TagNumber,
+                BirthDate = dto.BirthDate,
+                Breed = dto.Breed,
+                MotherId = motherId,
+                FatherId = fatherId,
+                Status = dto.Status,
+                GroupId = dto.GroupId,
+                Origin = dto.Origin,
+                OriginLocation = dto.OriginLocation,
+            };
+            _db.InsertAnimal(animal);
+            if (dto.Type == "Нетель")
+                _db.IfNetelInsertReproduction( animalId, dto.InseminationDate, dto.ExpectedCalvingDate,
+                                    dto.InseminationType, dto.SpermBatch, dto.Technician, dto.Notes);
+            foreach (var animalField in dto.AdditionalFields)
+                _db.InsertAnimalIdentification(animalId, animalField.Key, animalField.Value);
         }
 
         public ImportAnimalsInfo ImportAnimalsFromCSV(List<AnimalCSVInfoDTO> animals, Guid org_id)
@@ -93,10 +100,7 @@ namespace CAT.Services
                                                         animal.WeightOfDisposal, animal.LastWeightDate, animal.ReasonOfDisposal);
                     var animalId = _db.Animals.FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.TagNumber).Id;
                     foreach (var field in animal.AdditionalFields)
-                        _db.Database.ExecuteSqlInterpolated($@"
-                                                SELECT insert_animal_identification(
-                                                    {animalId}, {field.Key}, {field.Value}
-                                                )");
+                        _db.InsertAnimalIdentification(animalId, field.Key, field.Value);
                     importInfo.Imported++;
                 }
                 catch
@@ -111,14 +115,6 @@ namespace CAT.Services
             return importInfo;
         }
 
-        public void RegistrationNetel(NetelRegistrationDTO animal, string? photoUrl)
-        {
-            RegistrationAnimal(animal, photoUrl);
-            var animalId = GetAnimalIdByTag(animal.TagNumber);
-            _db.Database.ExecuteSqlRaw("SELECT if_netel_insert_reproduction({0}, {1}, {2}, {3}, {4}, {5}, {6})",
-                                    animalId, animal.InseminationDate, animal.ExpectedCalvingDate,
-                                    animal.InseminationType, animal.SpermBatch, animal.Technician, animal.Notes);
-        }
 
         private Guid? GetAnimalIdByTag(string tag)
         {

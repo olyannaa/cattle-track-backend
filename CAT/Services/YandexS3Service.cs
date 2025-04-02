@@ -2,6 +2,8 @@
 using Amazon.S3.Model;
 using Amazon.S3;
 using Amazon;
+using System.IO;
+using System.Net.Mime;
 
 namespace CAT.Services
 {
@@ -43,6 +45,28 @@ namespace CAT.Services
             await _s3Client.PutObjectAsync(request);
             return $"https://storage.yandexcloud.net/{_bucketName}/{fileName}";
         }
+
+        public async Task<string> UploadFileInS3Async(IFormFile file)
+        {
+            if (file != null && file.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}";
+                using var stream = file.OpenReadStream();
+                var request = new PutObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = fileName,
+                    InputStream = stream,
+                    ContentType = file.ContentType,
+                    CannedACL = S3CannedACL.PublicRead
+                };
+
+                await _s3Client.PutObjectAsync(request);
+                return fileName;
+            }
+            return null;
+        }
+
         public async Task<bool> CheckS3AccessAsync()
         {
             try

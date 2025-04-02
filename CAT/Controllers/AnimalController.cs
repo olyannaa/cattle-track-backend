@@ -32,19 +32,11 @@ namespace CAT.Controllers
         [HttpPost, Route("registration")]
         public async Task<IActionResult> RegistrationAnimal([FromForm] AnimalRegistrationDTO body)
         {
-            var photoUrl = await UploadFileInS3Async(body.Photo);
-            _animalService.RegistrationAnimal(body, photoUrl);
-            return Ok(new { Message = "ok", PhotoUrl = photoUrl });
-        }
-
-        /// <summary>
-        /// Регистрирует нетеля в системе.
-        /// </summary>
-        [HttpPost, Route("registration/netel")]
-        public async Task<IActionResult> RegistrationNetel([FromForm] NetelRegistrationDTO body)
-        {
-            var photoUrl = await UploadFileInS3Async(body.Photo);
-            _animalService.RegistrationNetel(body, photoUrl);
+            var photoUrl = "";
+            if (body.Photo != null &&
+                new string[] { ".png", ".jpg", ".jpeg" }.Contains(Path.GetExtension(body.Photo.FileName)))
+                photoUrl = await _s3Service.UploadFileInS3Async(body.Photo);
+            _animalService.RegisterAnimal(body);
             return Ok(new { Message = "ok", PhotoUrl = photoUrl });
         }
 
@@ -54,8 +46,8 @@ namespace CAT.Controllers
         [HttpPost, Route("registration/import/csv")]
         public ActionResult ImportAnimalsFromCSV(IFormFile file, Guid org_id)
         {
-            if (file == null || !IsFileExtensionAllowed(file, new string[] { ".csv" }))
-                return StatusCode(400);
+            if (file == null || !new string[] { ".csv" }.Contains(Path.GetExtension(file.FileName)))
+                return BadRequest("File is not valid");
 
             var animals = _csvService.ReadAnimalCSV(file.OpenReadStream())
                                      .Select(x =>
@@ -95,30 +87,5 @@ namespace CAT.Controllers
         {
             return Ok(_animalService.GetIdentificationsFields(orgatization_id));
         }
-
-        /// <summary>
-        /// Проверяет, является ли загруженный файл CSV-файлом.
-        /// </summary>
-        public static bool IsFileExtensionAllowed(IFormFile file, string[] allowedExtensions)
-        {
-            var extension = Path.GetExtension(file.FileName);
-            return allowedExtensions.Contains(extension);
-        }
-
-        /// <summary>
-        /// Загружает фото животного в S3-хранилище и возвращает его URL.
-        /// </summary>
-        [SwaggerIgnore]
-        public async Task<string> UploadFileInS3Async(IFormFile file)
-        {
-            if (file != null && file.Length > 0)
-            {
-                var fileName = $"{Guid.NewGuid()}_{file.FileName}";
-                using var stream = file.OpenReadStream();
-                return await _s3Service.UploadFileAsync(stream, fileName, file.ContentType);
-            }
-            return null;
-        }
-
     }
 }
