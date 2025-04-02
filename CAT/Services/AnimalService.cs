@@ -28,7 +28,6 @@ namespace CAT.Services
         public List<IdentificationInfoDTO>? GetIdentificationsFields(Guid org_id)
         {
             return _db.GetOrgIdentifications(org_id)
-                .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.FieldName, Order = x.FieldOrder })
                 .ToList();
         }
 

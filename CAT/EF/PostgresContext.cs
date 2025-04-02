@@ -241,10 +241,11 @@ public partial class PostgresContext : DbContext
         OnModelCreatingPartial(modelBuilder);
     }
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-    public IQueryable<IdentificationField>? GetOrgIdentifications(Guid org_id) 
-        => IdentificationFields.FromSqlRaw($@"SELECT * FROM get_identification_fields({org_id})");
+    public IQueryable<IdentificationInfoDTO>? GetOrgIdentifications(Guid org_id)
+        => IdentificationFields.FromSqlRaw(@"SELECT * FROM get_identification_fields({0})", org_id)
+                                .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.FieldName });
     public IQueryable<Group>? GetOrgGroups(Guid org_id)
-        => Groups.FromSqlRaw($@"SELECT * FROM get_groups({org_id})");
+        => Groups.FromSqlRaw(@"SELECT * FROM get_groups({0})", org_id);
     public void InsertAnimal(Animal animal)
     {
         Database.ExecuteSqlInterpolated($@"SELECT insert_animal(
