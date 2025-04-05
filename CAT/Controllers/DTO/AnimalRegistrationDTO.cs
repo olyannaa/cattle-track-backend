@@ -30,16 +30,12 @@ namespace CAT.Controllers.DTO
 
         //if netel
         [Format("dd.MM.yyyy")]
-        [RequiredIfNetel(nameof(Type), ErrorMessage = "Дата осеменения обязательна для Нетеля")]
-        public DateOnly InseminationDate { get; set; } = new DateOnly();
+        public DateOnly? InseminationDate { get; set; } = new DateOnly();
         [Format("dd.MM.yyyy")]
-        [RequiredIfNetel(nameof(Type), ErrorMessage = "Дата отела для Нетеля")]
-        public DateOnly ExpectedCalvingDate { get; set; } = new DateOnly();
-        [RequiredIfNetel(nameof(Type), ErrorMessage = "Тип осеменения для Нетеля")]
-        public string InseminationType { get; set; } = null;
-        [RequiredIfNetel(nameof(Type), ErrorMessage = "Номер партии спермы обязательна для Нетеля")]
-        public string SpermBatch { get; set; } = null;
-        public string Technician { get; set; } = null;
-        public string Notes { get; set; } = null;
+        public DateOnly? ExpectedCalvingDate { get; set; } = new DateOnly();
+        public string? InseminationType { get; set; } = null;
+        public string? SpermBatch { get; set; } = null;
+        public string? Technician { get; set; } = null;
+        public string? Notes { get; set; } = null;
     }
 }

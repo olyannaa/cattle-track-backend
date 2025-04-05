@@ -262,8 +262,8 @@ public partial class PostgresContext : DbContext
                                            {id}, {fieldName}, {fieldValue})");
     }
 
-    public void IfNetelInsertReproduction(Guid animalId, DateOnly inseminationDate,
-                                          DateOnly expectedCalvingDate, string inseminationType,
+    public void IfNetelInsertReproduction(Guid animalId, DateOnly? inseminationDate,
+                                          DateOnly? expectedCalvingDate, string inseminationType,
                                           string spermBatch, string technician, string notes)
     {
         Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},

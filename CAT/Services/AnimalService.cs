@@ -5,6 +5,7 @@ using CAT.EF.DAL;
 using CAT.Models;
 using CAT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace CAT.Services
 {
@@ -70,7 +71,8 @@ namespace CAT.Services
             var identificationFields = GetIdentificationsFields(org_id);
             var fieldOrder = 1;
             var importInfo = new ImportAnimalsInfo();
-            foreach(var field in identificationFields)
+            var animalStatuses = new Dictionary<string, string>();
+            foreach (var field in identificationFields)
                 foreach(var animalField in animals[0].AdditionalFields)
                 {
                     if (field.Name != animalField.Key) _db.IdentificationFields.Add(new IdentificationField
@@ -80,28 +82,42 @@ namespace CAT.Services
                         FieldOrder = fieldOrder++,
                         OrganizationId = org_id
                     });
+                    importInfo.CreatedFields++;
+                    importInfo.FieldNames.Add(animalField.Key);
                 }
             _db.SaveChanges();
             var allOrgAnimals = _db.Animals.Where(x => x.OrganizationId == org_id).ToList();
-            var animalsWithoutDuplicates = animals.Where(x => allOrgAnimals.Any(a => a.TagNumber == x.TagNumber));
+            var animalsWithoutDuplicates = animals.Where(x => allOrgAnimals.Any(a => a.TagNumber == x.TagNumber) 
+                                                              && x.TagNumber != "")
+                                                  .OrderBy(a => a.Status == "Корова стада" ? 0 : 1);
+            var activeAnimals = new List<AnimalCSVInfoDTO>();
+            var ancestorAnimals = new List<AnimalCSVInfoDTO>();
+            foreach (var animal in animalsWithoutDuplicates)
+            {
+                if ((animal.Status == "Корова стада" || animal.Status == "Бык стада") 
+                    && ((animal.Type == "Бычок" || animal.Type == "Телка") && animal.Status != "Мат.предок" 
+                    && animal.Status != "Отц.предок"))
+                    activeAnimals.Add(animal);
+                else ancestorAnimals.Add(animal);
+            }
+
 
             foreach (var animal in animalsWithoutDuplicates)
             {
-                DateOnly dateOfDisposal, dateOfReception, birthDay, lastWeightDate = new DateOnly(); 
-                if (animal.DateOfDisposal != "") dateOfDisposal = DateOnly.Parse(animal.DateOfDisposal);
-                if (animal.DateOfReceipt != "") dateOfReception = DateOnly.Parse(animal.DateOfReceipt);
-                if (animal.BirthDate != "") birthDay = DateOnly.Parse(animal.BirthDate);
-                if (animal.LastWeightDate != "") lastWeightDate = DateOnly.Parse(animal.LastWeightDate);
                 var originLocation = $"{animal.OriginFarm} {animal.OriginRegion} {animal.OriginCountry}";
                 try
                 {
+                    var birthDate = ParseStringToDate(animal.BirthDate);
+                    var dateOfReceipt = ParseStringToDate(animal.DateOfReceipt);
+                    var dateOfDisposal = ParseStringToDate(animal.DateOfDisposal);
+                    var lastWeightDate = ParseStringToDate(animal.LastWeightDate);
                     _db.Database.ExecuteSqlRaw("SELECT insert_animal_from_csv({0}, {1}," +
                         "                {2}::date, {3}, {4}, {5}::uuid, {6}::uuid, {7}, {8}::uuid, {9}, {10}," +
                                         "{11},{12},{13},{14},{15},{16},{17})",
-                                                        org_id, animal.TagNumber, animal.BirthDate, animal.Type,
+                                                        org_id, animal.TagNumber, birthDate, animal.Type,
                                                         animal.Breed, animal.MotherTag ?? null, animal.FatherTag ?? null, animal.Status,
-                                                        null, "", originLocation, animal.Сonsumption, animal.DateOfReceipt, animal.DateOfDisposal, animal.LastWeightWeight,
-                                                        animal.WeightOfDisposal, animal.LastWeightDate, animal.ReasonOfDisposal);
+                                                        null, "", originLocation, animal.Сonsumption, dateOfReceipt, dateOfDisposal, animal.LastWeightWeight,
+                                                        animal.WeightOfDisposal, lastWeightDate, animal.ReasonOfDisposal);
                     var animalId = _db.Animals.FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.TagNumber).Id;
                     foreach (var field in animal.AdditionalFields)
                         _db.InsertAnimalIdentification(animalId, field.Key, field.Value);
@@ -125,6 +141,27 @@ namespace CAT.Services
             var animal = _db.Animals.FirstOrDefault(x => x.TagNumber == tag);
             if (animal == null) return null;
             return animal.Id;
+        }
+
+        static DateOnly? ParseStringToDate(string dateString)
+        {
+            if (string.IsNullOrWhiteSpace(dateString))
+                return null;
+
+            string[] formats =
+            {
+                "dd.MM.yyyy",
+                "yyyy-MM-dd",
+                "dd/MM/yyyy",
+                "MM/dd/yyyy",
+                "dd-MM-yyyy"
+            };
+
+            if (DateTime.TryParseExact(dateString.Trim(), formats,
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
+                return DateOnly.FromDateTime(dateTime);
+
+            return null;
         }
     }
 }
