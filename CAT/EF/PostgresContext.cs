@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CAT.EF.DAL;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace CAT.EF;
@@ -244,6 +245,11 @@ public partial class PostgresContext : DbContext
         });
 
         OnModelCreatingPartial(modelBuilder);
+    }
+
+    public string? GetUserInfo(string login, string hashedPass)
+    {
+        return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
