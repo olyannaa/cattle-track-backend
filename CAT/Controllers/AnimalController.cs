@@ -76,9 +76,9 @@ namespace CAT.Controllers
         /// </summary>
         [HttpGet, Route("groups")]
       
-        public IActionResult GetGroups([FromQuery] Guid orgatization_id)
+        public IActionResult GetGroups([FromQuery] Guid organization_id)
         {
-            return Ok(_animalService.GetGroupsInfo(orgatization_id));
+            return Ok(_animalService.GetGroupsInfo(organization_id));
         }
 
         /// <summary>
@@ -86,9 +86,9 @@ namespace CAT.Controllers
         /// </summary>
         [HttpGet, Route("identifications")]
        
-        public IActionResult GetIdentificationsFields([FromQuery] Guid orgatization_id)
+        public IActionResult GetIdentificationsFields([FromQuery] Guid organization_id)
         {
-            return Ok(_animalService.GetIdentificationsFields(orgatization_id));
+            return Ok(_animalService.GetIdentificationsFields(organization_id));
         }
     }
 }

@@ -30,12 +30,12 @@ namespace CAT.Controllers.DTO
 
         //if netel
         [Format("dd.MM.yyyy")]
-        public DateOnly? InseminationDate { get; set; } = new DateOnly();
+        public DateOnly InseminationDate { get; set; } = new DateOnly();
         [Format("dd.MM.yyyy")]
-        public DateOnly? ExpectedCalvingDate { get; set; } = new DateOnly();
-        public string? InseminationType { get; set; } = null;
-        public string? SpermBatch { get; set; } = null;
-        public string? Technician { get; set; } = null;
-        public string? Notes { get; set; } = null;
+        public DateOnly ExpectedCalvingDate { get; set; } = new DateOnly();
+        public string InseminationType { get; set; } = null;
+        public string SpermBatch { get; set; } = null;
+        public string Technician { get; set; } = null;
+        public string Notes { get; set; } = null;
     }
 }

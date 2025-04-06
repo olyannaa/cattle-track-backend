@@ -132,7 +132,6 @@ public partial class PostgresContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.FieldName).HasColumnName("field_name");
-            entity.Property(e => e.FieldOrder).HasColumnName("field_order");
             entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.IdentificationFields)
@@ -269,6 +268,12 @@ public partial class PostgresContext : DbContext
         Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},
                                 {inseminationDate}, {expectedCalvingDate}, {inseminationType},
                                 {spermBatch}, {technician}, {notes})");
+    }
+
+    public void AddIdentificationField(string fieldName, Guid org_id)
+    {
+        Database.ExecuteSqlInterpolated($@"SELECT add_identification_field(
+                                           {fieldName}, {org_id})");
     }
 
 }
