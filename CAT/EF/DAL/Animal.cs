@@ -13,7 +13,7 @@ public partial class Animal
 
     public string? Type { get; set; }
 
-    public DateOnly? BirtDate { get; set; }
+    public DateOnly? BirthDate { get; set; }
 
     public string? Breed { get; set; }
 
@@ -28,12 +28,6 @@ public partial class Animal
     public string? Origin { get; set; }
 
     public string? OriginLocation { get; set; }
-
-    public string? IdOrganizationIdTagNumberTypeBirthDateBreedMotherIdF { get; set; }
-
-    public string? BirthDate { get; set; }
-
-    public string? GroupName { get; set; }
 
     public virtual ICollection<AnimalIdentification> AnimalIdentifications { get; set; } = new List<AnimalIdentification>();
 

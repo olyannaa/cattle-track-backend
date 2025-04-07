@@ -48,19 +48,12 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.BirtDate).HasColumnName("birt_date");
             entity.Property(e => e.BirthDate)
                 .HasMaxLength(50)
                 .HasColumnName("birth_date");
             entity.Property(e => e.Breed).HasColumnName("breed");
             entity.Property(e => e.FatherId).HasColumnName("father_id");
             entity.Property(e => e.GroupId).HasColumnName("group_id");
-            entity.Property(e => e.GroupName)
-                .HasMaxLength(50)
-                .HasColumnName("group_name");
-            entity.Property(e => e.IdOrganizationIdTagNumberTypeBirthDateBreedMotherIdF)
-                .HasMaxLength(256)
-                .HasColumnName("id;organization_id;tag_number;type;birth_date;breed;mother_id;f");
             entity.Property(e => e.MotherId).HasColumnName("mother_id");
             entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
             entity.Property(e => e.Origin).HasColumnName("origin");
