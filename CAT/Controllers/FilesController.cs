@@ -31,16 +31,10 @@ namespace CAT.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("csv/animals"), Authorize]
-        public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto)
+        [OrgValidationTypeFilter(checkAdmin: true, checkOrg: true)]
+        public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
         {
-            if (_db.Organizations.FirstOrDefault(x => x.Id == dto.Id) is null)
-                return BadRequest("Организация не найдена");
-
-            var userOrg = _authService.GetUserClaims().Find(x => x.Type == "Organization")?.Value;
-            if (Guid.Parse(userOrg) != dto.Id)
-                return Forbid();
-
-            var census = _animalService.GetAnimalCensus(dto.Id, dto.Type).ToList();
+            var census = _animalService.GetAnimalCensus(organizationId, dto.Type).ToList();
             var csvFile = _csv.WriteCSV(census);
 
             return File(csvFile, "application/octet-stream", $"{dto.Type}.csv");

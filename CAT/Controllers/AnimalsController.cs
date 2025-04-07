@@ -1,10 +1,12 @@
 ﻿using CAT.Controllers.DTO;
 using CAT.EF;
+using CAT.EF.DAL;
 using CAT.Services;
 using CAT.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CAT.Controllers
 {
@@ -32,16 +34,10 @@ namespace CAT.Controllers
         /// <response code="400">Неверно введённые данные</response>
         /// <response code="401">Не авторизован</response>
         [HttpGet, Authorize]
-        public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto)
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
         { 
-            if (_db.Organizations.FirstOrDefault(x => x.Id == dto.Id) is null)
-                return BadRequest("Организация не найдена");
-
-            var userOrg = _authService.GetUserClaims().Find(x => x.Type == "Organization")?.Value;
-            if (Guid.Parse(userOrg) != dto.Id)
-                return Forbid();
-
-            var census = _animalService.GetAnimalCensus(dto.Id, dto.Type).ToList();
+            var census = _animalService.GetAnimalCensus(organizationId, dto.Type).ToList();
             return Ok(census);
         }
 
@@ -53,21 +49,38 @@ namespace CAT.Controllers
         /// <returns></returns>
         /// <response code="200">Успешное выполнение</response>
         /// <response code="401">Не авторизован</response>
-        [HttpPut, Route("{id}"), Authorize]
-        public IActionResult EditCattleEntry([FromRoute] Guid id, [FromBody] UpdateAnimalDTO dto)
+        /// <response code="403">Пользователь не админ или не имеет доступа к организации</response>
+        [HttpPut, Authorize]
+        [OrgValidationTypeFilter(checkAdmin: true, checkOrg: true)]
+        public IActionResult EditCattleEntry([FromBody] UpdateAnimalDTO[] dtoArray, [FromHeader] Guid organizationId)
         {
-            var x = _db.UpdateAnimal(id, dto.TagNumber, dto.Type, dto.GroupID, dto.BirthDate, dto.Status);
+            using (var transaction = _db.Database.BeginTransaction())
+            {
+                foreach(var dto in dtoArray)
+                {
+                    if (_db.Animals.Where(x => x.Id == dto.Id).SingleOrDefault()?.OrganizationId != organizationId)
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO("Один из животных не приналежит организации пользователя"));
+                    }
+                        
+                    var x = _db.UpdateAnimal(dto.Id, dto.TagNumber, null, dto.GroupID, dto.BirthDate, dto.Status);
+                }
+                transaction.Commit();
+            }
             return Ok();
         }
 
+        /// <summary>
+        /// Получить группы животных
+        /// </summary>
+        /// <param name="organizationId">Id организации</param>
+        /// <returns></returns>
         [HttpGet, Route("groups"), Authorize]
+        [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetAnimalGroups([FromHeader] Guid organizationId)
-        { 
-            var userOrg = _authService.GetUserClaims().Find(x => x.Type == "Organization")?.Value;
-            if (Guid.Parse(userOrg) != organizationId)
-                return Forbid();
-            
-            return Ok(_db.Groups.Where(x => x.OrganizationId == organizationId));
+        {   
+            return Ok(_db.Groups.Where(x => x.OrganizationId == organizationId).Select(x => new {x.Name, x.Id}));
         }
     }
 }
