@@ -128,8 +128,8 @@ public partial class PostgresContext : DbContext
                 .HasConstraintName("groups_organization_id_fkey");
 
             entity.HasOne(d => d.Type).WithMany(p => p.Groups)
-                .HasForeignKey(d => d.TypeId)
-                .HasConstraintName("fk_group_type");
+                 .HasForeignKey(d => d.TypeId)
+                 .HasConstraintName("fk_group_type");
         });
 
         modelBuilder.Entity<IdentificationField>(entity =>
