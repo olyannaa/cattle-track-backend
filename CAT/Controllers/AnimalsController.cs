@@ -59,5 +59,15 @@ namespace CAT.Controllers
             var x = _db.UpdateAnimal(id, dto.TagNumber, dto.Type, dto.GroupID, dto.BirthDate, dto.Status);
             return Ok();
         }
+
+        [HttpGet, Route("groups"), Authorize]
+        public IActionResult GetAnimalGroups([FromHeader] Guid organizationId)
+        { 
+            var userOrg = _authService.GetUserClaims().Find(x => x.Type == "Organization")?.Value;
+            if (Guid.Parse(userOrg) != organizationId)
+                return Forbid();
+            
+            return Ok(_db.Groups.Where(x => x.OrganizationId == organizationId));
+        }
     }
 }
