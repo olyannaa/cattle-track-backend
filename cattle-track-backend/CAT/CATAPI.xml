@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>CAT</name>
+    </assembly>
+    <members>
+        <member name="M:CAT.Controllers.AnimalController.RegistrationAnimal(CAT.Controllers.DTO.AnimalRegistrationDTO)">
+            <summary>
+            Регистрирует новое животное в системе.
+            </summary>
+            <param name="body">Данные для регистрации животного, включая фото.</param>
+            <returns>Сообщение об успешной регистрации и URL загруженного фото.</returns>
+        </member>
+        <member name="M:CAT.Controllers.AnimalController.ImportAnimalsFromCSV(Microsoft.AspNetCore.Http.IFormFile,System.Guid)">
+            <summary>
+            Импортирует данные о животных из CSV-файла.
+            </summary>
+        </member>
+        <member name="M:CAT.Controllers.AnimalController.GetGroups(System.Guid)">
+            <summary>
+            Получает информацию о группах животных.
+            </summary>
+        </member>
+        <member name="M:CAT.Controllers.AnimalController.GetIdentificationsFields(System.Guid)">
+            <summary>
+            Получает идентификационные поля для животных.
+            </summary>
+        </member>
+        <member name="M:CAT.Controllers.AuthController.Login(CAT.Controllers.DTO.LoginDTO)">
+            <summary>
+            Авторизация по логину и паролю на куках
+            </summary>
+            <param name="body"></param>
+            <returns></returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="400">Неправльно введённые данные</response>
+        </member>
+        <member name="M:CAT.Controllers.AuthController.LogOut">
+            <summary>
+            Отзыв кук с токеном
+            </summary>
+            <returns></returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="401">Не авторизован</response>
+        </member>
+        <member name="T:CAT.Migrations.editgroup">
+            <inheritdoc />
+        </member>
+        <member name="M:CAT.Migrations.editgroup.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CAT.Migrations.editgroup.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:CAT.Migrations.editgroup.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

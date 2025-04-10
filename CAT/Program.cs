@@ -20,6 +20,12 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 builder.Services.AddCors();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<YandexS3Service>();
+builder.Services.AddScoped<IAnimalService, AnimalService>();
+builder.Services.AddScoped<ICSVService, CSVService>();
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAuthService, CookiesAuthService>();
