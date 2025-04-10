@@ -1,6 +1,7 @@
 ﻿using CAT.Controllers.DTO;
 using CAT.EF;
 using CAT.EF.DAL;
+using CAT.Logic;
 using CAT.Services;
 using CAT.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CAT.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]"), Authorize]
     [ApiController]
     public class AnimalsController : ControllerBase
     {
@@ -27,18 +28,34 @@ namespace CAT.Controllers
         }
 
         /// <summary>
-        /// Возвращение списка животных по типу
+        /// Возвращение списка животных по типу с пагинацией
         /// </summary>
         /// <returns></returns>
         /// <response code="200">Успешное выполнение</response>
         /// <response code="400">Неверно введённые данные</response>
         /// <response code="401">Не авторизован</response>
-        [HttpGet, Authorize]
+        [HttpGet]
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
         { 
-            var census = _animalService.GetAnimalCensus(organizationId, dto.Type).ToList();
+            var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
+            var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.Page, isMobileDevice)
+                .ToList();
             return Ok(census);
+        }
+        /// <summary>
+        /// Количество страниц для отображения списка животных
+        /// </summary>
+        /// <param name="type">Тип животного</param>
+        /// <param name="organizationId">Id организации</param>
+        /// <returns></returns>
+        [HttpGet, Route("page-count")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetCattlePageCount([FromQuery] string type, [FromHeader] Guid organizationId)
+        { 
+            var pagination = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5.0 : 10.0;
+            var count = Math.Ceiling(_animalService.GetAnimalCensus(organizationId, type).Count() / pagination);
+            return Ok(new {Count = count});
         }
 
         /// <summary>
@@ -50,7 +67,7 @@ namespace CAT.Controllers
         /// <response code="200">Успешное выполнение</response>
         /// <response code="401">Не авторизован</response>
         /// <response code="403">Пользователь не админ или не имеет доступа к организации</response>
-        [HttpPut, Authorize]
+        [HttpPut]
         [OrgValidationTypeFilter(checkAdmin: true, checkOrg: true)]
         public IActionResult EditCattleEntry([FromBody] UpdateAnimalDTO[] dtoArray, [FromHeader] Guid organizationId)
         {
@@ -76,7 +93,7 @@ namespace CAT.Controllers
         /// </summary>
         /// <param name="organizationId">Id организации</param>
         /// <returns></returns>
-        [HttpGet, Route("groups"), Authorize]
+        [HttpGet, Route("groups")]
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetAnimalGroups([FromHeader] Guid organizationId)
         {   

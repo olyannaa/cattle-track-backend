@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using CAT.Logic;
 
 namespace CAT.Controllers.DTO
 {
@@ -9,6 +10,13 @@ namespace CAT.Controllers.DTO
         /// </summary>
         /// <example>Корова</example>
         [Required]
-        public string Type { get; set; }
+        public string Type { get; init; }
+
+        /// <summary>
+        /// Номер страницы
+        /// </summary>
+        /// <example>Корова</example>
+        [Required, GreaterThan(0)]
+        public int Page { get; init; }
     }
 }
