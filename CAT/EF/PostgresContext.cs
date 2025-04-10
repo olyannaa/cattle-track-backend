@@ -49,7 +49,6 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()
                 .HasColumnName("id");
-            entity.Property(e => e.BirthDate).HasColumnName("birt_date");
             entity.Property(e => e.BirthDate)
                 .HasMaxLength(50)
                 .HasColumnName("birth_date");
@@ -116,11 +115,15 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Location).HasColumnName("location");
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
-            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.TypeId).HasColumnName("type_id");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.Groups)
                 .HasForeignKey(d => d.OrganizationId)
                 .HasConstraintName("groups_organization_id_fkey");
+
+            entity.HasOne(d => d.Type).WithMany(p => p.Groups)
+                 .HasForeignKey(d => d.TypeId)
+                 .HasConstraintName("fk_group_type");
         });
 
         modelBuilder.Entity<IdentificationField>(entity =>

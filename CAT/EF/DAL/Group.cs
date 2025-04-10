@@ -11,7 +11,7 @@ public partial class Group
 
     public string Name { get; set; } = null!;
 
-    public string Type { get; set; } = null!;
+    public Guid? TypeId { get; set; }
 
     public string? Description { get; set; }
 
@@ -24,4 +24,6 @@ public partial class Group
     public virtual ICollection<Animal> Animals { get; set; } = new List<Animal>();
 
     public virtual Organization? Organization { get; set; }
+
+    public virtual GroupType Type { get; set; }
 }

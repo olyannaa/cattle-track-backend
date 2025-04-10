@@ -1,8 +1,6 @@
 using CAT.EF;
 using CAT.Events;
-using CAT.Services;
-
-using CAT.EF.DAL;
+using CAT.Filters;
 using CAT.Services;
 using CAT.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -33,6 +31,7 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAuthService, CookiesAuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSingleton<CustomCookieAuthenticationEvents>();
+builder.Services.AddScoped<OrgValidationFilter>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options => 
