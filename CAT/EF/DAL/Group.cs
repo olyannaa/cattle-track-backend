@@ -17,6 +17,8 @@ public partial class Group
 
     public string? Location { get; set; }
 
+    public Guid TypeId { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<Animal> Animals { get; set; } = new List<Animal>();
