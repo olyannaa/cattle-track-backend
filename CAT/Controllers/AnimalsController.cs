@@ -44,17 +44,16 @@ namespace CAT.Controllers
             return Ok(census);
         }
         /// <summary>
-        /// Количество страниц для отображения списка животных
+        /// Количество животных в списке
         /// </summary>
         /// <param name="type">Тип животного</param>
         /// <param name="organizationId">Id организации</param>
         /// <returns></returns>
-        [HttpGet, Route("page-count")]
+        [HttpGet, Route("count")]
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetCattlePageCount([FromQuery] string type, [FromHeader] Guid organizationId)
-        { 
-            var pagination = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5.0 : 10.0;
-            var count = Math.Ceiling(_animalService.GetAnimalCensus(organizationId, type).Count() / pagination);
+        {
+            var count = _animalService.GetAnimalCensus(organizationId, type).Count();
             return Ok(new {Count = count});
         }
 
