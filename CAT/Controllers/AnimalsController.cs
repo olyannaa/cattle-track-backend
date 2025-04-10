@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace CAT.Controllers
 {
@@ -79,6 +80,12 @@ namespace CAT.Controllers
                     {
                         transaction.Rollback();
                         return BadRequest(new ErrorDTO("Один из животных не приналежит организации пользователя"));
+                    }
+
+                    if (_db.Groups.Where(x => x.Id == dto.GroupID).SingleOrDefault()?.OrganizationId != organizationId)
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO("Одиного из животных не возможно добавить в группу, не пренадлежащую организации пользователя"));
                     }
                         
                     var x = _db.UpdateAnimal(dto.Id, dto.TagNumber, null, dto.GroupID, dto.BirthDate, dto.Status);
