@@ -14,19 +14,6 @@ namespace CAT.Services
         {
             _db = postgresContext;
         }
-        public void RegistrationGroup(GroupRegistrationDTO dto)
-        {
-            var groupId = Guid.NewGuid();
-            try
-            {
-                _db.AddGroup(groupId, dto.Name, dto.TypeId, dto.Description, dto.Location);
-            }
-            catch
-            {
-                throw new Exception("Не удалось добавить группу");
-            }
-            
-        }
 
         public List<GroupTypeDTO> GetGroupTypes(Guid organizationId)
             =>_db.GetGroupTypes(organizationId)

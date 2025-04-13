@@ -34,7 +34,7 @@ namespace CAT.Controllers
         /// <param name="organizationId">ID организации</param>
         [HttpPost, Route("type")]
         [OrgValidationTypeFilter()]
-        public async Task<IActionResult> CreateGroupType([FromForm] CreateGroupTypeDTO dto, [FromHeader] Guid organizationId)
+        public async Task<IActionResult> CreateGroupType([FromBody] CreateGroupTypeDTO dto, [FromHeader] Guid organizationId)
         {
             var ans = _groupService.CreateGroupType(dto, organizationId);
             if (!ans) return BadRequest(new { ErrorText = "Тип группы с таким названием уже существует в данной организации" });
@@ -71,7 +71,7 @@ namespace CAT.Controllers
         /// <param name="organizationId">ID организации</param>
         [HttpPost, Route("")]
         [OrgValidationTypeFilter()]
-        public async Task<IActionResult> CreateGroup([FromForm] CreateGroupDTO dto, [FromHeader] Guid organizationId)
+        public async Task<IActionResult> CreateGroup([FromBody] CreateGroupDTO dto, [FromHeader] Guid organizationId)
         {
             var ans = _groupService.CreateGroup(dto, organizationId);
             if (!ans) return BadRequest(new { ErrorText = "Группа с таким названием уже существует в данной организации" });
@@ -97,7 +97,7 @@ namespace CAT.Controllers
         /// <param name="organizationId">ID организации</param>
         [HttpPut, Route("")]
         [OrgValidationTypeFilter()]
-        public async Task<IActionResult> EditGroup([FromForm] EditGroupDTO dto, [FromHeader] Guid organizationId)
+        public async Task<IActionResult> EditGroup([FromBody] EditGroupDTO dto, [FromHeader] Guid organizationId)
         {
             _groupService.EditGroup(dto, organizationId);
             return Ok(new { Message = "Группа успешно изменена" });
@@ -121,7 +121,7 @@ namespace CAT.Controllers
         /// <param name="organizationId">ID организации</param>
         [HttpPost, Route("identification")]
         [OrgValidationTypeFilter()]
-        public async Task<IActionResult> CreateIdentificationField([FromForm] CreateIdentificationDTO dto, [FromHeader] Guid organizationId)
+        public async Task<IActionResult> CreateIdentificationField([FromBody] CreateIdentificationDTO dto, [FromHeader] Guid organizationId)
         {
             var ans = _groupService.CreateIdentification(dto, organizationId);
             if (!ans) return BadRequest(new { ErrorText = "Поле идентификации с таким названием уже существует в данной организации" });

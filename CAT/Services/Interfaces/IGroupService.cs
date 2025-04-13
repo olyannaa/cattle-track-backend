@@ -5,7 +5,6 @@ namespace CAT.Services.Interfaces
 {
     public interface IGroupService
     {
-        public void RegistrationGroup(GroupRegistrationDTO dto);
         public List<GroupTypeDTO> GetGroupTypes(Guid org_id);
         public List<GroupInfrasctructureDTO> GetGroupsByOrganization(Guid org_id);
         public bool CreateGroup(CreateGroupDTO dto, Guid org_id);

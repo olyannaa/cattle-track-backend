@@ -76,7 +76,7 @@ namespace CAT.Controllers
         /// Получает информацию о группах животных.
         /// </summary>
         [HttpGet, Route("groups")]
-        [OrgValidationTypeFilter()]
+        [OrgValidationTypeFilter(true)]
         public IActionResult GetGroups([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetGroupsInfo(organizationId));
@@ -86,10 +86,10 @@ namespace CAT.Controllers
         /// Получает идентификационные поля для животных.
         /// </summary>
         [HttpGet, Route("identifications")]
-        [OrgValidationTypeFilter()]
-        public IActionResult GetIdentificationsFields([FromQuery] Guid organization_id)
+        [OrgValidationTypeFilter(true)]
+        public IActionResult GetIdentificationsFields([FromHeader] Guid organizationId)
         {
-            return Ok(_animalService.GetIdentificationsFields(organization_id));
+            return Ok(_animalService.GetIdentificationsFields(organizationId));
         }
     }
 }
