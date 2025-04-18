@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using CAT.Controllers.DTO;
 using CAT.EF.DAL;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+
 namespace CAT.EF;
 
 public partial class PostgresContext : DbContext
@@ -34,7 +34,6 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<RolesPermission> RolesPermissions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-    public virtual DbSet<Reproduction> Reproductions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
@@ -251,34 +250,4 @@ public partial class PostgresContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-    public IQueryable<IdentificationInfoDTO>? GetOrgIdentifications(Guid org_id)
-        => IdentificationFields.FromSqlRaw(@"SELECT * FROM get_identification_fields({0})", org_id)
-                                .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.FieldName });
-    public IQueryable<Group>? GetOrgGroups(Guid org_id)
-        => Groups.FromSqlRaw(@"SELECT * FROM get_groups({0})", org_id);
-    public void InsertAnimal(Animal animal)
-    {
-        Database.ExecuteSqlInterpolated($@"SELECT insert_animal(
-                                       {animal.Id}, {animal.OrganizationId}, {animal.TagNumber},
-                                       {animal.BirthDate}, {animal.Type},
-                                       {animal.Breed}, {animal.MotherId}, {animal.FatherId}, {animal.Status},
-                                       {animal.GroupId}, {animal.Origin}, {animal.OriginLocation}
-                                       )");                              
-    }
-    
-    public void InsertAnimalIdentification(Guid id, string fieldName, string fieldValue)
-    {
-        Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification(
-                                           {id}, {fieldName}, {fieldValue})");
-    }
-
-    public void IfNetelInsertReproduction(Guid animalId, DateOnly? inseminationDate,
-                                          DateOnly? expectedCalvingDate, string inseminationType,
-                                          string spermBatch, string technician, string notes)
-    {
-        Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},
-                                {inseminationDate}, {expectedCalvingDate}, {inseminationType},
-                                {spermBatch}, {technician}, {notes})");
-    }
-
 }
