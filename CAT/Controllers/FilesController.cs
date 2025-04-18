@@ -31,7 +31,7 @@ namespace CAT.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("csv/animals"), Authorize]
-        [OrgValidationTypeFilter(checkAdmin: true, checkOrg: true)]
+        [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
         {
             var census = _animalService.GetAnimalCensus(organizationId, dto.Type).ToList();
