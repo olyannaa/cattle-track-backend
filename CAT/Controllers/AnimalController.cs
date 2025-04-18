@@ -30,7 +30,8 @@ namespace CAT.Controllers
         /// <param name="body">Данные для регистрации животного, включая фото.</param>
         /// <returns>Сообщение об успешной регистрации и URL загруженного фото.</returns>
         [HttpPost, Route("registration")]
-        public async Task<IActionResult> RegistrationAnimal([FromForm] AnimalRegistrationDTO body)
+        [OrgValidationTypeFilter()]
+        public async Task<IActionResult> RegistrationAnimal([FromForm] AnimalRegistrationDTO body, [FromHeader] Guid organizationId)
         {
             var photoUrl = "";
             if (body.Photo != null &&
@@ -39,15 +40,16 @@ namespace CAT.Controllers
             if (body.Type == "Нетель" && (body.InseminationDate == null || body.ExpectedCalvingDate == null
                 || body.SpermBatch == null || body.InseminationType == null))
                 return BadRequest(new { ErrorText = "Не все обязательные поля заполнены!" });
-            _animalService.RegisterAnimal(body);
-            return Ok(new { Message = "Животное успешно зарегистрировано!"});
+            _animalService.RegisterAnimal(body, organizationId);
+            return Ok(new { Message = "Животное успешно зарегистрировано!" });
         }
 
         /// <summary>
         /// Импортирует данные о животных из CSV-файла.
         /// </summary>
         [HttpPost, Route("registration/import/csv")]
-        public ActionResult ImportAnimalsFromCSV(IFormFile file, Guid org_id)
+        [OrgValidationTypeFilter()]
+        public ActionResult ImportAnimalsFromCSV(IFormFile file, [FromHeader] Guid organizationId)
         {
             if (file == null || !new string[] { ".csv" }.Contains(Path.GetExtension(file.FileName)))
                 return BadRequest("Формат файла должен быть .csv");
@@ -67,7 +69,7 @@ namespace CAT.Controllers
                                      .ToList();
 
             if (animals.Count == 0) return StatusCode(400);
-            var importInfo = _animalService.ImportAnimalsFromCSV(animals, org_id);
+            var importInfo = _animalService.ImportAnimalsFromCSV(animals, organizationId);
             return Ok(importInfo);
         }
 
@@ -75,20 +77,20 @@ namespace CAT.Controllers
         /// Получает информацию о группах животных.
         /// </summary>
         [HttpGet, Route("groups")]
-      
-        public IActionResult GetGroups([FromQuery] Guid orgatization_id)
+        [OrgValidationTypeFilter(true)]
+        public IActionResult GetGroups([FromHeader] Guid organizationId)
         {
-            return Ok(_animalService.GetGroupsInfo(orgatization_id));
+            return Ok(_animalService.GetGroupsInfo(organizationId));
         }
 
         /// <summary>
         /// Получает идентификационные поля для животных.
         /// </summary>
         [HttpGet, Route("identifications")]
-       
-        public IActionResult GetIdentificationsFields([FromQuery] Guid orgatization_id)
+        [OrgValidationTypeFilter(true)]
+        public IActionResult GetIdentificationsFields([FromHeader] Guid organizationId)
         {
-            return Ok(_animalService.GetIdentificationsFields(orgatization_id));
+            return Ok(_animalService.GetIdentificationsFields(organizationId));
         }
     }
 }

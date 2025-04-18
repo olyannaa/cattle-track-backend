@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
 using CAT.Controllers.DTO;
 using CAT.EF.DAL;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.Internal.Postgres;
 namespace CAT.EF;
 
 public partial class PostgresContext : DbContext
@@ -36,6 +39,7 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Reproduction> Reproductions { get; set; }
 
+    public virtual DbSet<GroupType> GroupTypes { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -115,15 +119,10 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Location).HasColumnName("location");
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
-            entity.Property(e => e.TypeId).HasColumnName("type_id");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.Groups)
                 .HasForeignKey(d => d.OrganizationId)
                 .HasConstraintName("groups_organization_id_fkey");
-
-            entity.HasOne(d => d.Type).WithMany(p => p.Groups)
-                 .HasForeignKey(d => d.TypeId)
-                 .HasConstraintName("fk_group_type");
         });
 
         modelBuilder.Entity<IdentificationField>(entity =>
@@ -136,7 +135,6 @@ public partial class PostgresContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.FieldName).HasColumnName("field_name");
-            entity.Property(e => e.FieldOrder).HasColumnName("field_order");
             entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.IdentificationFields)
@@ -241,6 +239,13 @@ public partial class PostgresContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("users_role_id_fkey");
         });
+        modelBuilder.Entity<GroupType>()
+            .Property(e => e.Id)
+            .HasColumnName("id");
+
+        modelBuilder.Entity<GroupType>()
+            .Property(e => e.Name)
+            .HasColumnName("name");
 
         OnModelCreatingPartial(modelBuilder);
     }
@@ -257,28 +262,44 @@ public partial class PostgresContext : DbContext
     public IQueryable<Group>? GetOrgGroups(Guid org_id)
         => Groups.FromSqlRaw(@"SELECT * FROM get_groups({0})", org_id);
     public void InsertAnimal(Animal animal)
-    {
-        Database.ExecuteSqlInterpolated($@"SELECT insert_animal(
+        => Database.ExecuteSqlInterpolated($@"SELECT insert_animal(
                                        {animal.Id}, {animal.OrganizationId}, {animal.TagNumber},
                                        {animal.BirthDate}, {animal.Type},
                                        {animal.Breed}, {animal.MotherId}, {animal.FatherId}, {animal.Status},
                                        {animal.GroupId}, {animal.Origin}, {animal.OriginLocation}
-                                       )");                              
-    }
-    
+                                       )");
+
     public void InsertAnimalIdentification(Guid id, string fieldName, string fieldValue)
-    {
-        Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification(
-                                           {id}, {fieldName}, {fieldValue})");
-    }
+        => Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification({id}, {fieldName}, {fieldValue})");
 
     public void IfNetelInsertReproduction(Guid animalId, DateOnly? inseminationDate,
                                           DateOnly? expectedCalvingDate, string inseminationType,
                                           string spermBatch, string technician, string notes)
-    {
-        Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},
+        => Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},
                                 {inseminationDate}, {expectedCalvingDate}, {inseminationType},
                                 {spermBatch}, {technician}, {notes})");
-    }
+
+    public void AddIdentificationField(string fieldName, Guid organizationId)
+        => Database.ExecuteSqlInterpolated($@"SELECT add_identification_field({fieldName}, {organizationId})");
+    public void DeleteIdentification(Guid identificationId)
+        => Database.ExecuteSqlInterpolated($@"SELECT delete_identification_field({identificationId})");
+
+    public void AddGroupType(Guid organizationId, string name)
+        => Database.ExecuteSqlInterpolated($@"SELECT add_group_type({name}, {organizationId})");
+
+    public IQueryable<GroupType> GetGroupTypes(Guid organizationId)
+        => GroupTypes.FromSqlRaw(@"SELECT * FROM get_group_types_by_organization({0})", organizationId);
+
+    public void DeleteGroupType(Guid typeId)
+        => Database.ExecuteSqlInterpolated($@"SELECT delete_group_type({typeId})");
+
+    public void AddGroup(Guid organizationId, string name, Guid? typeId, string? description = "", string? location = "")
+        => Database.ExecuteSqlInterpolated($@"SELECT add_group({organizationId}, {name}, {typeId}, {description}, {location})");
+
+    public void DeleteGroup(Guid groupId)
+        => Database.ExecuteSqlInterpolated($@"SELECT delete_group({groupId})");
+
+    public void EditGroup(Guid groupId, Guid organizationId, string groupName, Guid? typeId, string? description = "", string? location = "")
+        => Database.ExecuteSqlInterpolated($@"SELECT update_group({groupId},{organizationId}, {groupName}, {typeId}, {description}, {location})");
 
 }

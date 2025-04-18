@@ -71,7 +71,7 @@ namespace CAT.Services
             {
                 using (var writeFile = new StreamWriter(stream, leaveOpen: true))
                 {
-                    var config = new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = ",", HasHeaderRecord = false };
+                    var config = new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = ";", HasHeaderRecord = false };
                     var csv = new CsvWriter(writeFile, config);
                     csv.WriteRecords(items);
                 }

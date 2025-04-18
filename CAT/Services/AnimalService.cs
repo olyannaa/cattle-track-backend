@@ -32,7 +32,7 @@ namespace CAT.Services
                 .ToList();
         }
 
-        public void RegisterAnimal(AnimalRegistrationDTO dto)
+        public void RegisterAnimal(AnimalRegistrationDTO dto, Guid org_id)
         {
             var animalId = Guid.NewGuid();
             var fatherId = GetAnimalIdByTag(dto.FatherTag);
@@ -41,23 +41,19 @@ namespace CAT.Services
             var animal = new Animal
             {
                 Id = animalId,
-                OrganizationId = dto.OrganizationId,
+                OrganizationId = org_id,
                 TagNumber = dto.TagNumber,
                 BirthDate = dto.BirthDate,
                 Type = dto.Type,
                 Breed = dto.Breed,
                 MotherId = motherId,
                 FatherId = fatherId,
-                Status = dto.Status,
+                Status = "Активное",
                 GroupId = dto.GroupId,
                 Origin = dto.Origin,
                 OriginLocation = dto.OriginLocation,
             };
-            var beforeCount = _db.Animals.Count();
             _db.InsertAnimal(animal);
-            _db.SaveChanges();
-            var afterCount = _db.Animals.Count();
-            Console.WriteLine($"Количество записей в Animals: до = {beforeCount}, после = {afterCount}");
 
             if (dto.Type == "Нетель")
                 _db.IfNetelInsertReproduction( animalId, dto.InseminationDate, dto.ExpectedCalvingDate,
@@ -66,43 +62,40 @@ namespace CAT.Services
                 _db.InsertAnimalIdentification(animalId, animalField.Key, animalField.Value);
         }
 
+
         public ImportAnimalsInfo ImportAnimalsFromCSV(List<AnimalCSVInfoDTO> animals, Guid org_id)
         {
             var identificationFields = GetIdentificationsFields(org_id);
-            var fieldOrder = 1;
             var importInfo = new ImportAnimalsInfo();
             var animalStatuses = new Dictionary<string, string>();
-            foreach (var field in identificationFields)
-                foreach(var animalField in animals[0].AdditionalFields)
+            var existingFields = new HashSet<string>(identificationFields.Select(f => f.Name));
+            foreach (var animalField in animals[0].AdditionalFields)
+            {
+                if (!existingFields.Contains(animalField.Key))
                 {
-                    if (field.Name != animalField.Key) _db.IdentificationFields.Add(new IdentificationField
-                    {
-                        Id = Guid.NewGuid(),
-                        FieldName = animalField.Key,
-                        FieldOrder = fieldOrder++,
-                        OrganizationId = org_id
-                    });
+                    _db.AddIdentificationField(animalField.Key, org_id);
                     importInfo.CreatedFields++;
                     importInfo.FieldNames.Add(animalField.Key);
                 }
-            _db.SaveChanges();
+            }
             var allOrgAnimals = _db.Animals.Where(x => x.OrganizationId == org_id).ToList();
-            var animalsWithoutDuplicates = animals.Where(x => allOrgAnimals.Any(a => a.TagNumber == x.TagNumber) 
-                                                              && x.TagNumber != "")
-                                                  .OrderBy(a => a.Status == "Корова стада" ? 0 : 1);
+            var sortedAnimals = animals
+                                                //.Where(x => !allOrgAnimals.Any(a => a.TagNumber == x.TagNumber) && x.TagNumber != "")
+                                                .OrderBy(a => a.Status == "Корова стада" ? 0 : 1)
+                                                .ToList();
             var activeAnimals = new List<AnimalCSVInfoDTO>();
             var ancestorAnimals = new List<AnimalCSVInfoDTO>();
-            foreach (var animal in animalsWithoutDuplicates)
+            foreach (var animal in sortedAnimals)
             {
                 if ((animal.Status == "Корова стада" || animal.Status == "Бык стада") 
-                    && ((animal.Type == "Бычок" || animal.Type == "Телка") && animal.Status != "Мат.предок" 
-                    && animal.Status != "Отц.предок"))
+                    || (((animal.Type == "Бычок" || animal.Type == "Телка") && animal.Status != "Мат.предок" 
+                    && animal.Status != "Отц.предок")))
                     activeAnimals.Add(animal);
                 else ancestorAnimals.Add(animal);
             }
 
-
-            foreach (var animal in animalsWithoutDuplicates)
+            var addedAnimals = new List<AnimalCSVInfoDTO>();
+            foreach (var animal in sortedAnimals)
             {
                 var originLocation = $"{animal.OriginFarm} {animal.OriginRegion} {animal.OriginCountry}";
                 try
@@ -111,27 +104,40 @@ namespace CAT.Services
                     var dateOfReceipt = ParseStringToDate(animal.DateOfReceipt);
                     var dateOfDisposal = ParseStringToDate(animal.DateOfDisposal);
                     var lastWeightDate = ParseStringToDate(animal.LastWeightDate);
-                    _db.Database.ExecuteSqlRaw("SELECT insert_animal_from_csv({0}, {1}," +
-                        "                {2}::date, {3}, {4}, {5}::uuid, {6}::uuid, {7}, {8}::uuid, {9}, {10}," +
-                                        "{11},{12},{13},{14},{15},{16},{17})",
-                                                        org_id, animal.TagNumber, birthDate, animal.Type,
-                                                        animal.Breed, animal.MotherTag ?? null, animal.FatherTag ?? null, animal.Status,
-                                                        null, "", originLocation, animal.Сonsumption, dateOfReceipt, dateOfDisposal, animal.LastWeightWeight,
-                                                        animal.WeightOfDisposal, lastWeightDate, animal.ReasonOfDisposal);
-                    var animalId = _db.Animals.FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.TagNumber).Id;
-                    foreach (var field in animal.AdditionalFields)
-                        _db.InsertAnimalIdentification(animalId, field.Key, field.Value);
+                    var lastWeightAtDisposal = double.Parse(animal.LastWeightWeight);
+                    var motherId = _db.Animals
+                        .FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.MotherTag)?.Id;
+
+                    var fatherId = _db.Animals
+                        .FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.FatherTag)?.Id;
+
+                    _db.Database.ExecuteSqlRaw("SELECT insert_animal_from_csv({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17})",
+                        org_id, animal.TagNumber, birthDate, animal.Type,
+                        animal.Breed, motherId ?? (object)DBNull.Value, fatherId ?? (object)DBNull.Value, animal.Status,
+                        Guid.Empty, "", originLocation, animal.Сonsumption, dateOfReceipt,
+                        dateOfDisposal, animal.LastWeightWeight,
+                        lastWeightAtDisposal, lastWeightDate, animal.ReasonOfDisposal);
+
                     importInfo.Imported++;
+                    addedAnimals.Add(animal);
                 }
-                catch
+                catch (Exception ex)
                 {
                     importInfo.Errors++;
+                    Console.WriteLine($"Ошибка при вставке животного с номером {animal.TagNumber}: {ex.Message}");
                 }
-                
+
                 
                 importInfo.TotalRows++;
             }
-            importInfo.Duplicates = animals.Count() - animalsWithoutDuplicates.Count();
+
+            foreach (var animal in addedAnimals)
+            {
+                var animalId = _db.Animals.FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.TagNumber).Id;
+                foreach (var field in animal.AdditionalFields)
+                    _db.InsertAnimalIdentification(animalId, field.Key, field.Value);
+            }
+            importInfo.Duplicates = animals.Count() - sortedAnimals.Count();
             return importInfo;
         }
 

@@ -19,8 +19,6 @@ namespace CAT.Controllers.DTO
         public string? Breed { get; set; } = null!;
         public string? Status { get; set; } = null!;
         public string? MotherTag { get; set; } = null!;
-        [Required]
-        public Guid OrganizationId { get; set; }
         public string? FatherTag { get; set; } = null!;
         public Guid? GroupId { get; set; } = null!;
         public string? Origin { get; set; } = null!;
@@ -36,6 +34,6 @@ namespace CAT.Controllers.DTO
         public string? InseminationType { get; set; } = null;
         public string? SpermBatch { get; set; } = null;
         public string? Technician { get; set; } = null;
-        public string? Notes { get; set; } = null;
+        public string?  Notes { get; set; } = null;
     }
 }
