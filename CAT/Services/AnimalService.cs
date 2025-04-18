@@ -32,7 +32,7 @@ namespace CAT.Services
                 .ToList();
         }
 
-        public void RegisterAnimal(AnimalRegistrationDTO dto)
+        public void RegisterAnimal(AnimalRegistrationDTO dto, Guid org_id)
         {
             var animalId = Guid.NewGuid();
             var fatherId = GetAnimalIdByTag(dto.FatherTag);
@@ -41,7 +41,7 @@ namespace CAT.Services
             var animal = new Animal
             {
                 Id = animalId,
-                OrganizationId = dto.OrganizationId,
+                OrganizationId = org_id,
                 TagNumber = dto.TagNumber,
                 BirthDate = dto.BirthDate,
                 Type = dto.Type,
