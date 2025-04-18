@@ -44,6 +44,8 @@ namespace CAT.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userInfo.Id),
+                new Claim("Organization", userInfo.OrganizationId ?? String.Empty),
+                new Claim(ClaimTypes.Role, userInfo.RoleId)
             };
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         }
