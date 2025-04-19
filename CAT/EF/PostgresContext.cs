@@ -35,6 +35,8 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<DailyAction> DailyActions { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -254,9 +256,33 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})");
     }
 
+    public IQueryable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId)
+    {
+        return Database.SqlQuery<ActiveAnimalDAL>($"SELECT * FROM get_active_animals({organizationId})");
+    }
+
     public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, int skip = default, int take = default)
     {
         return GetAnimalsByOrgAndType(organizationId, type).Skip(skip).Take(take);
+    }
+
+    public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
+    {
+        if (type == "Осмотр")
+            return GetDailyActionsBase(organizationId, type).SelectTreatment();
+        if (type == "Вакцинации и обработки")
+            return GetDailyActionsBase(organizationId, type).SelectVaccination();
+        if (type == "Лечение")
+            return GetDailyActionsBase(organizationId, type).SelectTreatment();
+        if (type == "Перевод")
+            return GetDailyActionsBase(organizationId, type).SelectTransfer();
+        if (type == "Выбраковка")
+            return GetDailyActionsBase(organizationId, type).SelectCulling();
+        if (type == "Исследование")
+            return null;
+        if (type == "Присвоение номера")
+            return GetDailyActionsBase(organizationId, type).SelectIdentification();
+        return null;
     }
 
     public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
@@ -264,5 +290,18 @@ public partial class PostgresContext : DbContext
         return Database.ExecuteSql($"SELECT update_animal({id},{tag},{type},{groupId},{birthDate},{status})");
     }
 
+    private IQueryable<DailyAction> GetDailyActionsBase(Guid organizationId, string type)
+    {
+        return DailyActions.Include(e => e.Animal)
+                            .Include(e => e.OldGroup)
+                            .Include(e => e.NewGroup)
+                            .Where(e => e.Animal!.OrganizationId == organizationId)
+                            .Where(e => e.ActionType == type);
+    }
+
+    
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    
 }
