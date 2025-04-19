@@ -1,4 +1,5 @@
-﻿using CAT.EF.DAL;
+﻿using CAT.Controllers.DTO;
+using CAT.EF.DAL;
 
 namespace CAT.Services.Interfaces
 {
@@ -9,5 +10,7 @@ namespace CAT.Services.Interfaces
         IEnumerable<AnimalCensus> GetAnimalCensusByPage(Guid organisationId, string animalType, int page = 1, bool isMoblile = default);
 
         IEnumerable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId);
+
+        IEnumerable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, GetDailyAnimalsDTO filters);
     }
 }

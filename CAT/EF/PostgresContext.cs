@@ -314,6 +314,11 @@ public partial class PostgresContext : DbContext
         return null;
     }
 
+    public IQueryable<dynamic> GetDailyActionsWithPagination(Guid organizationId, string type, int skip = default, int take = default)
+    {
+        return GetDailyActions(organizationId, type).Skip(skip).Take(take);
+    }
+
     public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
     {
         return Database.ExecuteSql($"SELECT update_animal({id},{tag},{type},{groupId},{birthDate},{status})");

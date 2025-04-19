@@ -1,4 +1,5 @@
-﻿using CAT.EF;
+﻿using CAT.Controllers.DTO;
+using CAT.EF;
 using CAT.EF.DAL;
 using CAT.Services.Interfaces;
 
@@ -18,16 +19,22 @@ namespace CAT.Services
             return _db.GetAnimalsByOrgAndType(organizationId, animalType);
         }
 
-        public IEnumerable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId)
-        {
-            return _db.GetActiveAnimals(organizationId);
-        }
-
         public IEnumerable<AnimalCensus> GetAnimalCensusByPage(Guid organizationId, string animalType, int page = 1, bool isMoblile = default)
         {
             var take = isMoblile ? 5 : 10;
             var skip = (page - 1) * take;
             return _db.GetAnimalsWithPagintaion(organizationId, animalType, skip, take);
         }
+
+        public IEnumerable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, GetDailyAnimalsDTO filters)
+        {
+            return _db.GetActiveAnimalsWithFilter(organizationId, filters);
+        }
+
+        public IEnumerable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId)
+        {
+            return _db.GetActiveAnimals(organizationId);
+        }
+
     }
 }

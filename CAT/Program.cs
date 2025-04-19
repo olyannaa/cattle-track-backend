@@ -26,6 +26,7 @@ builder.Services.AddScoped<IAuthService, CookiesAuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICSVService, CSVService>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
+builder.Services.AddScoped<IDailyActionService, DailyActionService>();
 builder.Services.AddSingleton<CustomCookieAuthenticationEvents>();
 builder.Services.AddScoped<OrgValidationFilter>();
 
