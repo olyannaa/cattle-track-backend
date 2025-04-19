@@ -297,7 +297,7 @@ public partial class PostgresContext : DbContext
 
     public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
     {
-        if (type == "Осмотр")
+        if (type == "Осмотры")
             return GetDailyActionsBase(organizationId, type).SelectTreatment();
         if (type == "Вакцинации и обработки")
             return GetDailyActionsBase(organizationId, type).SelectVaccination();
@@ -307,9 +307,9 @@ public partial class PostgresContext : DbContext
             return GetDailyActionsBase(organizationId, type).SelectTransfer();
         if (type == "Выбраковка")
             return GetDailyActionsBase(organizationId, type).SelectCulling();
-        if (type == "Исследование")
+        if (type == "Исследования")
             return null;
-        if (type == "Присвоение номера")
+        if (type == "Присвоение номеров")
             return GetDailyActionsBase(organizationId, type).SelectIdentification();
         return null;
     }
@@ -332,8 +332,6 @@ public partial class PostgresContext : DbContext
                             .Where(e => e.Animal!.OrganizationId == organizationId)
                             .Where(e => e.ActionType == type);
     }
-
-    
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 

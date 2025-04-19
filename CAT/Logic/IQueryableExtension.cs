@@ -45,8 +45,7 @@ public static class IQueryableExstension
             PerformedBy = e.Actor,
             Notes = e.Notes,
             Type = e.ActionSubtype,
-            Medicine = e.Medicine,
-            Dose = e.Dose,
+            Result = e.Result,
             NextActionDate = e.NextDate
         });
     }
