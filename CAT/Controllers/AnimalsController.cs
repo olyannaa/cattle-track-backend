@@ -56,7 +56,7 @@ namespace CAT.Controllers
         {
             var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
             var count = _animalService.GetAnimalCensus(organizationId, type).Count();
-            return Ok(new PaginationDTO{AnimalCount = count, EntriesPerPage = entries});
+            return Ok(new PaginationDTO{Count = count, EntriesPerPage = entries});
         }
 
         /// <summary>

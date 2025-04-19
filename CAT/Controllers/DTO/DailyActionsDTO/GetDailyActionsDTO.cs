@@ -4,8 +4,8 @@ namespace CAT.Controllers.DTO
 {
     public class GetDailyActionsDTO
     {
-        public string? Type { get; set; }
+        public string? Type { get; init; }
 
-        //public string Subtype { get; set; } = null!;
+        public int Page { get; init; }
     }
 }

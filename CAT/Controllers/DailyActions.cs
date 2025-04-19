@@ -27,25 +27,16 @@ namespace CAT.Controllers
             _authService = authService;
             _db = postgresContext;
         }
-
-        // [HttpGet, Route("animals")]
-        // [OrgValidationTypeFilter(checkOrg: true)]
-        // public IActionResult GetActiveCattle([FromHeader] Guid organizationId, [FromQuery] bool pagination)
-        // { 
-        //     var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
-        //     var animals = _animalService.GetActiveAnimals(organizationId).ToList();
-        //     return Ok(animals);
-        // }
-
-        // [HttpGet, Route("animals/pagination-info")]
-        // [OrgValidationTypeFilter(checkOrg: true)]
-        // public IActionResult GetActivePagination([FromQuery] string type, [FromHeader] Guid organizationId)
-        // {
-        //     var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
-        //     var count = _animalService.GetActiveAnimals(organizationId).Count();
-        //     return Ok(new PaginationDTO{AnimalCount = count, EntriesPerPage = entries});
-        // }
-
+        
+        [HttpGet, Route("pagination-info")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetPagination([FromQuery] string type, [FromHeader] Guid organizationId)
+        {
+            var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
+            var count = _db.GetDailyActions(organizationId, type).Count();
+            return Ok(new PaginationDTO{Count = count, EntriesPerPage = entries});
+        }
+        
         [HttpGet]
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetDailyActions([FromHeader] Guid organizationId, [FromQuery] GetDailyActionsDTO dto)
@@ -53,6 +44,11 @@ namespace CAT.Controllers
             return Ok(_db.GetDailyActions(organizationId, dto.Type)?.ToList());
         }
 
-
+        [HttpGet, Route("animals")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetDailyAnimals([FromHeader] Guid organizationId, [FromQuery] GetDailyAnimalsDTO dto)
+        {
+            return Ok(_db.GetActiveAnimals(organizationId));
+        }
     }
 }
