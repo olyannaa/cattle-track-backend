@@ -32,6 +32,12 @@ namespace CAT.Controllers
             _daService = daService;
         }
         
+        /// <summary>
+        /// Информация о списке ежедневных действий для пагинации
+        /// </summary>
+        /// <param name="type">Тип ежедневного действия</param>
+        /// <param name="organizationId">Id организации</param>
+        /// <returns></returns>
         [HttpGet, Route("pagination-info")]
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetPagination([FromQuery] string type, [FromHeader] Guid organizationId)
@@ -41,18 +47,28 @@ namespace CAT.Controllers
             return Ok(new PaginationDTO{Count = count ?? default, EntriesPerPage = entries});
         }
         
+        /// <summary>
+        /// Возвращение списка ежедневных действий по типу с пагинацией
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetDailyActions([FromHeader] Guid organizationId, [FromQuery] GetDailyActionsDTO dto)
+        public IActionResult GetDailyActions([FromHeader] Guid organizationId, [FromQuery] DailyActionsDTO dto)
         {
             var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
             var dailyActions = _daService.GetDailyActionsByPage(organizationId, dto.Type, dto.Page, isMobileDevice)?.ToList();
             return Ok(dailyActions);
         }
 
+        /// <summary>
+        /// Возвращает список активных животных, используя фильтры
+        /// </summary>
+        /// <param name="organizationId"></param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost, Route("animals")]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetActiveAnimals([FromHeader] Guid organizationId, [FromBody] GetDailyAnimalsDTO dto)
+        public IActionResult GetActiveAnimals([FromHeader] Guid organizationId, [FromBody] DailyAnimalsFilterDTO dto)
         {
             return Ok(_animalService.GetActiveAnimalsWithFilter(organizationId, dto));
         }

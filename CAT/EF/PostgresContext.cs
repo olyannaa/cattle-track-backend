@@ -262,7 +262,7 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<ActiveAnimalDAL>($"SELECT * FROM get_active_animals({organizationId})");
     }
 
-    public IQueryable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, GetDailyAnimalsDTO filter)
+    public IQueryable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filter)
     {
         var orgAnimals = GetActiveAnimalsWithFilterBase(organizationId);
         if (filter.GroupId != null)

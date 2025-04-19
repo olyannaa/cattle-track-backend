@@ -26,7 +26,7 @@ namespace CAT.Services
             return _db.GetAnimalsWithPagintaion(organizationId, animalType, skip, take);
         }
 
-        public IEnumerable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, GetDailyAnimalsDTO filters)
+        public IEnumerable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filters)
         {
             return _db.GetActiveAnimalsWithFilter(organizationId, filters);
         }

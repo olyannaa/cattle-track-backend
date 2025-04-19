@@ -11,6 +11,6 @@ namespace CAT.Services.Interfaces
 
         IEnumerable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId);
 
-        IEnumerable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, GetDailyAnimalsDTO filters);
+        IEnumerable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filters);
     }
 }

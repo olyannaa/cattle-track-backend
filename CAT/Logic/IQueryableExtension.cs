@@ -104,6 +104,4 @@ public static class IQueryableExstension
             Notes = e.Notes
         });
     }
-
-    //culling
 }
