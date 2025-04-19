@@ -106,23 +106,5 @@ namespace CAT.Controllers
         {   
             return Ok(_db.Groups.Where(x => x.OrganizationId == organizationId).Select(x => new {x.Name, x.Id}));
         }
-
-        [HttpGet, Route("active")]
-        [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetActiveCattle([FromHeader] Guid organizationId, [FromQuery] bool pagination)
-        { 
-            var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
-            var animals = _animalService.GetActiveAnimals(organizationId).ToList();
-            return Ok(animals);
-        }
-
-        [HttpGet, Route("active/pagination-info")]
-        [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetActivePagination([FromQuery] string type, [FromHeader] Guid organizationId)
-        {
-            var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
-            var count = _animalService.GetActiveAnimals(organizationId).Count();
-            return Ok(new PaginationDTO{AnimalCount = count, EntriesPerPage = entries});
-        }
     }
 }
