@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CAT.Controllers.DTO;
 using CAT.EF.DAL;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -259,6 +260,34 @@ public partial class PostgresContext : DbContext
     public IQueryable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId)
     {
         return Database.SqlQuery<ActiveAnimalDAL>($"SELECT * FROM get_active_animals({organizationId})");
+    }
+
+    public IQueryable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, GetDailyAnimalsDTO filter)
+    {
+        var orgAnimals = GetActiveAnimalsWithFilterBase(organizationId);
+        if (filter.GroupId != null)
+            orgAnimals = orgAnimals.Where(e => e.GroupId == filter.GroupId);
+        if (filter.Type != null)
+            orgAnimals = orgAnimals.Where(e => e.Type == filter.Type);
+        if (filter.TagNumber != null)
+            orgAnimals = orgAnimals.Where(e => e.TagNumber == filter.TagNumber);
+        //if (filter.IdentificationId != null)
+        //    orgAnimals = orgAnimals.Include(e => e.)
+        // ToDo: идентификации
+
+        return orgAnimals.Include(e => e.Group).Select(e => new ActiveAnimalDAL
+            {
+                Id = e.Id,
+                TagNumber = e.TagNumber,
+                Type = e.Type,
+                Status = e.Status,
+                GroupName = e.Group.Name
+            });
+    }
+
+    private IQueryable<Animal> GetActiveAnimalsWithFilterBase(Guid organizationId)
+    {
+        return Animals.Where(e => e.OrganizationId == organizationId && e.Status == "Активное");
     }
 
     public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, int skip = default, int take = default)

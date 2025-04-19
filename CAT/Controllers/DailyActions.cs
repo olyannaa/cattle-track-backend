@@ -44,11 +44,11 @@ namespace CAT.Controllers
             return Ok(_db.GetDailyActions(organizationId, dto.Type)?.ToList());
         }
 
-        [HttpGet, Route("animals")]
+        [HttpPost, Route("animals")]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetDailyAnimals([FromHeader] Guid organizationId, [FromQuery] GetDailyAnimalsDTO dto)
+        public IActionResult GetDailyAnimals([FromHeader] Guid organizationId, [FromBody] GetDailyAnimalsDTO dto)
         {
-            return Ok(_db.GetActiveAnimals(organizationId));
+            return Ok(_db.GetActiveAnimalsWithFilter(organizationId, dto));
         }
     }
 }
