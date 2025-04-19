@@ -298,7 +298,7 @@ public partial class PostgresContext : DbContext
     public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
     {
         if (type == "Осмотры")
-            return GetDailyActionsBase(organizationId, type).SelectTreatment();
+            return GetDailyActionsBase(organizationId, type).SelectInspection();
         if (type == "Вакцинации и обработки")
             return GetDailyActionsBase(organizationId, type).SelectVaccination();
         if (type == "Лечение")
@@ -314,9 +314,9 @@ public partial class PostgresContext : DbContext
         return null;
     }
 
-    public IQueryable<dynamic> GetDailyActionsWithPagination(Guid organizationId, string type, int skip = default, int take = default)
+    public IQueryable<dynamic>? GetDailyActionsWithPagination(Guid organizationId, string type, int skip = default, int take = default)
     {
-        return GetDailyActions(organizationId, type).Skip(skip).Take(take);
+        return GetDailyActions(organizationId, type)?.Skip(skip)?.Take(take);
     }
 
     public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
