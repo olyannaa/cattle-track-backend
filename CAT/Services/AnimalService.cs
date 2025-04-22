@@ -5,6 +5,7 @@ using CAT.EF.DAL;
 using CAT.Models;
 using CAT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using System.Globalization;
 
 namespace CAT.Services
@@ -32,7 +33,7 @@ namespace CAT.Services
                 .ToList();
         }
 
-        public void RegisterAnimal(AnimalRegistrationDTO dto, Guid org_id)
+        public void RegisterAnimal(AnimalRegistrationDTO dto, Guid organizationId)
         {
             var animalId = Guid.NewGuid();
             var fatherId = GetAnimalIdByTag(dto.FatherTag);
@@ -41,7 +42,7 @@ namespace CAT.Services
             var animal = new Animal
             {
                 Id = animalId,
-                OrganizationId = org_id,
+                OrganizationId = dto.OrganizationId,
                 TagNumber = dto.TagNumber,
                 BirthDate = dto.BirthDate,
                 Type = dto.Type,
@@ -54,10 +55,26 @@ namespace CAT.Services
                 OriginLocation = dto.OriginLocation,
             };
             _db.InsertAnimal(animal);
+            _db.SaveChanges();
 
             if (dto.Type == "Нетель")
-                _db.IfNetelInsertReproduction( animalId, dto.InseminationDate, dto.ExpectedCalvingDate,
-                                    dto.InseminationType, dto.SpermBatch, dto.Technician, dto.Notes);
+            {
+                try
+                {
+                    _db.IfNetelInsertReproduction(
+                        animalId,
+                        dto.InseminationDate,
+                        dto.ExpectedCalvingDate,
+                        dto.InseminationType,
+                        dto.SpermBatch,
+                        dto.Technician,
+                        dto.Notes);
+                }
+                catch (PostgresException ex) when (ex.SqlState == "23503")
+                {
+                    throw new Exception($"Не удалось зарегистрировать осеменение: животное с ID {animalId} не найдено");
+                }
+            }
             foreach (var animalField in dto.AdditionalFields)
                 _db.InsertAnimalIdentification(animalId, animalField.Key, animalField.Value);
         }

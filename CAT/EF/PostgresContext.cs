@@ -40,6 +40,9 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<Reproduction> Reproductions { get; set; }
 
     public virtual DbSet<GroupType> GroupTypes { get; set; }
+    public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
+    public virtual DbSet<Calving> Calvings { get; set; }
+    public virtual DbSet<Pregnancy> Pregnancies { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -275,9 +278,9 @@ public partial class PostgresContext : DbContext
     public void IfNetelInsertReproduction(Guid animalId, DateOnly? inseminationDate,
                                           DateOnly? expectedCalvingDate, string inseminationType,
                                           string spermBatch, string technician, string notes)
-        => Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},
+        => Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_insemination_and_pregnancy({animalId},
                                 {inseminationDate}, {expectedCalvingDate}, {inseminationType},
-                                {spermBatch}, {technician}, {notes})");
+                                {spermBatch}, {technician}, {notes}, {"Подлежит проверке"})");
 
     public void AddIdentificationField(string fieldName, Guid organizationId)
         => Database.ExecuteSqlInterpolated($@"SELECT add_identification_field({fieldName}, {organizationId})");

@@ -41,7 +41,7 @@ namespace CAT.Controllers
                 || body.SpermBatch == null || body.InseminationType == null))
                 return BadRequest(new { ErrorText = "Не все обязательные поля заполнены!" });
             _animalService.RegisterAnimal(body, organizationId);
-            return Ok(new { Message = "Животное успешно зарегистрировано!" });
+            return Ok(new { Message = "Животное успешно зарегистрировано!"});
         }
 
         /// <summary>
