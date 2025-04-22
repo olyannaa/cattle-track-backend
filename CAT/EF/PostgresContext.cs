@@ -37,10 +37,9 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<RolesPermission> RolesPermissions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-    public virtual DbSet<Reproduction> Reproductions { get; set; }
+    public virtual DbSet<Insemination> Inseminations { get; set; }
 
     public virtual DbSet<GroupType> GroupTypes { get; set; }
-    public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
     public virtual DbSet<Calving> Calvings { get; set; }
     public virtual DbSet<Pregnancy> Pregnancies { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
