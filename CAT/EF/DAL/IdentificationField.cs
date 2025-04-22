@@ -9,7 +9,6 @@ public partial class IdentificationField
 
     public string? FieldName { get; set; }
 
-    public int? FieldOrder { get; set; }
 
     public Guid? OrganizationId { get; set; }
 
