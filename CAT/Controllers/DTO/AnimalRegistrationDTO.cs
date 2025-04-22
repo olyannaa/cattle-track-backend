@@ -19,23 +19,21 @@ namespace CAT.Controllers.DTO
         public string? Breed { get; set; } = null!;
         public string? Status { get; set; } = null!;
         public string? MotherTag { get; set; } = null!;
-        [Required]
-        public Guid OrganizationId { get; set; }
         public string? FatherTag { get; set; } = null!;
         public Guid? GroupId { get; set; } = null!;
         public string? Origin { get; set; } = null!;
         public string? OriginLocation { get; set; } = null!;
         public IFormFile? Photo { get; set; } = null!;
-        public Dictionary<string, string>? AdditionalFields { get; set; } = new();
+        public Dictionary<Guid, string>? AdditionalFields { get; set; } = new();
 
         //if netel
         [Format("dd.MM.yyyy")]
-        public DateOnly InseminationDate { get; set; } = new DateOnly();
+        public DateOnly? InseminationDate { get; set; } = new DateOnly();
         [Format("dd.MM.yyyy")]
-        public DateOnly ExpectedCalvingDate { get; set; } = new DateOnly();
-        public string InseminationType { get; set; } = null;
-        public string SpermBatch { get; set; } = null;
-        public string Technician { get; set; } = null;
-        public string Notes { get; set; } = null;
+        public DateOnly? ExpectedCalvingDate { get; set; } = new DateOnly();
+        public string? InseminationType { get; set; } = null;
+        public string? SpermBatch { get; set; } = null;
+        public string? Technician { get; set; } = null;
+        public string?  Notes { get; set; } = null;
     }
 }
