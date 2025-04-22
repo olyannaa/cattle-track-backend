@@ -24,7 +24,7 @@ namespace CAT.Controllers.DTO
         public string? Origin { get; set; } = null!;
         public string? OriginLocation { get; set; } = null!;
         public IFormFile? Photo { get; set; } = null!;
-        public Dictionary<string, string>? AdditionalFields { get; set; } = new();
+        public Dictionary<Guid, string>? AdditionalFields { get; set; } = new();
 
         //if netel
         [Format("dd.MM.yyyy")]
