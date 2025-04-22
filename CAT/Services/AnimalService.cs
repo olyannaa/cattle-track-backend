@@ -42,7 +42,7 @@ namespace CAT.Services
             var animal = new Animal
             {
                 Id = animalId,
-                OrganizationId = dto.OrganizationId,
+                OrganizationId = organizationId,
                 TagNumber = dto.TagNumber,
                 BirthDate = dto.BirthDate,
                 Type = dto.Type,
