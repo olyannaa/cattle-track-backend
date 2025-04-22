@@ -271,7 +271,7 @@ public partial class PostgresContext : DbContext
                                        {animal.GroupId}, {animal.Origin}, {animal.OriginLocation}
                                        )");
 
-    public void InsertAnimalIdentification(Guid id, string fieldName, string fieldValue)
+    public void InsertAnimalIdentification(Guid id, Guid fieldName, string fieldValue)
         => Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification({id}, {fieldName}, {fieldValue})");
 
     public void IfNetelInsertReproduction(Guid animalId, DateOnly? inseminationDate,
