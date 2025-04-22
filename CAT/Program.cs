@@ -24,6 +24,7 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<YandexS3Service>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddScoped<ICSVService, CSVService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
 
 builder.Services.AddAuthorization();
 
