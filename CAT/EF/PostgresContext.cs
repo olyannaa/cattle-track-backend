@@ -40,6 +40,7 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<Insemination> Inseminations { get; set; }
 
     public virtual DbSet<GroupType> GroupTypes { get; set; }
+    public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
     public virtual DbSet<Calving> Calvings { get; set; }
     public virtual DbSet<Pregnancy> Pregnancies { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
@@ -121,10 +122,15 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Location).HasColumnName("location");
             entity.Property(e => e.Name).HasColumnName("name");
             entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
+            entity.Property(e => e.TypeId).HasColumnName("type_id");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.Groups)
                 .HasForeignKey(d => d.OrganizationId)
                 .HasConstraintName("groups_organization_id_fkey");
+
+            entity.HasOne(d => d.Type).WithMany(p => p.Groups)
+                 .HasForeignKey(d => d.TypeId)
+                 .HasConstraintName("fk_group_type");
         });
 
         modelBuilder.Entity<IdentificationField>(entity =>
@@ -248,6 +254,7 @@ public partial class PostgresContext : DbContext
         modelBuilder.Entity<GroupType>()
             .Property(e => e.Name)
             .HasColumnName("name");
+        modelBuilder.Entity<GroupRaw>().HasNoKey().ToView(null);
 
         OnModelCreatingPartial(modelBuilder);
     }
@@ -269,7 +276,6 @@ public partial class PostgresContext : DbContext
                                        {animal.BirthDate}, {animal.Type},
                                        {animal.Breed}, {animal.MotherId}, {animal.FatherId}, {animal.Status},
                                        {animal.GroupId}, {animal.Origin}, {animal.OriginLocation}
-                                       )");
 
     public void InsertAnimalIdentification(Guid id, Guid fieldName, string fieldValue)
         => Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification({id}, {fieldName}, {fieldValue})");
@@ -297,6 +303,9 @@ public partial class PostgresContext : DbContext
 
     public void AddGroup(Guid organizationId, string name, Guid? typeId, string? description = "", string? location = "")
         => Database.ExecuteSqlInterpolated($@"SELECT add_group({organizationId}, {name}, {typeId}, {description}, {location})");
+
+    public IQueryable<GroupRaw> GetGroupsByOrganization(Guid organizationId)
+       => GroupsRaw.FromSqlRaw(@"SELECT * FROM get_groups_by_organization({0})", organizationId);
 
     public void DeleteGroup(Guid groupId)
         => Database.ExecuteSqlInterpolated($@"SELECT delete_group({groupId})");

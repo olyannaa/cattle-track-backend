@@ -4,7 +4,7 @@
         <name>CAT</name>
     </assembly>
     <members>
-        <member name="M:CAT.Controllers.AnimalController.RegistrationAnimal(CAT.Controllers.DTO.AnimalRegistrationDTO,System.Guid)">
+        <member name="M:CAT.Controllers.AnimalController.RegistrationAnimal(CAT.Controllers.DTO.AnimalRegistrationDTO)">
             <summary>
             Регистрирует новое животное в системе.
             </summary>
@@ -42,6 +42,70 @@
             <returns></returns>
             <response code="200">Успешное выполнение</response>
             <response code="401">Не авторизован</response>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.GetAllGroupTypes(System.Guid)">
+            <summary>
+            Получить список всех типов групп по организации.
+            </summary>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.CreateGroupType(CAT.Controllers.DTO.CreateGroupTypeDTO,System.Guid)">
+            <summary>
+            Создать новый тип группы.
+            </summary>
+            <param name="dto">Данные нового типа группы</param>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.DeleteGroupType(System.Guid)">
+            <summary>
+            Удалить тип группы.
+            </summary>
+            <param name="typeId">ID типа группы</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.GetAllGroup(System.Guid)">
+            <summary>
+            Получить список всех групп в организации.
+            </summary>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.CreateGroup(CAT.Controllers.DTO.CreateGroupDTO,System.Guid)">
+            <summary>
+            Создать новую группу.
+            </summary>
+            <param name="dto">Данные новой группы</param>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.DeleteGroup(System.Guid)">
+            <summary>
+            Удалить группу.
+            </summary>
+            <param name="groupId">ID группы</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.EditGroup(CAT.Controllers.DTO.EditGroupDTO,System.Guid)">
+            <summary>
+            Обновить данные группы.
+            </summary>
+            <param name="dto">Данные для обновления</param>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.GetAllIdentificationFields(System.Guid)">
+            <summary>
+            Получить список всех полей идентификации по организации.
+            </summary>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.CreateIdentificationField(CAT.Controllers.DTO.CreateIdentificationDTO,System.Guid)">
+            <summary>
+            Создать новое поле идентификации.
+            </summary>
+            <param name="dto">Данные нового поля</param>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupController.DeleteIdentification(System.Guid)">
+            <summary>
+            Удалить поле идентификации.
+            </summary>
+            <param name="identificationId">ID поля</param>
         </member>
     </members>
 </doc>
