@@ -104,8 +104,8 @@ namespace CAT.Services
             var ancestorAnimals = new List<AnimalCSVInfoDTO>();
             foreach (var animal in sortedAnimals)
             {
-                if ((animal.Status == "Корова стада" || animal.Status == "Бык стада") 
-                    || (((animal.Type == "Бычок" || animal.Type == "Телка") && animal.Status != "Мат.предок" 
+                if ((animal.Status == "Корова стада" || animal.Status == "Бык стада")
+                    || (((animal.Type == "Бычок" || animal.Type == "Телка") && animal.Status != "Мат.предок"
                     && animal.Status != "Отц.предок")))
                     activeAnimals.Add(animal);
                 else ancestorAnimals.Add(animal);
@@ -131,7 +131,7 @@ namespace CAT.Services
                     _db.Database.ExecuteSqlRaw("SELECT insert_animal_from_csv({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17})",
                         org_id, animal.TagNumber, birthDate, animal.Type,
                         animal.Breed, motherId ?? (object)DBNull.Value, fatherId ?? (object)DBNull.Value, animal.Status,
-                        Guid.Empty, "", originLocation, animal.Сonsumption, dateOfReceipt,
+                        null, "", originLocation, animal.Сonsumption, dateOfReceipt,
                         dateOfDisposal, animal.LastWeightWeight,
                         lastWeightAtDisposal, lastWeightDate, animal.ReasonOfDisposal);
 
@@ -144,15 +144,16 @@ namespace CAT.Services
                     Console.WriteLine($"Ошибка при вставке животного с номером {animal.TagNumber}: {ex.Message}");
                 }
 
-                
+
                 importInfo.TotalRows++;
             }
+            identificationFields = GetIdentificationsFields(org_id);
 
             foreach (var animal in addedAnimals)
             {
                 var animalId = _db.Animals.FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.TagNumber).Id;
                 foreach (var field in animal.AdditionalFields)
-                    _db.InsertAnimalIdentification(animalId, field.Key, field.Value);
+                    _db.InsertAnimalIdentification(animalId, identificationFields.FirstOrDefault(x => x.Name == field.Key).Id, field.Value);
             }
             importInfo.Duplicates = animals.Count() - sortedAnimals.Count();
             return importInfo;
