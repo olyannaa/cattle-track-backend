@@ -7,11 +7,11 @@ namespace CAT.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GroupController : Controller
+    public class GroupsController : Controller
     {
         private readonly IGroupService _groupService;
 
-        public GroupController(IGroupService groupService)
+        public GroupsController(IGroupService groupService)
         {
             _groupService = groupService;
         }
