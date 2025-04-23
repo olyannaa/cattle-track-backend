@@ -281,8 +281,10 @@ public partial class PostgresContext : DbContext
     public IQueryable<IdentificationInfoDTO>? GetOrgIdentifications(Guid org_id)
         => IdentificationFields.FromSqlRaw(@"SELECT * FROM get_identification_fields({0})", org_id)
                                 .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.FieldName });
+                                
     public IQueryable<Group>? GetOrgGroups(Guid org_id)
         => Groups.FromSqlRaw(@"SELECT * FROM get_groups({0})", org_id);
+
     public void InsertAnimal(Animal animal)
         => Database.ExecuteSqlInterpolated($@"SELECT insert_animal(
                                        {animal.Id}, {animal.OrganizationId}, {animal.TagNumber},
@@ -293,16 +295,17 @@ public partial class PostgresContext : DbContext
 
     public void InsertAnimalIdentification(Guid id, Guid fieldName, string fieldValue)
         => Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification({id}, {fieldName}, {fieldValue})");
-    
+
     public void IfNetelInsertReproduction(Guid animalId, DateOnly? inseminationDate,
-                                          DateOnly? expectedCalvingDate, string inseminationType,
-                                          string spermBatch, string technician, string notes)
-        => Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},
+                                      DateOnly? expectedCalvingDate, string inseminationType,
+                                      string spermBatch, string technician, string notes)
+    => Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_insemination_and_pregnancy({animalId},
                                 {inseminationDate}, {expectedCalvingDate}, {inseminationType},
-                                {spermBatch}, {technician}, {notes})");
+                                {spermBatch}, {technician}, {notes}, {"Подлежит проверке"})");
 
     public void AddIdentificationField(string fieldName, Guid organizationId)
         => Database.ExecuteSqlInterpolated($@"SELECT add_identification_field({fieldName}, {organizationId})");
+
     public void DeleteIdentification(Guid identificationId)
         => Database.ExecuteSqlInterpolated($@"SELECT delete_identification_field({identificationId})");
 

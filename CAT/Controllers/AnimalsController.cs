@@ -106,7 +106,7 @@ namespace CAT.Controllers
         /// <param name="body">Данные для регистрации животного, включая фото.</param>
         /// <returns>Сообщение об успешной регистрации и URL загруженного фото.</returns>
         [HttpPost, Route("registration")]
-        [OrgValidationTypeFilter()]
+        [OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> RegistrationAnimal([FromForm] AnimalRegistrationDTO body, [FromHeader] Guid organizationId)
         {
             var photoUrl = "";
@@ -124,7 +124,7 @@ namespace CAT.Controllers
         /// Импортирует данные о животных из CSV-файла.
         /// </summary>
         [HttpPost, Route("registration/import/csv")]
-        [OrgValidationTypeFilter()]
+        [OrgValidationTypeFilter(checkOrg: true)]
         public ActionResult ImportAnimalsFromCSV(IFormFile file, [FromHeader] Guid organizationId)
         {
             if (file == null || !new string[] { ".csv" }.Contains(Path.GetExtension(file.FileName)))
@@ -153,7 +153,7 @@ namespace CAT.Controllers
         /// Получает информацию о группах животных.
         /// </summary>
         [HttpGet, Route("groups")]
-        [OrgValidationTypeFilter(true)]
+        [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetGroups([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetGroupsInfo(organizationId));
@@ -163,7 +163,7 @@ namespace CAT.Controllers
         /// Получает идентификационные поля для животных.
         /// </summary>
         [HttpGet, Route("identifications")]
-        [OrgValidationTypeFilter(true)]
+        [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetIdentificationsFields([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetIdentificationsFields(organizationId));
