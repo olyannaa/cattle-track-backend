@@ -262,6 +262,21 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
+    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, int skip = default, int take = default)
+    {
+        return Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})");
+    }
+
+    public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, int skip = default, int take = default)
+    {
+        return GetAnimalsByOrgAndType(organizationId, type).Skip(skip).Take(take);
+    }
+
+    public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
+    {
+        return Database.ExecuteSql($"SELECT update_animal({id},{tag},{type},{groupId},{birthDate},{status})");
+    }
+
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     public IQueryable<IdentificationInfoDTO>? GetOrgIdentifications(Guid org_id)
         => IdentificationFields.FromSqlRaw(@"SELECT * FROM get_identification_fields({0})", org_id)

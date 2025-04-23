@@ -10,5 +10,7 @@ namespace CAT.Services.Interfaces
         List<GroupInfoDTO>? GetGroupsInfo(Guid org_id);
         List<IdentificationInfoDTO>? GetIdentificationsFields(Guid org_id);
         public ImportAnimalsInfo ImportAnimalsFromCSV(List<AnimalCSVInfoDTO> animals, Guid org_id);
+        IEnumerable<AnimalCensus> GetAnimalCensus(Guid organisationId, string animalType);
+        IEnumerable<AnimalCensus> GetAnimalCensusByPage(Guid organisationId, string animalType, int page = 1, bool isMoblile = default);
     }
 }
