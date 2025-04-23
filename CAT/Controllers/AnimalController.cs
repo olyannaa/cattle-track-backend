@@ -30,8 +30,7 @@ namespace CAT.Controllers
         /// <param name="body">Данные для регистрации животного, включая фото.</param>
         /// <returns>Сообщение об успешной регистрации и URL загруженного фото.</returns>
         [HttpPost, Route("registration")]
-        [OrgValidationTypeFilter()]
-        public async Task<IActionResult> RegistrationAnimal([FromForm] AnimalRegistrationDTO body, [FromHeader] Guid organizationId)
+        public async Task<IActionResult> RegistrationAnimal([FromForm] AnimalRegistrationDTO body)
         {
             var photoUrl = "";
             if (body.Photo != null &&
@@ -40,7 +39,7 @@ namespace CAT.Controllers
             if (body.Type == "Нетель" && (body.InseminationDate == null || body.ExpectedCalvingDate == null
                 || body.SpermBatch == null || body.InseminationType == null))
                 return BadRequest(new { ErrorText = "Не все обязательные поля заполнены!" });
-            _animalService.RegisterAnimal(body, organizationId);
+            _animalService.RegisterAnimal(body);
             return Ok(new { Message = "Животное успешно зарегистрировано!"});
         }
 

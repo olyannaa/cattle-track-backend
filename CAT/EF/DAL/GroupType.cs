@@ -1,4 +1,3 @@
-
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CAT.EF.DAL;
@@ -12,6 +11,7 @@ public partial class GroupType
     public Guid? OrganizationId { get; set; }
 
     public string Name { get; set; } = null!;
+
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
 

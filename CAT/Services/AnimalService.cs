@@ -5,7 +5,6 @@ using CAT.EF.DAL;
 using CAT.Models;
 using CAT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using System.Globalization;
 
 namespace CAT.Services
@@ -33,7 +32,7 @@ namespace CAT.Services
                 .ToList();
         }
 
-        public void RegisterAnimal(AnimalRegistrationDTO dto, Guid organizationId)
+        public void RegisterAnimal(AnimalRegistrationDTO dto)
         {
             var animalId = Guid.NewGuid();
             var fatherId = GetAnimalIdByTag(dto.FatherTag);
@@ -42,7 +41,7 @@ namespace CAT.Services
             var animal = new Animal
             {
                 Id = animalId,
-                OrganizationId = organizationId,
+                OrganizationId = dto.OrganizationId,
                 TagNumber = dto.TagNumber,
                 BirthDate = dto.BirthDate,
                 Type = dto.Type,
@@ -55,26 +54,10 @@ namespace CAT.Services
                 OriginLocation = dto.OriginLocation,
             };
             _db.InsertAnimal(animal);
-            _db.SaveChanges();
 
             if (dto.Type == "Нетель")
-            {
-                try
-                {
-                    _db.IfNetelInsertReproduction(
-                        animalId,
-                        dto.InseminationDate,
-                        dto.ExpectedCalvingDate,
-                        dto.InseminationType,
-                        dto.SpermBatch,
-                        dto.Technician,
-                        dto.Notes);
-                }
-                catch (PostgresException ex) when (ex.SqlState == "23503")
-                {
-                    throw new Exception($"Не удалось зарегистрировать осеменение: животное с ID {animalId} не найдено");
-                }
-            }
+                _db.IfNetelInsertReproduction( animalId, dto.InseminationDate, dto.ExpectedCalvingDate,
+                                    dto.InseminationType, dto.SpermBatch, dto.Technician, dto.Notes);
             foreach (var animalField in dto.AdditionalFields)
                 _db.InsertAnimalIdentification(animalId, animalField.Key, animalField.Value);
         }
@@ -131,7 +114,7 @@ namespace CAT.Services
                     _db.Database.ExecuteSqlRaw("SELECT insert_animal_from_csv({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17})",
                         org_id, animal.TagNumber, birthDate, animal.Type,
                         animal.Breed, motherId ?? (object)DBNull.Value, fatherId ?? (object)DBNull.Value, animal.Status,
-                        null, "", originLocation, animal.Сonsumption, dateOfReceipt,
+                        Guid.Empty, "", originLocation, animal.Сonsumption, dateOfReceipt,
                         dateOfDisposal, animal.LastWeightWeight,
                         lastWeightAtDisposal, lastWeightDate, animal.ReasonOfDisposal);
 
@@ -147,13 +130,12 @@ namespace CAT.Services
                 
                 importInfo.TotalRows++;
             }
-            identificationFields = GetIdentificationsFields(org_id);
 
             foreach (var animal in addedAnimals)
             {
                 var animalId = _db.Animals.FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.TagNumber).Id;
                 foreach (var field in animal.AdditionalFields)
-                    _db.InsertAnimalIdentification(animalId, identificationFields.FirstOrDefault(x => x.Name == field.Key).Id, field.Value);
+                    _db.InsertAnimalIdentification(animalId, field.Key, field.Value);
             }
             importInfo.Duplicates = animals.Count() - sortedAnimals.Count();
             return importInfo;

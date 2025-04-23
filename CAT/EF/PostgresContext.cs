@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml.Linq;
 using CAT.Controllers.DTO;
 using CAT.EF.DAL;
@@ -37,12 +36,10 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<RolesPermission> RolesPermissions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-    public virtual DbSet<Insemination> Inseminations { get; set; }
+    public virtual DbSet<Reproduction> Reproductions { get; set; }
 
     public virtual DbSet<GroupType> GroupTypes { get; set; }
     public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
-    public virtual DbSet<Calving> Calvings { get; set; }
-    public virtual DbSet<Pregnancy> Pregnancies { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -276,16 +273,17 @@ public partial class PostgresContext : DbContext
                                        {animal.BirthDate}, {animal.Type},
                                        {animal.Breed}, {animal.MotherId}, {animal.FatherId}, {animal.Status},
                                        {animal.GroupId}, {animal.Origin}, {animal.OriginLocation}
-
-    public void InsertAnimalIdentification(Guid id, Guid fieldName, string fieldValue)
+                                       )");                              
+    
+    public void InsertAnimalIdentification(Guid id, string fieldName, string fieldValue)
         => Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification({id}, {fieldName}, {fieldValue})");
-
+    
     public void IfNetelInsertReproduction(Guid animalId, DateOnly? inseminationDate,
                                           DateOnly? expectedCalvingDate, string inseminationType,
                                           string spermBatch, string technician, string notes)
-        => Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_insemination_and_pregnancy({animalId},
+        => Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_reproduction({animalId},
                                 {inseminationDate}, {expectedCalvingDate}, {inseminationType},
-                                {spermBatch}, {technician}, {notes}, {"Подлежит проверке"})");
+                                {spermBatch}, {technician}, {notes})");
 
     public void AddIdentificationField(string fieldName, Guid organizationId)
         => Database.ExecuteSqlInterpolated($@"SELECT add_identification_field({fieldName}, {organizationId})");
