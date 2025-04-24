@@ -19,5 +19,6 @@
         public List<string> SkippedReasons { get; set; } = new List<string>();
         public int CreatedFields { get; set; } = 0;
         public List<string> FieldNames { get; set; } = new List<string>();
+        public string Message { get; set; } = "";
     }
 }
