@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace CAT.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]"), Authorize]
     [ApiController]
     public class AnimalsController : ControllerBase
     {
@@ -124,7 +124,7 @@ namespace CAT.Controllers
         /// Импортирует данные о животных из CSV-файла.
         /// </summary>
         [HttpPost, Route("registration/import/csv")]
-        //[OrgValidationTypeFilter(checkOrg: true)]
+        [OrgValidationTypeFilter(checkOrg: true)]
         public ActionResult ImportAnimalsFromCSV(IFormFile file, [FromHeader] Guid organizationId)
         {
             if (file == null || !new string[] { ".csv" }.Contains(Path.GetExtension(file.FileName)))
