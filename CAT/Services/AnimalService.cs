@@ -6,6 +6,7 @@ using CAT.Models;
 using CAT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using NpgsqlTypes;
 using System.Globalization;
 
 namespace CAT.Services
@@ -82,102 +83,301 @@ namespace CAT.Services
 
         public ImportAnimalsInfo ImportAnimalsFromCSV(List<AnimalCSVInfoDTO> animals, Guid org_id)
         {
-            using var transaction = _db.Database.BeginTransaction();
+            if (animals == null || !animals.Any())
+            {
+                return new ImportAnimalsInfo
+                {
+                    Message = "Нет данных для импорта",
+                    Errors = 1
+                };
+            }
+
             var importInfo = new ImportAnimalsInfo();
+            var addedAnimals = new List<(AnimalCSVInfoDTO animal, Guid animalId)>();
+
+            using var transaction = _db.Database.BeginTransaction();
 
             try
             {
-                var identificationFields = GetIdentificationsFields(org_id);
-                var animalStatuses = new Dictionary<string, string>();
-                var existingFields = new HashSet<string>(identificationFields.Select(f => f.Name));
-
-                foreach (var animalField in animals[0].AdditionalFields)
-                {
-                    if (!existingFields.Contains(animalField.Key))
-                    {
-                        _db.AddIdentificationField(animalField.Key, org_id);
-                        importInfo.CreatedFields++;
-                        importInfo.FieldNames.Add(animalField.Key);
-                    }
-                }
-
-                var allOrgAnimals = _db.Animals.Where(x => x.OrganizationId == org_id).ToList();
-                var sortedAnimals = animals
-                    //.Where(x => !allOrgAnimals.Any(a => a.TagNumber == x.TagNumber) && x.TagNumber != "")
-                    .OrderBy(a => a.Status == "Корова стада" ? 0 : 1)
+                // Шаг 1 Получение и добавление полей идентификации
+                var identificationFields = _db.GetOrgIdentifications(org_id)
+                    .Select(x => new IdentificationField { Id = x.Id, FieldName = x.Name })
                     .ToList();
 
-                var activeAnimals = new List<AnimalCSVInfoDTO>();
-                var ancestorAnimals = new List<AnimalCSVInfoDTO>();
-                foreach (var animal in sortedAnimals)
+                importInfo.FieldNames = AddNewIdentificationFields(animals, org_id, identificationFields, ref importInfo);
+                if (importInfo.Errors > 0)
                 {
-                    if ((animal.Status == "Корова стада" || animal.Status == "Бык стада")
-                        || (((animal.Type == "Бычок" || animal.Type == "Телка") && animal.Status != "Мат.предок"
-                        && animal.Status != "Отц.предок")))
-                        activeAnimals.Add(animal);
-                    else ancestorAnimals.Add(animal);
+                    transaction.Rollback();
+                    return importInfo;
                 }
 
-                var addedAnimals = new List<AnimalCSVInfoDTO>();
+                // Шаг 2 Подготовка данных животных
+                var (activeAnimals, ancestorAnimals) = CategorizeAnimals(animals, org_id);
+                var sortedAnimals = activeAnimals.Concat(ancestorAnimals).ToList();
+
+                // Шаг 3 Проверка родителей
+                var parentTags = sortedAnimals
+                    .Where(a => !string.IsNullOrWhiteSpace(a.MotherTag) || !string.IsNullOrWhiteSpace(a.FatherTag))
+                    .Select(a => new { a.MotherTag, a.FatherTag })
+                    .Distinct()
+                    .ToList();
+
+                var existingParents = _db.Animals
+                    .Where(a => a.OrganizationId == org_id &&
+                               parentTags.Select(p => p.MotherTag).Concat(parentTags.Select(p => p.FatherTag))
+                                        .Contains(a.TagNumber))
+                    .ToDictionary(a => a.TagNumber, a => a.Id);
+
+                // Шаг 4 Импорт животных
                 foreach (var animal in sortedAnimals)
                 {
-                    var originLocation = $"{animal.OriginFarm} {animal.OriginRegion} {animal.OriginCountry}";
+                    if (string.IsNullOrWhiteSpace(animal.TagNumber))
+                    {
+                        transaction.Rollback();
+                        return new ImportAnimalsInfo
+                        {
+                            Message = $"Ошибка: животное без номера метки не может быть импортировано",
+                            Errors = 1,
+                            TotalRows = importInfo.TotalRows
+                        };
+                    }
+
+                    if (!TryParseAnimalData(animal, out var parsedData, out var parseError))
+                    {
+                        transaction.Rollback();
+                        return new ImportAnimalsInfo
+                        {
+                            Message = $"Ошибка в данных животного {animal.TagNumber}: {parseError}",
+                            Errors = 1,
+                            TotalRows = importInfo.TotalRows
+                        };
+                    }
+
+                    var motherId = GetParentId(animal.MotherTag, existingParents);
+                    var fatherId = GetParentId(animal.FatherTag, existingParents);
+
                     try
                     {
-                        var birthDate = ParseStringToDate(animal.BirthDate);
-                        var dateOfReceipt = ParseStringToDate(animal.DateOfReceipt);
-                        var dateOfDisposal = ParseStringToDate(animal.DateOfDisposal);
-                        var lastWeightDate = ParseStringToDate(animal.LastWeightDate);
-                        var lastWeightAtDisposal = double.Parse(animal.LastWeightWeight);
-                        var motherId = _db.Animals
-                            .FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.MotherTag)?.Id;
-
-                        var fatherId = _db.Animals
-                            .FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.FatherTag)?.Id;
-
-                        _db.Database.ExecuteSqlRaw("SELECT insert_animal_from_csv({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17})",
-                            org_id, animal.TagNumber, birthDate, animal.Type,
-                            animal.Breed, motherId ?? null, fatherId ?? null, animal.Status,
-                            null, "", originLocation, animal.Сonsumption, dateOfReceipt,
-                            dateOfDisposal, animal.LastWeightWeight,
-                            lastWeightAtDisposal, lastWeightDate, animal.ReasonOfDisposal);
-
+                        var originLocation = BuildOriginLocation(animal.OriginFarm, animal.OriginRegion, animal.OriginCountry);
+                        var animalId = InsertAnimalToDatabase(org_id, animal, parsedData, motherId, fatherId, originLocation);
+                        addedAnimals.Add((animal, animalId));
                         importInfo.Imported++;
-                        addedAnimals.Add(animal);
                     }
                     catch (Exception ex)
                     {
-                        importInfo.Errors++;
-                        Console.WriteLine($"Ошибка при вставке животного с номером {animal.TagNumber}: {ex.Message} {ex.Source} {ex.InnerException}");
                         transaction.Rollback();
-                        importInfo.Message = $"Импорт отменён. Ошибка при вставке животного {animal.TagNumber}";
-                        return importInfo;
+                        return new ImportAnimalsInfo
+                        {
+                            Message = $"Ошибка при импорте животного {animal.TagNumber}: {ex.Message}",
+                            Errors = 1,
+                            TotalRows = importInfo.TotalRows
+                        };
                     }
 
                     importInfo.TotalRows++;
                 }
 
-                identificationFields = GetIdentificationsFields(org_id);
-
-                foreach (var animal in addedAnimals)
+                // Шаг 5 Добавление полей идентификации
+                try
                 {
-                    var animalId = _db.Animals.FirstOrDefault(x => x.OrganizationId == org_id && x.TagNumber == animal.TagNumber).Id;
-                    foreach (var field in animal.AdditionalFields)
-                        _db.InsertAnimalIdentification(animalId, identificationFields.FirstOrDefault(x => x.Name == field.Key).Id, field.Value);
+                    AddIdentificationFields(addedAnimals, org_id, ref importInfo);
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return new ImportAnimalsInfo
+                    {
+                        Message = $"Ошибка при добавлении полей идентификации: {ex.Message}",
+                        Errors = 1,
+                        TotalRows = importInfo.TotalRows
+                    };
                 }
 
-                importInfo.Duplicates = animals.Count - sortedAnimals.Count;
                 transaction.Commit();
                 importInfo.Message = "Импорт успешно завершён.";
+                importInfo.Duplicates = animals.Count - sortedAnimals.Count;
+                return importInfo;
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                importInfo.Errors++;
-                importInfo.Message = $"Импорт отменён из-за критической ошибки: {ex.Message}";
-            }   
+                return new ImportAnimalsInfo
+                {
+                    Message = $"Критическая ошибка при импорте: {ex.Message}",
+                    Errors = 1,
+                    TotalRows = importInfo.TotalRows
+                };
+            }
+        }
 
-            return importInfo;
+        private Guid? GetParentId(string parentTag, Dictionary<string, Guid> existingParents)
+        {
+            return !string.IsNullOrWhiteSpace(parentTag) && existingParents.TryGetValue(parentTag, out var id)
+                ? id
+                : null;
+        }
+
+
+        private List<string> AddNewIdentificationFields(List<AnimalCSVInfoDTO> animals, Guid org_id,
+            List<IdentificationField> existingFields, ref ImportAnimalsInfo importInfo)
+        {
+            var createdFields = new List<string>();
+            var existingFieldNames = new HashSet<string>(existingFields.Select(f => f.FieldName));
+
+            foreach (var animalField in animals[0].AdditionalFields)
+                if (!existingFieldNames.Contains(animalField.Key))
+                {
+                    try
+                    {
+                        _db.AddIdentificationField(animalField.Key, org_id);
+                        createdFields.Add(animalField.Key);
+                        importInfo.CreatedFields++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message, $"Ошибка при добавлении поля идентификации {animalField.Key}");
+                    }
+                }
+
+            return createdFields;
+        }
+
+        private (List<AnimalCSVInfoDTO> active, List<AnimalCSVInfoDTO> ancestors) CategorizeAnimals(
+            List<AnimalCSVInfoDTO> animals, Guid org_id)
+        {
+            var activeAnimals = new List<AnimalCSVInfoDTO>();
+            var ancestorAnimals = new List<AnimalCSVInfoDTO>();
+
+            foreach (var animal in animals)
+            {
+                if (string.IsNullOrWhiteSpace(animal.TagNumber)) continue;
+
+                if ((animal.Status == "Корова стада" || animal.Status == "Бык стада") ||
+                    ((animal.Type == "Бычок" || animal.Type == "Телка") &&
+                     animal.Status != "Мат.предок" && animal.Status != "Отц.предок"))
+                {
+                    animal.Status = "Активное";
+                    activeAnimals.Add(animal);
+                }
+                else
+                {
+                    animal.Status = animal.Сonsumption == "Продажа" ? "Проданное" : "Выбывшее";
+                    ancestorAnimals.Add(animal);
+                }
+            }
+
+            return (activeAnimals, ancestorAnimals);
+        }
+
+        private bool TryParseAnimalData(AnimalCSVInfoDTO animal,
+                out (DateOnly? birthDate, DateOnly? dateOfReceipt, DateOnly? dateOfDisposal,
+                    DateOnly? lastWeightDate, double? lastWeightAtDisposal) parsedData,
+                out string error)
+        {
+            parsedData = default;
+            error = null;
+            var parseErrors = new List<string>();
+
+            DateOnly? ParseOptionalDate(string dateStr, string fieldName)
+            {
+                if (string.IsNullOrWhiteSpace(dateStr)) return null;
+                if (DateOnly.TryParse(dateStr, out var date)) return date;
+                parseErrors.Add($"Некорректный формат {fieldName} ('{dateStr}') - будет сохранено как NULL");
+                return null;
+            }
+
+            var birthDate = ParseOptionalDate(animal.BirthDate, "дата рождения");
+            var dateOfReceipt = ParseOptionalDate(animal.DateOfReceipt, "дата поступления");
+            var dateOfDisposal = ParseOptionalDate(animal.DateOfDisposal, "дата выбытия");
+            var lastWeightDate = ParseOptionalDate(animal.LastWeightDate, "дата взвешивания");
+
+            double? weight = null;
+            if (!string.IsNullOrWhiteSpace(animal.LastWeightWeight))
+            {
+                if (!double.TryParse(animal.LastWeightWeight, out var parsedWeight))
+                    parseErrors.Add($"Некорректный вес при выбытии ('{animal.LastWeightWeight}') - будет сохранено как NULL");
+                else
+                    weight = parsedWeight;
+            }
+
+            parsedData = (birthDate, dateOfReceipt, dateOfDisposal, lastWeightDate, weight);
+
+            if (parseErrors.Any())
+                error = string.Join("; ", parseErrors);
+
+            return true;
+        }
+
+        private Guid InsertAnimalToDatabase(Guid org_id, AnimalCSVInfoDTO animal,
+                    (DateOnly? birthDate, DateOnly? dateOfReceipt, DateOnly? dateOfDisposal,
+                     DateOnly? lastWeightDate, double? lastWeightAtDisposal) parsedData,
+                    Guid? motherId, Guid? fatherId, string originLocation)
+        {
+
+
+            var parameters = new[]
+             {
+                new NpgsqlParameter("@p_organization_id", org_id),
+                new NpgsqlParameter("@p_tag_number", animal.TagNumber),
+                new NpgsqlParameter("@p_birth_date", parsedData.birthDate ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_type", animal.Type ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_breed", animal.Breed ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_mother_id", motherId ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_father_id", fatherId ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_status", animal.Status),
+                new NpgsqlParameter("@p_group_id", DBNull.Value),
+                new NpgsqlParameter("@p_origin", string.Empty),
+                new NpgsqlParameter("@p_origin_location", originLocation ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_consumption", animal.Сonsumption ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_date_of_receipt", parsedData.dateOfReceipt ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_date_of_disposal", parsedData.dateOfDisposal ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_last_weight_weight", animal.LastWeightWeight ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_live_weight_at_disposal", parsedData.lastWeightAtDisposal ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_last_weigh_date", parsedData.lastWeightDate ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_reason_of_disposal", animal.ReasonOfDisposal ?? (object)DBNull.Value)
+            };
+
+            _db.Database.ExecuteSqlRaw(@"SELECT FROM insert_animal_from_csv(
+                @p_organization_id, @p_tag_number, @p_birth_date, @p_type, 
+                @p_breed, @p_mother_id, @p_father_id, @p_status, 
+                @p_group_id, @p_origin, @p_origin_location, @p_consumption, 
+                @p_date_of_receipt, @p_date_of_disposal, @p_last_weight_weight, 
+                @p_live_weight_at_disposal, @p_last_weigh_date, @p_reason_of_disposal)", parameters);
+            var createdAnimal = _db.Animals
+                .FirstOrDefault(a => a.OrganizationId == org_id && a.TagNumber == animal.TagNumber);
+
+            return createdAnimal.Id;
+        }
+
+        private void AddIdentificationFields(List<(AnimalCSVInfoDTO animal, Guid animalId)> addedAnimals,
+            Guid org_id, ref ImportAnimalsInfo importInfo)
+        {
+            var identificationFields = GetIdentificationsFields(org_id).ToDictionary(f => f.Name, f => f.Id);
+
+            foreach (var (animal, animalId) in addedAnimals)
+            {
+                foreach (var field in animal.AdditionalFields)
+                {
+                    if (identificationFields.TryGetValue(field.Key, out var fieldId))
+                    {
+                        try
+                        {
+                            _db.InsertAnimalIdentification(animalId, fieldId, field.Value);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message, $"Ошибка при добавлении поля идентификации {field.Key} для животного {animal.TagNumber}");
+                            importInfo.Errors++;
+                        }
+                    }
+                }
+            }
+        }
+
+        private string BuildOriginLocation(string farm, string region, string country)
+        {
+            var parts = new[] { farm, region, country }.Where(p => !string.IsNullOrWhiteSpace(p));
+            return string.Join(" ", parts);
         }
 
 
@@ -187,27 +387,6 @@ namespace CAT.Services
             var animal = _db.Animals.FirstOrDefault(x => x.TagNumber == tag);
             if (animal == null) return null;
             return animal.Id;
-        }
-
-        static DateOnly? ParseStringToDate(string dateString)
-        {
-            if (string.IsNullOrWhiteSpace(dateString))
-                return null;
-
-            string[] formats =
-            {
-                "dd.MM.yyyy",
-                "yyyy-MM-dd",
-                "dd/MM/yyyy",
-                "MM/dd/yyyy",
-                "dd-MM-yyyy"
-            };
-
-            if (DateTime.TryParseExact(dateString.Trim(), formats,
-                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
-                return DateOnly.FromDateTime(dateTime);
-
-            return null;
         }
         
         public IEnumerable<AnimalCensus> GetAnimalCensus(Guid organisationId, string animalType)
