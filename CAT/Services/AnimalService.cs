@@ -5,6 +5,7 @@ using CAT.EF.DAL;
 using CAT.Models;
 using CAT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using Npgsql;
 using NpgsqlTypes;
 using System.Globalization;
@@ -281,7 +282,8 @@ namespace CAT.Services
             DateOnly? ParseOptionalDate(string dateStr, string fieldName)
             {
                 if (string.IsNullOrWhiteSpace(dateStr)) return null;
-                if (DateOnly.TryParse(dateStr, out var date)) return date;
+                var ruRu = System.Globalization.CultureInfo.GetCultureInfo("ru-RU");
+                if (DateOnly.TryParse(dateStr, ruRu, out var date)) return date;
                 parseErrors.Add($"Некорректный формат {fieldName} ('{dateStr}') - будет сохранено как NULL");
                 return null;
             }
