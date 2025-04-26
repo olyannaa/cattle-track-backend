@@ -53,7 +53,10 @@ builder.Services.AddAuthorization();
 
 var connectionString = builder.Configuration.GetConnectionString("PostgresDB");
 builder.Services.AddDbContext<PostgresContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString)
+               .UseLoggerFactory(LoggerFactory.Create(builder =>
+                   builder.AddFilter(level => level >= LogLevel.Warning))));
+
 
 var app = builder.Build();
 

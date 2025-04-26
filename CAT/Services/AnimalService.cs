@@ -112,7 +112,7 @@ namespace CAT.Services
                 }
 
                 // Шаг 2 Подготовка данных животных
-                var (activeAnimals, ancestorAnimals) = CategorizeAnimals(animals, org_id);
+                var (activeAnimals, ancestorAnimals) = CategorizeAnimals(animals);
                 var sortedAnimals = activeAnimals.Concat(ancestorAnimals).ToList();
 
                 // Шаг 3 Проверка родителей
@@ -161,6 +161,7 @@ namespace CAT.Services
                         var originLocation = BuildOriginLocation(animal.OriginFarm, animal.OriginRegion, animal.OriginCountry);
                         var animalId = InsertAnimalToDatabase(org_id, animal, parsedData, motherId, fatherId, originLocation);
                         addedAnimals.Add((animal, animalId));
+                        //existingParents.Add(animal.TagNumber, animalId);
                         importInfo.Imported++;
                     }
                     catch (Exception ex)
@@ -242,31 +243,59 @@ namespace CAT.Services
             return createdFields;
         }
 
-        private (List<AnimalCSVInfoDTO> active, List<AnimalCSVInfoDTO> ancestors) CategorizeAnimals(
-            List<AnimalCSVInfoDTO> animals, Guid org_id)
+        private (List<AnimalCSVInfoDTO> active, List<AnimalCSVInfoDTO> inactive) CategorizeAnimals(
+    List<AnimalCSVInfoDTO> animals)
         {
             var activeAnimals = new List<AnimalCSVInfoDTO>();
-            var ancestorAnimals = new List<AnimalCSVInfoDTO>();
+            var inactiveAnimals = new List<AnimalCSVInfoDTO>();
 
             foreach (var animal in animals)
             {
-                if (string.IsNullOrWhiteSpace(animal.TagNumber)) continue;
 
-                if ((animal.Status == "Корова стада" || animal.Status == "Бык стада") ||
-                    ((animal.Type == "Бычок" || animal.Type == "Телка") &&
-                     animal.Status != "Мат.предок" && animal.Status != "Отц.предок"))
+                if (ShouldBeInactive(animal))
+                {
+                    animal.Status = DetermineInactiveStatus(animal);
+                    inactiveAnimals.Add(animal);
+                }
+                else
                 {
                     animal.Status = "Активное";
                     activeAnimals.Add(animal);
                 }
-                else
-                {
-                    animal.Status = animal.Сonsumption == "Продажа" ? "Проданное" : "Выбывшее";
-                    ancestorAnimals.Add(animal);
-                }
             }
 
-            return (activeAnimals, ancestorAnimals);
+            return (activeAnimals, inactiveAnimals);
+        }
+
+        private bool ShouldBeInactive(AnimalCSVInfoDTO animal)
+        {
+            // Критерий 1: Есть признаки выбытия (дата, причина или расход)
+            bool hasDisposalInfo = !string.IsNullOrEmpty(animal.DateOfDisposal) ||
+                                  !string.IsNullOrEmpty(animal.ReasonOfDisposal) ||
+                                  !string.IsNullOrEmpty(animal.Сonsumption);
+
+            // Критерий 2: Статус предка (даже без информации о выбытии)
+            bool isAncestor = animal.Status == "Мат.предок" || animal.Status == "Отц.предок";
+
+            return hasDisposalInfo || isAncestor;
+        }
+
+        private string DetermineInactiveStatus(AnimalCSVInfoDTO animal)
+        {
+            // Если есть расход "Продажа" - статус "Проданное"
+            if (animal.Сonsumption == "Продажа")
+                return "Проданное";
+
+            // Если есть причина выбытия - статус "Выбывшее"
+            if (!string.IsNullOrEmpty(animal.ReasonOfDisposal))
+                return "Выбывшее";
+
+            // Для предков без конкретной информации
+            if (animal.Status == "Мат.предок" || animal.Status == "Отц.предок")
+                return "Выбывшее";
+
+            // Дефолтный статус для неактивных животных
+            return "Выбывшее";
         }
 
         private bool TryParseAnimalData(AnimalCSVInfoDTO animal,
