@@ -146,6 +146,7 @@ namespace CAT.Controllers
 
             if (animals.Count == 0) return StatusCode(400);
             var importInfo = _animalService.ImportAnimalsFromCSV(animals, organizationId);
+            if (importInfo.Errors > 0) return BadRequest(new { ErrorText = importInfo.Message });
             return Ok(importInfo);
         }
 
