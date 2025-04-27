@@ -18,5 +18,11 @@ namespace CAT.Controllers.DTO
         /// <example>Корова</example>
         [Required, GreaterThan(0)]
         public int Page { get; init; }
+
+        /// <summary>
+        /// Отображать ли только активных животных
+        /// </summary>
+        /// <example>true</example>
+        public bool? Active { get; init; }
     }
 }

@@ -262,14 +262,23 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
-    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, int skip = default, int take = default)
+    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, bool isActive = default)
     {
-        return Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})");
+        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})")
+                            .OrderBy(e => e.TagNumber)
+                            .ThenBy(e => e.BirthDate)
+                            .ThenBy(e => e.Breed)
+                            .ThenBy(e => e.GroupName)
+                            .ThenBy(e => e.Status)
+                            .ThenBy(e => e.Origin)
+                            .ThenBy(e => e.OriginLocation);
+        return isActive ? query.Where(e => e.Status == "Активное") : query;
     }
 
-    public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, int skip = default, int take = default)
+    public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, bool isActive = default, int skip = default, int take = default)
     {
-        return GetAnimalsByOrgAndType(organizationId, type).Skip(skip).Take(take);
+
+        return GetAnimalsByOrgAndType(organizationId, type, isActive).Skip(skip).Take(take);
     }
 
     public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
