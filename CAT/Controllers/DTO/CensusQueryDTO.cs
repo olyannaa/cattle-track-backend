@@ -19,10 +19,6 @@ namespace CAT.Controllers.DTO
         [Required, GreaterThan(0)]
         public int Page { get; init; }
 
-        /// <summary>
-        /// Отображать ли только активных животных
-        /// </summary>
-        /// <example>true</example>
-        public bool? Active { get; init; }
+        public CensusSortInfoDTO SortInfo { get; init; }
     }
 }

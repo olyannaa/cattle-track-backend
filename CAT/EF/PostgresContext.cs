@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
-using CAT.Controllers.DTO;
+﻿using CAT.Controllers.DTO;
 using CAT.EF.DAL;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.Internal.Postgres;
+using EntityFramework = Microsoft.EntityFrameworkCore.EF;
 namespace CAT.EF;
 
 public partial class PostgresContext : DbContext
@@ -262,23 +257,25 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
-    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, bool isActive = default)
+    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, CensusSortInfoDTO? sort)
     {
-        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})")
-                            .OrderBy(e => e.TagNumber)
-                            .ThenBy(e => e.BirthDate)
-                            .ThenBy(e => e.Breed)
-                            .ThenBy(e => e.GroupName)
-                            .ThenBy(e => e.Status)
-                            .ThenBy(e => e.Origin)
-                            .ThenBy(e => e.OriginLocation);
-        return isActive ? query.Where(e => e.Status == "Активное") : query;
+        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})");
+
+        if (sort is not null && sort.Active) query = query.Where(e => e.Status == "Активное");
+        
+        if (sort is not null && sort.Column is not null)
+        {
+                query = sort.Descending ? query.OrderByDescending(p => EntityFramework.Property<AnimalCensus>(p, sort.Column))
+                                        : query.OrderBy(p => EntityFramework.Property<AnimalCensus>(p, sort.Column));
+        }
+
+        return query;
     }
 
-    public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, bool isActive = default, int skip = default, int take = default)
+    public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, CensusSortInfoDTO? sortInfo, int skip = default, int take = default)
     {
 
-        return GetAnimalsByOrgAndType(organizationId, type, isActive).Skip(skip).Take(take);
+        return GetAnimalsByOrgAndType(organizationId, type, sortInfo).Skip(skip).Take(take);
     }
 
     public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
@@ -290,7 +287,7 @@ public partial class PostgresContext : DbContext
     public IQueryable<IdentificationInfoDTO>? GetOrgIdentifications(Guid org_id)
         => IdentificationFields.FromSqlRaw(@"SELECT * FROM get_identification_fields({0})", org_id)
                                 .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.FieldName });
-                                
+
     public IQueryable<Group>? GetOrgGroups(Guid org_id)
         => Groups.FromSqlRaw(@"SELECT * FROM get_groups({0})", org_id);
 

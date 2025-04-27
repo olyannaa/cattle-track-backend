@@ -188,16 +188,17 @@ namespace CAT.Services
             return null;
         }
         
-        public IEnumerable<AnimalCensus> GetAnimalCensus(Guid organisationId, string animalType, bool isActive = default)
+        public IEnumerable<AnimalCensus> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo)
         {
-            return _db.GetAnimalsByOrgAndType(organisationId, animalType, isActive);
+            return _db.GetAnimalsByOrgAndType(organisationId, animalType, sortInfo);
         }
 
-        public IEnumerable<AnimalCensus> GetAnimalCensusByPage(Guid organisationId, string animalType, bool isActive = default, int page = 1, bool isMoblile = default)
+        public IEnumerable<AnimalCensus> GetAnimalCensusByPage(Guid organisationId, string animalType,
+            CensusSortInfoDTO sortInfo, int page = 1, bool isMoblile = default)
         {
             var take = isMoblile ? 5 : 10;
             var skip = (page - 1) * take;
-            return _db.GetAnimalsWithPagintaion(organisationId, animalType, isActive, skip, take);
+            return _db.GetAnimalsWithPagintaion(organisationId, animalType, sortInfo, skip, take);
         }
     }
 }

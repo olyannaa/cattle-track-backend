@@ -8,7 +8,8 @@ namespace CAT.Controllers.DTO
         /// Тип животного
         /// </summary>
         /// <example>Корова</example>
-        public string Type { get; init; }
+        [Required]
+        public string Type { get; init; } = null!;
 
         /// <summary>
         /// Учитывать ли только активных животных

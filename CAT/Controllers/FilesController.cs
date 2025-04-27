@@ -34,7 +34,7 @@ namespace CAT.Controllers
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
         {
-            var census = _animalService.GetAnimalCensus(organizationId, dto.Type).ToList();
+            var census = _animalService.GetAnimalCensus(organizationId, dto.Type, null).ToList();
             var csvFile = _csv.WriteCSV(census);
 
             return File(csvFile, "application/octet-stream", $"{dto.Type}.csv");

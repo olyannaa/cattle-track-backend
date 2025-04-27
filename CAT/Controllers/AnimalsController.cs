@@ -45,7 +45,7 @@ namespace CAT.Controllers
         public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
         { 
             var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
-            var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.Active ?? default, dto.Page, isMobileDevice)
+            var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice)
                 .ToList();
             return Ok(census);
         }
@@ -60,7 +60,8 @@ namespace CAT.Controllers
         public IActionResult GetPagination([FromQuery] PaginationQueryDTO dto, [FromHeader] Guid organizationId)
         {
             var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
-            var count = _animalService.GetAnimalCensus(organizationId, dto.Type, dto.Active ?? default).Count();
+            var sortInfo = new CensusSortInfoDTO{Active = dto.Active ?? default};
+            var count = _animalService.GetAnimalCensus(organizationId, dto.Type, sortInfo).Count();
             return Ok(new PaginationDTO{AnimalCount = count, EntriesPerPage = entries});
         }
 
