@@ -10,6 +10,7 @@ namespace CAT.Controllers.DTO
         /// </summary>
         /// <example>Корова</example>
         [Required]
+        [IsIn("Корова", "Бык", "Бычок", "Нетель", "Телка")]
         public string Type { get; init; }
 
         public CensusSortInfoDTO SortInfo { get; init; }
