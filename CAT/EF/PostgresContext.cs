@@ -1,7 +1,9 @@
 ﻿using CAT.Controllers.DTO;
 using CAT.EF.DAL;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using EntityFramework = Microsoft.EntityFrameworkCore.EF;
+using NpgsqlTypes;
 namespace CAT.EF;
 
 public partial class PostgresContext : DbContext
@@ -338,5 +340,44 @@ public partial class PostgresContext : DbContext
 
     public void EditGroup(Guid groupId, Guid organizationId, string groupName, Guid? typeId, string? description = "", string? location = "")
         => Database.ExecuteSqlInterpolated($@"SELECT update_group({groupId},{organizationId}, {groupName}, {typeId}, {description}, {location})");
+    public Guid InsertAnimalToDatabase(Guid org_id, AnimalCSVInfoDTO animal,
+                    (DateOnly? birthDate, DateOnly? dateOfReceipt, DateOnly? dateOfDisposal,
+                     DateOnly? lastWeightDate, double? lastWeightAtDisposal) parsedData,
+                    Guid? motherId, Guid? fatherId, string originLocation)
+    {
 
+
+        var parameters = new[]
+         {
+                new NpgsqlParameter("@p_organization_id", org_id),
+                new NpgsqlParameter("@p_tag_number", animal.TagNumber),
+                new NpgsqlParameter("@p_birth_date", parsedData.birthDate ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_type", animal.Type ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_breed", animal.Breed ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_mother_id", motherId ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_father_id", fatherId ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_status", animal.Status),
+                new NpgsqlParameter("@p_group_id", DBNull.Value),
+                new NpgsqlParameter("@p_origin", string.Empty),
+                new NpgsqlParameter("@p_origin_location", originLocation ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_consumption", animal.Сonsumption ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_date_of_receipt", parsedData.dateOfReceipt ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_date_of_disposal", parsedData.dateOfDisposal ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_last_weight_weight", animal.LastWeightWeight ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_live_weight_at_disposal", parsedData.lastWeightAtDisposal ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_last_weigh_date", parsedData.lastWeightDate ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_reason_of_disposal", animal.ReasonOfDisposal ?? (object)DBNull.Value)
+            };
+
+        Database.ExecuteSqlRaw(@"SELECT FROM insert_animal_from_csv(
+                @p_organization_id, @p_tag_number, @p_birth_date, @p_type, 
+                @p_breed, @p_mother_id, @p_father_id, @p_status, 
+                @p_group_id, @p_origin, @p_origin_location, @p_consumption, 
+                @p_date_of_receipt, @p_date_of_disposal, @p_last_weight_weight, 
+                @p_live_weight_at_disposal, @p_last_weigh_date, @p_reason_of_disposal)", parameters);
+        var createdAnimal = Animals
+            .FirstOrDefault(a => a.OrganizationId == org_id && a.TagNumber == animal.TagNumber);
+
+        return createdAnimal.Id;
+    }
 }

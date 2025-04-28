@@ -4,24 +4,52 @@
         <name>CAT</name>
     </assembly>
     <members>
-        <member name="M:CAT.Controllers.AnimalController.RegistrationAnimal(CAT.Controllers.DTO.AnimalRegistrationDTO)">
+        <member name="M:CAT.Controllers.AnimalsController.GetListOfCattle(CAT.Controllers.DTO.CensusQueryDTO,System.Guid)">
+            <summary>
+            Возвращение списка животных по типу с пагинацией
+            </summary>
+            <returns></returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="400">Неверно введённые данные</response>
+            <response code="401">Не авторизован</response>
+        </member>
+        <member name="M:CAT.Controllers.AnimalsController.GetPagination(System.String,System.Guid)">
+            <summary>
+            Информация о списке животных для пагинации
+            </summary>
+            <param name="type">Тип животного</param>
+            <param name="organizationId">Id организации</param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.AnimalsController.EditCattleEntry(CAT.Controllers.DTO.UpdateAnimalDTO[],System.Guid)">
+            <summary>
+            Обновление данных о животном
+            </summary>
+            <param name="id">Id животного</param>
+            <param name="dto">Редактируемые данные</param>
+            <returns></returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="401">Не авторизован</response>
+            <response code="403">Пользователь не админ или не имеет доступа к организации</response>
+        </member>
+        <member name="M:CAT.Controllers.AnimalsController.RegistrationAnimal(CAT.Controllers.DTO.AnimalRegistrationDTO,System.Guid)">
             <summary>
             Регистрирует новое животное в системе.
             </summary>
             <param name="body">Данные для регистрации животного, включая фото.</param>
             <returns>Сообщение об успешной регистрации и URL загруженного фото.</returns>
         </member>
-        <member name="M:CAT.Controllers.AnimalController.ImportAnimalsFromCSV(Microsoft.AspNetCore.Http.IFormFile,System.Guid)">
+        <member name="M:CAT.Controllers.AnimalsController.ImportAnimalsFromCSV(Microsoft.AspNetCore.Http.IFormFile,System.Guid)">
             <summary>
             Импортирует данные о животных из CSV-файла.
             </summary>
         </member>
-        <member name="M:CAT.Controllers.AnimalController.GetGroups(System.Guid)">
+        <member name="M:CAT.Controllers.AnimalsController.GetGroups(System.Guid)">
             <summary>
             Получает информацию о группах животных.
             </summary>
         </member>
-        <member name="M:CAT.Controllers.AnimalController.GetIdentificationsFields(System.Guid)">
+        <member name="M:CAT.Controllers.AnimalsController.GetIdentificationsFields(System.Guid)">
             <summary>
             Получает идентификационные поля для животных.
             </summary>
@@ -43,65 +71,110 @@
             <response code="200">Успешное выполнение</response>
             <response code="401">Не авторизован</response>
         </member>
-        <member name="M:CAT.Controllers.GroupController.GetAllGroupTypes(System.Guid)">
+        <member name="P:CAT.Controllers.DTO.CensusQueryDTO.Type">
+            <summary>
+            Тип животного
+            </summary>
+            <example>Корова</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.CensusQueryDTO.Page">
+            <summary>
+            Номер страницы
+            </summary>
+            <example>Корова</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.LoginDTO.Login">
+            <example>useruser</example>>
+        </member>
+        <member name="P:CAT.Controllers.DTO.LoginDTO.Password">
+            <example>secure_password</example>>
+        </member>
+        <member name="P:CAT.Controllers.DTO.PaginationDTO.AnimalCount">
+            <example>d9776ffe-58e9-4ec2-bb03-d1a3f57942b9</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.PaginationDTO.EntriesPerPage">
+            <example>Активное</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.Id">
+            <example>d9776ffe-58e9-4ec2-bb03-d1a3f57942b9</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.TagNumber">
+            <example>TAG123</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.GroupID">
+            <example>0fbedbab-83ea-44cc-b7a0-69768dca5750</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.BirthDate">
+            <example>2023-12-31</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.Status">
+            <example>Активное</example>
+        </member>
+        <member name="M:CAT.Controllers.FilesController.GetListOfCattle(CAT.Controllers.DTO.CensusQueryDTO,System.Guid)">
+            <summary>
+            Экспорт списка животных в csv
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.GroupsController.GetAllGroupTypes(System.Guid)">
             <summary>
             Получить список всех типов групп по организации.
             </summary>
             <param name="organizationId">ID организации</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.CreateGroupType(CAT.Controllers.DTO.CreateGroupTypeDTO,System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.CreateGroupType(CAT.Controllers.DTO.CreateGroupTypeDTO,System.Guid)">
             <summary>
             Создать новый тип группы.
             </summary>
             <param name="dto">Данные нового типа группы</param>
             <param name="organizationId">ID организации</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.DeleteGroupType(System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.DeleteGroupType(System.Guid)">
             <summary>
             Удалить тип группы.
             </summary>
             <param name="typeId">ID типа группы</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.GetAllGroup(System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.GetAllGroup(System.Guid)">
             <summary>
             Получить список всех групп в организации.
             </summary>
             <param name="organizationId">ID организации</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.CreateGroup(CAT.Controllers.DTO.CreateGroupDTO,System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.CreateGroup(CAT.Controllers.DTO.CreateGroupDTO,System.Guid)">
             <summary>
             Создать новую группу.
             </summary>
             <param name="dto">Данные новой группы</param>
             <param name="organizationId">ID организации</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.DeleteGroup(System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.DeleteGroup(System.Guid)">
             <summary>
             Удалить группу.
             </summary>
             <param name="groupId">ID группы</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.EditGroup(CAT.Controllers.DTO.EditGroupDTO,System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.EditGroup(CAT.Controllers.DTO.EditGroupDTO,System.Guid)">
             <summary>
             Обновить данные группы.
             </summary>
             <param name="dto">Данные для обновления</param>
             <param name="organizationId">ID организации</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.GetAllIdentificationFields(System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.GetAllIdentificationFields(System.Guid)">
             <summary>
             Получить список всех полей идентификации по организации.
             </summary>
             <param name="organizationId">ID организации</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.CreateIdentificationField(CAT.Controllers.DTO.CreateIdentificationDTO,System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.CreateIdentificationField(CAT.Controllers.DTO.CreateIdentificationDTO,System.Guid)">
             <summary>
             Создать новое поле идентификации.
             </summary>
             <param name="dto">Данные нового поля</param>
             <param name="organizationId">ID организации</param>
         </member>
-        <member name="M:CAT.Controllers.GroupController.DeleteIdentification(System.Guid)">
+        <member name="M:CAT.Controllers.GroupsController.DeleteIdentification(System.Guid)">
             <summary>
             Удалить поле идентификации.
             </summary>
