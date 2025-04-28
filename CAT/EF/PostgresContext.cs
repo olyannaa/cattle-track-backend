@@ -268,7 +268,10 @@ public partial class PostgresContext : DbContext
                 query = sort.Descending ? query.OrderByDescending(p => EntityFramework.Property<AnimalCensus>(p, sort.Column))
                                         : query.OrderBy(p => EntityFramework.Property<AnimalCensus>(p, sort.Column));
         }
-
+        else
+        {
+            query = query.OrderBy(e => e.TagNumber);
+        }
         return query;
     }
 

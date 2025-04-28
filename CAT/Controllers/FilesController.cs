@@ -32,9 +32,9 @@ namespace CAT.Controllers
         /// <returns></returns>
         [HttpGet, Route("csv/animals"), Authorize]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
+        public IActionResult GetListOfCattle([FromQuery] CensusCsvDTO dto, [FromHeader] Guid organizationId)
         {
-            var census = _animalService.GetAnimalCensus(organizationId, dto.Type, null).ToList();
+            var census = _animalService.GetAnimalCensus(organizationId, dto.Type, dto.SortInfo).ToList();
             var csvFile = _csv.WriteCSV(census);
 
             return File(csvFile, "application/octet-stream", $"{dto.Type}.csv");
