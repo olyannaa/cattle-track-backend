@@ -25,14 +25,13 @@ builder.Services.AddSingleton<YandexS3Service>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddScoped<ICSVService, CSVService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAuthService, CookiesAuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ICSVService, CSVService>();
-builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddSingleton<CustomCookieAuthenticationEvents>();
 builder.Services.AddScoped<OrgValidationFilter>();
 

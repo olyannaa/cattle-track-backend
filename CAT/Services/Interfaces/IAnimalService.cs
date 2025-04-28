@@ -7,6 +7,7 @@ namespace CAT.Services.Interfaces
     public interface IAnimalService
     {
         void RegisterAnimal(AnimalRegistrationDTO animal, Guid organizationId);
+        void UpdateAnimal(UpdateAnimalDTO updateInfo);
         List<GroupInfoDTO>? GetGroupsInfo(Guid org_id);
         List<IdentificationInfoDTO>? GetIdentificationsFields(Guid org_id);
         public ImportAnimalsInfo ImportAnimalsFromCSV(List<AnimalCSVInfoDTO> animals, Guid org_id);

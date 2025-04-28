@@ -21,16 +21,19 @@ namespace CAT.Controllers
         private readonly PostgresContext _db;
         private readonly ICSVService _csvService;
         private readonly YandexS3Service _s3Service;
+        private readonly IOrganizationService _orgService;
 
         public AnimalsController(IAnimalService animalService,
             IAuthService authService, PostgresContext postgresContext,
-            ICSVService csvService, YandexS3Service s3Service)
+            ICSVService csvService, YandexS3Service s3Service,
+            IOrganizationService orgService)
         {
             _animalService = animalService;
             _authService = authService;
             _db = postgresContext;
             _csvService = csvService;
             _s3Service = s3Service;
+            _orgService = orgService;
         }
 
         /// <summary>
@@ -82,19 +85,19 @@ namespace CAT.Controllers
             {
                 foreach(var dto in dtoArray)
                 {
-                    if (_db.Animals.Where(x => x.Id == dto.Id).SingleOrDefault()?.OrganizationId != organizationId)
+                    if (!_orgService.CheckAnimalById(organizationId, dto.Id))
                     {
                         transaction.Rollback();
                         return BadRequest(new ErrorDTO("Один из животных не приналежит организации пользователя"));
                     }
 
-                    if (dto.GroupID != null && _db.Groups.Where(x => x.Id == dto.GroupID).SingleOrDefault()?.OrganizationId != organizationId)
+                    if (dto.GroupID != null && !_orgService.CheckGroupById(organizationId, (Guid)dto.GroupID))
                     {
                         transaction.Rollback();
                         return BadRequest(new ErrorDTO("Одиного из животных не возможно добавить в группу, не пренадлежащую организации пользователя"));
                     }
                         
-                    var x = _db.UpdateAnimal(dto.Id, dto.TagNumber, null, dto.GroupID, dto.BirthDate, dto.Status);
+                    _animalService.UpdateAnimal(dto);
                 }
                 transaction.Commit();
             }

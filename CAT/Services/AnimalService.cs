@@ -393,5 +393,11 @@ namespace CAT.Services
             var skip = (page - 1) * take;
             return _db.GetAnimalsWithPagintaion(organisationId, animalType, sortInfo, skip, take);
         }
+
+        public void UpdateAnimal(UpdateAnimalDTO updateInfo)
+        {
+            _db.UpdateAnimal(updateInfo.Id, updateInfo.TagNumber,
+                null, updateInfo.GroupID, updateInfo.BirthDate, updateInfo.Status);
+        }
     }
 }
