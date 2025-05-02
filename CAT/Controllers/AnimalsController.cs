@@ -91,7 +91,7 @@ namespace CAT.Controllers
                         return BadRequest(new ErrorDTO("Один из животных не приналежит организации пользователя"));
                     }
 
-                    if (dto.GroupID != null && !_orgService.CheckGroupById(organizationId, (Guid)dto.GroupID))
+                    if (dto.GroupID != null && !_orgService.CheckGroupById(organizationId, dto.GroupID))
                     {
                         transaction.Rollback();
                         return BadRequest(new ErrorDTO("Одиного из животных не возможно добавить в группу, не пренадлежащую организации пользователя"));

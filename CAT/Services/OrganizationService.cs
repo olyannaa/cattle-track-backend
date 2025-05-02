@@ -15,13 +15,15 @@ namespace CAT.Services
             _db = postgresContext;
         }
 
-        public bool CheckAnimalById(Guid orgId, Guid animalId)
+        public bool CheckAnimalById(Guid orgId, Guid? animalId)
         {
+            if (animalId == null) return false;
             return _db.Animals.Where(x => x.Id == animalId).SingleOrDefault()?.OrganizationId == orgId;
         }
 
-        public bool CheckGroupById(Guid orgId, Guid groupId)
+        public bool CheckGroupById(Guid orgId, Guid? groupId)
         {
+            if (groupId == null) return false;
             return _db.Groups.Where(x => x.Id == groupId).SingleOrDefault()?.OrganizationId == orgId;
         }
     }

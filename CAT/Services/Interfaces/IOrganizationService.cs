@@ -6,7 +6,7 @@ namespace CAT.Services.Interfaces
 {
     public interface IOrganizationService
     {
-        bool CheckAnimalById(Guid orgId, Guid animalId);
-        bool CheckGroupById(Guid orgId, Guid groupId);
+        bool CheckAnimalById(Guid orgId, Guid? animalId);
+        bool CheckGroupById(Guid orgId, Guid? groupId);
     }
 }
