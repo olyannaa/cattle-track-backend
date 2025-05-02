@@ -399,5 +399,17 @@ namespace CAT.Services
             _db.UpdateAnimal(updateInfo.Id, updateInfo.TagNumber,
                 null, updateInfo.GroupID, updateInfo.BirthDate, updateInfo.Status);
         }
+
+        public IEnumerable<CowDTO> GetCows(Guid organizationId)
+            => _db.GetCowsByOrganization(organizationId).ToList();
+
+        public IEnumerable<BullDTO> GetBulls(Guid organizationId)
+            => _db.GetBullsByOrganization(organizationId).ToList();
+
+        public void InsertInsemination(InseminationDTO dto)
+            => _db.InsertInsemination(dto);
+
+        public void InsertPregnancy(PregnancyDTO dto)
+            => _db.InsertPregnancy(dto);
     }
 }

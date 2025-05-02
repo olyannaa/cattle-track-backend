@@ -13,7 +13,7 @@
             <response code="400">Неверно введённые данные</response>
             <response code="401">Не авторизован</response>
         </member>
-        <member name="M:CAT.Controllers.AnimalsController.GetPagination(System.String,System.Guid)">
+        <member name="M:CAT.Controllers.AnimalsController.GetPagination(CAT.Controllers.DTO.PaginationQueryDTO,System.Guid)">
             <summary>
             Информация о списке животных для пагинации
             </summary>
@@ -71,6 +71,12 @@
             <response code="200">Успешное выполнение</response>
             <response code="401">Не авторизован</response>
         </member>
+        <member name="P:CAT.Controllers.DTO.CensusCsvDTO.Type">
+            <summary>
+            Тип животного
+            </summary>
+            <example>Корова</example>
+        </member>
         <member name="P:CAT.Controllers.DTO.CensusQueryDTO.Type">
             <summary>
             Тип животного
@@ -83,6 +89,24 @@
             </summary>
             <example>Корова</example>
         </member>
+        <member name="P:CAT.Controllers.DTO.CensusSortInfoDTO.Active">
+            <summary>
+            Отображать ли только активных животных
+            </summary>
+            <example>true</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.CensusSortInfoDTO.Column">
+            <summary>
+            Название колонки по сортировке
+            </summary>
+            <example>TagNumber</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.CensusSortInfoDTO.Descending">
+            <summary>
+            Сортировать ли по убыванию
+            </summary>
+            <example>true</example>
+        </member>
         <member name="P:CAT.Controllers.DTO.LoginDTO.Login">
             <example>useruser</example>>
         </member>
@@ -94,6 +118,18 @@
         </member>
         <member name="P:CAT.Controllers.DTO.PaginationDTO.EntriesPerPage">
             <example>Активное</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.PaginationQueryDTO.Type">
+            <summary>
+            Тип животного
+            </summary>
+            <example>Корова</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.PaginationQueryDTO.Active">
+            <summary>
+            Учитывать ли только активных животных
+            </summary>
+            <example>true</example>
         </member>
         <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.Id">
             <example>d9776ffe-58e9-4ec2-bb03-d1a3f57942b9</example>
@@ -110,7 +146,7 @@
         <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.Status">
             <example>Активное</example>
         </member>
-        <member name="M:CAT.Controllers.FilesController.GetListOfCattle(CAT.Controllers.DTO.CensusQueryDTO,System.Guid)">
+        <member name="M:CAT.Controllers.FilesController.GetListOfCattle(CAT.Controllers.DTO.CensusCsvDTO,System.Guid)">
             <summary>
             Экспорт списка животных в csv
             </summary>
