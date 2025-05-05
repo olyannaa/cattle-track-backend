@@ -6,7 +6,7 @@ namespace CAT.EF.DAL
 {
     public partial class AnimalCensus
     {
-        [Column("id")]
+        [Column("animal_id")]
         public Guid Id { get; set; }
 
         [Column("tag_number")]
@@ -14,6 +14,9 @@ namespace CAT.EF.DAL
 
         [Column("birth_date")]
         public DateOnly? BirthDate { get; set; }
+
+        [Column("type")]
+        public string? Type { get; set; }
 
         [Column("breed")]
         public string? Breed { get; set; }
@@ -35,5 +38,29 @@ namespace CAT.EF.DAL
 
         [Column("father_tag_number")]
         public string? FatherTagNumber { get; set; }
+
+        [Column("date_of_receipt")]
+        public DateTime? DateOfReceipt { get; set; }
+
+        [Column("date_of_disposal")]
+        public DateTime? DateOfDisposal { get; set; }
+
+        [Column("reason_of_disposal")]
+        public string? ReasonOfDisposal { get; set; }
+
+        [Column("consumption")]
+        public string? Consumption { get; set; }
+
+        [Column("live_weight_at_disposal")]
+        public double? LiveWeightAtDisposal { get; set; }
+
+        [Column("last_weigh_date")]
+        public DateTime? LastWeightDate { get; set; }
+
+        [Column("identification_field_name")]
+        public string? IdentificationFieldName { get; set; }
+
+        [Column("identification_value")]
+        public string? IdentificationValue { get; set; }
     }
 }

@@ -261,7 +261,7 @@ public partial class PostgresContext : DbContext
 
     public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, CensusSortInfoDTO? sort)
     {
-        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})");
+        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_with_if_by_organization({organizationId})").Where(e => e.Type == type);
 
         if (sort is not null && sort.Active) query = query.Where(e => e.Status == "Активное");
         
