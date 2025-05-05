@@ -247,7 +247,17 @@ public partial class PostgresContext : DbContext
             .HasColumnName("name");
         modelBuilder.Entity<GroupRaw>().HasNoKey().ToView(null);
         modelBuilder.Entity<CowInseminationDTO>().HasNoKey().ToView(null);
-        OnModelCreatingPartial(modelBuilder);
+        modelBuilder.Entity<CowInseminationDTO>(entity =>
+        {
+            entity.HasNoKey(); // Если это DTO без первичного ключа
+            entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
+            entity.Property(e => e.CowId).HasColumnName("cow_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.InseminationType).HasColumnName("insemination_type");
+            entity.Property(e => e.InseminationDate).HasColumnName("insemination_date");
+            entity.Property(e => e.BullId).HasColumnName("bull_id");
+        });
+    OnModelCreatingPartial(modelBuilder);
     }
 
     public string? GetUserInfo(string login, string hashedPass)
@@ -420,14 +430,21 @@ public partial class PostgresContext : DbContext
         => Database.ExecuteSqlInterpolated($"SELECT delete_calvings_by_cow({cowId})");
 
     public int DeleteInseminationByCow(Guid cowId)
-    => Database.ExecuteSqlInterpolated($"SELECT delete_insemination_by_cow({cowId})");
+        => Database.ExecuteSqlInterpolated($"SELECT delete_insemination_by_cow({cowId})");
 
     public int DeletePregnancyByCow(Guid cowId)
-    => Database.ExecuteSqlInterpolated($"SELECT delete_pregnancy_by_cow({cowId})");
+        => Database.ExecuteSqlInterpolated($"SELECT delete_pregnancy_by_cow({cowId})");
 
     public IQueryable<CowInseminationDTO> GetPregnancyByOrganization(Guid organizationId)
-    => CowInseminations
-        .FromSqlRaw(@"SELECT  organization_id as OrganizationId, cow_id as CowId,
-            status as Status, insemination_type as InseminationType, insemination_date as InseminationDate, bull_id as BullId
-        FROM get_pregnancy_by_organization({0})", organizationId);
+        => CowInseminations
+            .FromSqlRaw(@"SELECT * FROM get_pregnancy_by_organization({0})", organizationId);
+
+    public void InsertPregnancy(InsertPregnancyDTO dto)
+        => Database.ExecuteSqlInterpolated($@"SELECT insert_pregnancy({dto.CowId}, {dto.Date},
+                                           {dto.Status}, {dto.ExpectedCalvingDate})");
+    public void InsertCalving(InsertCalvingDTO dto)
+        => Database.ExecuteSqlInterpolated($@"
+        SELECT insert_calving({dto.CowId}, {dto.Date}, {dto.Complication}, {dto.Type}, {dto.Veterinar}, 
+            {dto.Treatments}, {dto.Pathology}, {dto.CalfId})");
+
 }

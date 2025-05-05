@@ -414,8 +414,27 @@ namespace CAT.Services
 
         public void InsertCalving(CalvingDTO dto)
             => _db.InsertCalving(dto);
-
         public IEnumerable<CowInseminationDTO> GetPregnancies(Guid organizationId)
-            => _db.GetPregnancyByOrganization(organizationId).Where(x => x.Status == "Подлежит проверке").ToList();
+        {
+            return _db.GetPregnancyByOrganization(organizationId)
+                .Where(x => x.Status == "Подлежит проверке")
+                .Select(x => new CowInseminationDTO
+                {
+                    OrganizationId = x.OrganizationId,
+                    CowId = x.CowId,
+                    Status = x.Status,
+                    InseminationType = x.InseminationType,
+                    InseminationDate = x.InseminationDate,
+                    BullId = x.BullId,
+                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate.ToString() ?? "дата неизвестна"}), быком №{(x.BullTagNumber != null ? x.BullTagNumber : "*")}"
+                })
+                .ToList();
+        }
+
+        public void InsertPregnancy(InsertPregnancyDTO dto)
+             => _db.InsertPregnancy(dto);
+
+        public void InsertCalving(InsertCalvingDTO dto)
+            => _db.InsertCalving(dto);
     }
 }

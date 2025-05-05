@@ -4,6 +4,7 @@ using CAT.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CAT.Controllers.DTO;
+using Amazon.Runtime.Telemetry;
 
 namespace CAT.Controllers
 {
@@ -55,6 +56,20 @@ namespace CAT.Controllers
         public async Task<IActionResult> GetPregnancies([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetPregnancies(organizationId));
+        }
+
+        [HttpPost, Route("pregnancy")]
+        public async Task<IActionResult> InsertPregnancy([FromBody] InsertPregnancyDTO dto)
+        {
+            _animalService.InsertPregnancy(dto);
+            return Ok(new { Message = "Результат проверки сохранён!" });
+        }
+
+        [HttpPost, Route("calving")]
+        public async Task<IActionResult> InsertCalving([FromBody] InsertCalvingDTO dto)
+        {
+            _animalService.InsertCalving(dto);
+            return Ok(new { Message = $"✅ Отёл успешно зарегистрирован!🐮 Мать: {dto.CowTagNumber} 📅 Дата отёла: {dto.Date.ToString()}" });
         }
     }
 }

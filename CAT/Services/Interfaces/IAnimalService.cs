@@ -19,5 +19,7 @@ namespace CAT.Services.Interfaces
         void InsertPregnancy(PregnancyDTO dto);
         void InsertCalving(CalvingDTO dto);
         IEnumerable<CowInseminationDTO> GetPregnancies(Guid organizationId);
+        void InsertPregnancy(InsertPregnancyDTO dto);
+        void InsertCalving(InsertCalvingDTO dto);
     }
 }
