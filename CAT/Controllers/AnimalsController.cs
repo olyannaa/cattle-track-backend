@@ -48,9 +48,8 @@ namespace CAT.Controllers
         public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
         { 
             var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
-            var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice)
-                .ToList();
-            return Ok(census);
+            var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice);
+            return Ok(AnimalDTO.Parse(census));
         }
         /// <summary>
         /// Информация о списке животных для пагинации
@@ -64,7 +63,7 @@ namespace CAT.Controllers
         {
             var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
             var sortInfo = new CensusSortInfoDTO{Active = dto.Active ?? default};
-            var count = _animalService.GetAnimalCensus(organizationId, dto.Type, sortInfo).Count();
+            var count = _animalService.GetAnimalCensus(organizationId, dto.Type, sortInfo).GroupBy(e => e.Id).Count();
             return Ok(new PaginationDTO{AnimalCount = count, EntriesPerPage = entries});
         }
 
@@ -94,10 +93,18 @@ namespace CAT.Controllers
                     if (dto.GroupID != null && !_orgService.CheckGroupById(organizationId, dto.GroupID))
                     {
                         transaction.Rollback();
-                        return BadRequest(new ErrorDTO("Одиного из животных не возможно добавить в группу, не пренадлежащую организации пользователя"));
+                        return BadRequest(new ErrorDTO("Одного из животных не возможно добавить в группу, не пренадлежащую организации пользователя"));
                     }
-                        
-                    _animalService.UpdateAnimal(dto);
+                    try
+                    {
+                        _animalService.UpdateAnimal(dto);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO(ex.Message));
+                    }
+                    
                 }
                 transaction.Commit();
             }

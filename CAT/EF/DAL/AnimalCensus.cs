@@ -40,10 +40,10 @@ namespace CAT.EF.DAL
         public string? FatherTagNumber { get; set; }
 
         [Column("date_of_receipt")]
-        public DateTime? DateOfReceipt { get; set; }
+        public DateOnly? DateOfReceipt { get; set; }
 
         [Column("date_of_disposal")]
-        public DateTime? DateOfDisposal { get; set; }
+        public DateOnly? DateOfDisposal { get; set; }
 
         [Column("reason_of_disposal")]
         public string? ReasonOfDisposal { get; set; }
@@ -55,7 +55,10 @@ namespace CAT.EF.DAL
         public double? LiveWeightAtDisposal { get; set; }
 
         [Column("last_weigh_date")]
-        public DateTime? LastWeightDate { get; set; }
+        public DateOnly? LastWeightDate { get; set; }
+
+        [Column("last_weight_weight")]
+        public string? LastWeightWeight { get; set; }
 
         [Column("identification_field_name")]
         public string? IdentificationFieldName { get; set; }

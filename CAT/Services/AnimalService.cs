@@ -24,7 +24,7 @@ namespace CAT.Services
         public List<GroupInfoDTO>? GetGroupsInfo(Guid org_id)
         {
             return _db.GetOrgGroups(org_id)
-                .Select(x => new GroupInfoDTO() { Id = x.Id, Name = x.Name})
+                .Select(x => new GroupInfoDTO() { Id = x.Id, Name = x.Name })
                 .ToList();
 
         }
@@ -339,7 +339,7 @@ namespace CAT.Services
             return true;
         }
 
-        
+
 
         private void AddIdentificationFields(List<(AnimalCSVInfoDTO animal, Guid animalId)> addedAnimals,
             Guid org_id, ref ImportAnimalsInfo importInfo)
@@ -380,7 +380,7 @@ namespace CAT.Services
             if (animal == null) return null;
             return animal.Id;
         }
-        
+
         public IEnumerable<AnimalCensus> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo)
         {
             return _db.GetAnimalsByOrgAndType(organisationId, animalType, sortInfo);
@@ -396,8 +396,22 @@ namespace CAT.Services
 
         public void UpdateAnimal(UpdateAnimalDTO updateInfo)
         {
-            _db.UpdateAnimal(updateInfo.Id, updateInfo.TagNumber,
-                null, updateInfo.GroupID, updateInfo.BirthDate, updateInfo.Status);
+            var father = _db.Animals.FirstOrDefault(e => e.TagNumber == updateInfo.FatherTagNumber);
+            var mother = _db.Animals.FirstOrDefault(e => e.TagNumber == updateInfo.MotherTagNumber);
+
+            _db.UpdateAnimal(updateInfo.Id, updateInfo.TagNumber, updateInfo.Type, updateInfo.Breed, mother?.Id,
+                father?.Id, updateInfo.Status, updateInfo.GroupID, updateInfo.Origin, updateInfo.OriginLocation,
+                updateInfo.BirthDate, updateInfo.DateOfReceipt, updateInfo.DateOfDisposal, updateInfo.ReasonOfDisposal,
+                updateInfo.Consumption, updateInfo.LiveWeightAtDisposal, updateInfo.LastWeightDate, updateInfo.LastWeightWeight,
+                null, null);
+
+            if (updateInfo.IdentificationFields != null)
+                foreach (var field in updateInfo.IdentificationFields)
+                {
+                    _db.UpdateAnimal(id: updateInfo.Id, identificationFieldName: field.IdentificationFieldName,
+                        identificationValue: field.IdentificationValue);
+                }
         }
     }
 }
+

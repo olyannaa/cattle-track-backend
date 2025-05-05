@@ -283,9 +283,17 @@ public partial class PostgresContext : DbContext
         return GetAnimalsByOrgAndType(organizationId, type, sortInfo).Skip(skip).Take(take);
     }
 
-    public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
+    public int UpdateAnimal(Guid id, string? tag = default, string? type = default, string? breed = default, Guid? motherId = default,
+        Guid? fatherId = default, string? status = default,  Guid? groupId = default, string? origin = default, string? originLoc = default,
+        DateOnly? birthDate = default, DateOnly? dateOfReceipt = default, DateOnly? dateOfDisposal = default, string? reasonOfDisposal = default,
+        string? consumption = default, double? liveWeightAtDisposal = default, DateOnly? lastWeightDate = default,
+        string? lastWeightWeight = default, string? identificationFieldName = default, string? identificationValue = default)
     {
-        return Database.ExecuteSql($"SELECT update_animal({id},{tag},{type},{groupId},{birthDate},{status})");
+        return Database.ExecuteSqlInterpolated($@"SELECT update_animal_data_with_if({id},{tag},{type},{breed},
+            {motherId},{fatherId},{status},{groupId},{origin},{originLoc},{birthDate},{dateOfReceipt},{dateOfDisposal},
+            {reasonOfDisposal},{consumption},{liveWeightAtDisposal},{lastWeightDate},{lastWeightWeight},{identificationFieldName},
+            {identificationValue})");
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
