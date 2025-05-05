@@ -38,6 +38,7 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<GroupType> GroupTypes { get; set; }
     public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
+    public virtual DbSet<CowInseminationDTO> CowInseminations { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -245,8 +246,18 @@ public partial class PostgresContext : DbContext
             .Property(e => e.Name)
             .HasColumnName("name");
         modelBuilder.Entity<GroupRaw>().HasNoKey().ToView(null);
-
-        OnModelCreatingPartial(modelBuilder);
+        modelBuilder.Entity<CowInseminationDTO>().HasNoKey().ToView(null);
+        modelBuilder.Entity<CowInseminationDTO>(entity =>
+        {
+            entity.HasNoKey(); // Если это DTO без первичного ключа
+            entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
+            entity.Property(e => e.CowId).HasColumnName("cow_id");
+            entity.Property(e => e.Status).HasColumnName("status");
+            entity.Property(e => e.InseminationType).HasColumnName("insemination_type");
+            entity.Property(e => e.InseminationDate).HasColumnName("insemination_date");
+            entity.Property(e => e.BullId).HasColumnName("bull_id");
+        });
+    OnModelCreatingPartial(modelBuilder);
     }
 
     public string? GetUserInfo(string login, string hashedPass)
@@ -409,4 +420,31 @@ public partial class PostgresContext : DbContext
         => Database.ExecuteSqlInterpolated($@"
         SELECT insert_pregnancy(
             {pregnancy.CowId}, {pregnancy.Date}, {pregnancy.Status}, {pregnancy.ExpectedCalvingDate})");
+
+    public void InsertCalving(CalvingDTO calving)
+        => Database.ExecuteSqlInterpolated($@"
+        SELECT insert_calving({calving.CowId}, {calving.Date}, {calving.Complication}, {calving.Type}, {calving.Veterinar},
+            {calving.Treatments}, {calving.Pathology}, {calving.CalfId})");
+
+    public int DeleteCalvingsByCow(Guid cowId)
+        => Database.ExecuteSqlInterpolated($"SELECT delete_calvings_by_cow({cowId})");
+
+    public int DeleteInseminationByCow(Guid cowId)
+        => Database.ExecuteSqlInterpolated($"SELECT delete_insemination_by_cow({cowId})");
+
+    public int DeletePregnancyByCow(Guid cowId)
+        => Database.ExecuteSqlInterpolated($"SELECT delete_pregnancy_by_cow({cowId})");
+
+    public IQueryable<CowInseminationDTO> GetPregnancyByOrganization(Guid organizationId)
+        => CowInseminations
+            .FromSqlRaw(@"SELECT * FROM get_pregnancy_by_organization({0})", organizationId);
+
+    public void InsertPregnancy(InsertPregnancyDTO dto)
+        => Database.ExecuteSqlInterpolated($@"SELECT insert_pregnancy({dto.CowId}, {dto.Date},
+                                           {dto.Status}, {dto.ExpectedCalvingDate})");
+    public void InsertCalving(InsertCalvingDTO dto)
+        => Database.ExecuteSqlInterpolated($@"
+        SELECT insert_calving({dto.CowId}, {dto.Date}, {dto.Complication}, {dto.Type}, {dto.Veterinar}, 
+            {dto.Treatments}, {dto.Pathology}, {dto.CalfId})");
+
 }

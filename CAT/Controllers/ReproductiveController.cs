@@ -4,10 +4,11 @@ using CAT.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using CAT.Controllers.DTO;
+using Amazon.Runtime.Telemetry;
 
 namespace CAT.Controllers
 {
-    [Route("api/[controller]"), Authorize]
+    [Route("api/[controller]")]
     [ApiController]
     public class ReproductiveController : ControllerBase
     {
@@ -21,15 +22,15 @@ namespace CAT.Controllers
         }
 
         
-        [HttpGet, Route("cows")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        [HttpGet, Route("cow")]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> GetAllCows([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetCows(organizationId));
         }
 
-        [HttpGet, Route("bulls")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        [HttpGet, Route("bull")]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> GetAllBulls([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetBulls(organizationId));
@@ -48,6 +49,27 @@ namespace CAT.Controllers
             };
             _animalService.InsertPregnancy(pregnancy);
             return Ok(new { Message = "Осеменение успешно зарегистрировано!" });
+        }
+
+        [HttpGet, Route("pregnancy")]
+        //[OrgValidationTypeFilter(checkOrg: true)]
+        public async Task<IActionResult> GetPregnancies([FromHeader] Guid organizationId)
+        {
+            return Ok(_animalService.GetPregnancies(organizationId));
+        }
+
+        [HttpPost, Route("pregnancy")]
+        public async Task<IActionResult> InsertPregnancy([FromBody] InsertPregnancyDTO dto)
+        {
+            _animalService.InsertPregnancy(dto);
+            return Ok(new { Message = "Результат проверки сохранён!" });
+        }
+
+        [HttpPost, Route("calving")]
+        public async Task<IActionResult> InsertCalving([FromBody] InsertCalvingDTO dto)
+        {
+            _animalService.InsertCalving(dto);
+            return Ok(new { Message = $"✅ Отёл успешно зарегистрирован!🐮 Мать: {dto.CowTagNumber} 📅 Дата отёла: {dto.Date.ToString()}" });
         }
     }
 }
