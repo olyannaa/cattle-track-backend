@@ -7,7 +7,7 @@ using CAT.Controllers.DTO;
 
 namespace CAT.Controllers
 {
-    [Route("api/[controller]"), Authorize]
+    [Route("api/[controller]")]
     [ApiController]
     public class ReproductiveController : ControllerBase
     {
@@ -21,15 +21,15 @@ namespace CAT.Controllers
         }
 
         
-        [HttpGet, Route("cows")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        [HttpGet, Route("cow")]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> GetAllCows([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetCows(organizationId));
         }
 
-        [HttpGet, Route("bulls")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        [HttpGet, Route("bull")]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> GetAllBulls([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetBulls(organizationId));
@@ -48,6 +48,13 @@ namespace CAT.Controllers
             };
             _animalService.InsertPregnancy(pregnancy);
             return Ok(new { Message = "Осеменение успешно зарегистрировано!" });
+        }
+
+        [HttpGet, Route("pregnancy")]
+        //[OrgValidationTypeFilter(checkOrg: true)]
+        public async Task<IActionResult> GetPregnancies([FromHeader] Guid organizationId)
+        {
+            return Ok(_animalService.GetPregnancies(organizationId));
         }
     }
 }

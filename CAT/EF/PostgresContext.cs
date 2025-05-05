@@ -409,4 +409,22 @@ public partial class PostgresContext : DbContext
         => Database.ExecuteSqlInterpolated($@"
         SELECT insert_pregnancy(
             {pregnancy.CowId}, {pregnancy.Date}, {pregnancy.Status}, {pregnancy.ExpectedCalvingDate})");
+
+    public void InsertCalving(CalvingDTO calving)
+        => Database.ExecuteSqlInterpolated($@"
+        SELECT insert_calving({calving.CowId}, {calving.Date}, {calving.Complication}, {calving.Type}, {calving.Veterinar},
+            {calving.Treatments}, {calving.Pathology}, {calving.CalfId})");
+
+    public int DeleteCalvingsByCow(Guid cowId)
+        => Database.ExecuteSqlInterpolated($"SELECT delete_calvings_by_cow({cowId})");
+
+    public int DeleteInseminationByCow(Guid cowId)
+    => Database.ExecuteSqlInterpolated($"SELECT delete_insemination_by_cow({cowId})");
+
+    public int DeletePregnancyByCow(Guid cowId)
+    => Database.ExecuteSqlInterpolated($"SELECT delete_pregnancy_by_cow({cowId})");
+
+    public IQueryable<CowInseminationDTO> GetPregnancyByOrganization(Guid organizationId)
+    => Set<CowInseminationDTO>()
+        .FromSqlRaw(@"SELECT * FROM get_pregnancy_by_organization({0})", organizationId);
 }
