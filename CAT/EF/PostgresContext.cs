@@ -38,6 +38,7 @@ public partial class PostgresContext : DbContext
 
     public virtual DbSet<GroupType> GroupTypes { get; set; }
     public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
+    public virtual DbSet<CowInseminationDTO> CowInseminations { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -245,7 +246,7 @@ public partial class PostgresContext : DbContext
             .Property(e => e.Name)
             .HasColumnName("name");
         modelBuilder.Entity<GroupRaw>().HasNoKey().ToView(null);
-
+        modelBuilder.Entity<CowInseminationDTO>().HasNoKey().ToView(null);
         OnModelCreatingPartial(modelBuilder);
     }
 
@@ -425,6 +426,8 @@ public partial class PostgresContext : DbContext
     => Database.ExecuteSqlInterpolated($"SELECT delete_pregnancy_by_cow({cowId})");
 
     public IQueryable<CowInseminationDTO> GetPregnancyByOrganization(Guid organizationId)
-    => Set<CowInseminationDTO>()
-        .FromSqlRaw(@"SELECT * FROM get_pregnancy_by_organization({0})", organizationId);
+    => CowInseminations
+        .FromSqlRaw(@"SELECT  organization_id as OrganizationId, cow_id as CowId,
+            status as Status, insemination_type as InseminationType, insemination_date as InseminationDate, bull_id as BullId
+        FROM get_pregnancy_by_organization({0})", organizationId);
 }

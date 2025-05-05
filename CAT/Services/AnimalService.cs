@@ -414,7 +414,8 @@ namespace CAT.Services
 
         public void InsertCalving(CalvingDTO dto)
             => _db.InsertCalving(dto);
+
         public IEnumerable<CowInseminationDTO> GetPregnancies(Guid organizationId)
-            => _db.GetPregnancyByOrganization(organizationId).ToList();
+            => _db.GetPregnancyByOrganization(organizationId).Where(x => x.Status == "Подлежит проверке").ToList();
     }
 }
