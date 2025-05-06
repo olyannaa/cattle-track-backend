@@ -36,7 +36,6 @@ namespace CAT.Services
 
         public List<IdentificationInfoDTO> GetIdentificationsByOrganization(Guid organizationId)
         => _db.GetOrgIdentifications(organizationId)
-                 .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.Name })
                  .ToList();
 
         public bool CreateGroup(CreateGroupDTO dto, Guid organizationId)

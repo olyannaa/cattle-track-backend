@@ -28,7 +28,7 @@ namespace CAT.Controllers.DTO
 
         //if netel
         [Format("dd.MM.yyyy")]
-        public DateOnly? InseminationDate { get; set; } = new DateOnly();
+        public DateOnly InseminationDate { get; set; } = new DateOnly();
         [Format("dd.MM.yyyy")]
         public DateOnly? ExpectedCalvingDate { get; set; } = new DateOnly();
         public string? InseminationType { get; set; } = null;

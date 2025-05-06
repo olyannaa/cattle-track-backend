@@ -1,5 +1,6 @@
 ﻿
 using CAT.Controllers.DTO;
+using System.Security.Claims;
 
 namespace CAT.Services
 {
@@ -7,5 +8,6 @@ namespace CAT.Services
     {
         UserInfoDTO LogIn(string username, string password);
         void LogOut();
+        List<Claim> GetUserClaims();
     }
 }

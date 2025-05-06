@@ -79,5 +79,14 @@ namespace CAT.Services
                 return stream.ToArray();
             }
         }
+
+        public string GetFileName(string input)
+        {
+            var time = DateTime.UtcNow.ToString("dd-MM-yyyyTHH-mm-ss");
+            if (input == "Корова") input = "Cows";
+            else if (input == "Бык" || input == "Бычок") input = "Bulls";
+            else if (input == "Телка" || input == "Нетель") input = "Heifers";
+            return $"{input} {time}.csv";
+        }
     }
 }
