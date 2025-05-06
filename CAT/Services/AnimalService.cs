@@ -396,10 +396,23 @@ namespace CAT.Services
 
         public void UpdateAnimal(UpdateAnimalDTO updateInfo)
         {
-            var father = _db.Animals.FirstOrDefault(e => e.TagNumber == updateInfo.FatherTagNumber);
-            var mother = _db.Animals.FirstOrDefault(e => e.TagNumber == updateInfo.MotherTagNumber);
+            var animal = _db.Animals.First(e => e.Id == updateInfo.Id);
+            var father = updateInfo.FatherTagNumber is not null ? _db.Animals.FirstOrDefault(e => e.TagNumber == updateInfo.FatherTagNumber) : null;
+            var mother = updateInfo.MotherTagNumber is not null ? _db.Animals.FirstOrDefault(e => e.TagNumber == updateInfo.MotherTagNumber) : null;
 
-            _db.UpdateAnimal(updateInfo.Id, updateInfo.TagNumber, updateInfo.Type, updateInfo.Breed, mother?.Id,
+            if (updateInfo.FatherTagNumber is not null && father is null)
+            {
+                throw new Exception(message: $@"Для животного с номером бирки {animal.TagNumber}
+                    не удалось изменить номер Отца, т.к животного с заданной биркой не найдено. Операция отменена.");
+            }
+
+            if (updateInfo.MotherTagNumber is not null && mother is null)
+            {
+                throw new Exception(message: $@"Для животного с номером бирки {animal.TagNumber}
+                    не удалось изменить номер Матери, т.к животного с заданной биркой не найдено. Операция отменена.");
+            }
+            
+            _db.UpdateAnimal(updateInfo!.Id, updateInfo.TagNumber, updateInfo.Type, updateInfo.Breed, mother?.Id,
                 father?.Id, updateInfo.Status, updateInfo.GroupID, updateInfo.Origin, updateInfo.OriginLocation,
                 updateInfo.BirthDate, updateInfo.DateOfReceipt, updateInfo.DateOfDisposal, updateInfo.ReasonOfDisposal,
                 updateInfo.Consumption, updateInfo.LiveWeightAtDisposal, updateInfo.LastWeightDate, updateInfo.LastWeightWeight,
