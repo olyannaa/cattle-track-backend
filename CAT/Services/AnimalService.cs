@@ -253,7 +253,7 @@ namespace CAT.Services
             foreach (var animal in animals)
             {
 
-                if (ShouldBeInactive(animal))
+                if (ShouldBeInactive(animal) || animal.Status == "Покупное семя")
                 {
                     animal.Status = DetermineInactiveStatus(animal);
                     inactiveAnimals.Add(animal);
