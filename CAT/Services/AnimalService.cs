@@ -403,13 +403,13 @@ namespace CAT.Services
             if (updateInfo.FatherTagNumber is not null && father is null)
             {
                 throw new Exception(message: $@"Для животного с номером бирки {animal.TagNumber}
-                    не удалось изменить номер Отца, т.к животного с заданной биркой не найдено. Операция отменена.");
+                    не удалось изменить номер Отца, т.к животного с заданной биркой не найдено. Не удалось сохранить таблицу.");
             }
 
             if (updateInfo.MotherTagNumber is not null && mother is null)
             {
                 throw new Exception(message: $@"Для животного с номером бирки {animal.TagNumber}
-                    не удалось изменить номер Матери, т.к животного с заданной биркой не найдено. Операция отменена.");
+                    не удалось изменить номер Матери, т.к животного с заданной биркой не найдено. Не удалось сохранить таблицу.");
             }
             
             _db.UpdateAnimal(id: updateInfo!.Id, tag: updateInfo.TagNumber, breed: updateInfo.Breed, motherId: mother?.Id,
