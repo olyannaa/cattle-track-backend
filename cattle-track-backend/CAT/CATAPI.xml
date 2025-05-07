@@ -266,7 +266,7 @@
             <response code="400">Неверные данные беременности</response>
             <response code="401">Не авторизован</response>
         </member>
-        <member name="M:CAT.Controllers.ReproductiveController.InsertCalving(CAT.Controllers.DTO.InsertCalvingDTO)">
+        <member name="M:CAT.Controllers.ReproductiveController.InsertCalving(CAT.Controllers.DTO.InsertCalvingDTO,System.Guid)">
             <summary>
             Регистрация нового отёла
             </summary>
