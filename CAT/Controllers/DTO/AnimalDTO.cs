@@ -10,8 +10,6 @@ public class AnimalDTO
 
     public DateOnly? BirthDate { get; init; }
 
-    public string? Type { get; init; }
-
     public string? Breed { get; init; }
 
     public string? GroupName { get; init; }
@@ -26,20 +24,6 @@ public class AnimalDTO
 
     public string? FatherTagNumber { get; init; }
 
-    public DateOnly? DateOfReceipt { get; init; }
-
-    public DateOnly? DateOfDisposal { get; init; }
-
-    public string? ReasonOfDisposal { get; init; }
-
-    public string? Consumption { get; init; }
-
-    public double? LiveWeightAtDisposal { get; init; }
-
-    public DateOnly? LastWeightDate { get; init; }
-
-    public string? LastWeightWeight { get; init; }
-
     public IdentificationFieldDTO[]? IdentificationFields { get; init; }
 
     public static AnimalDTO[] Parse(IEnumerable<AnimalCensus> census)
@@ -47,11 +31,12 @@ public class AnimalDTO
         return census.GroupBy(e => e.Id)
             .Select(g =>
                 {
-                    var fields = g.Select(e => new IdentificationFieldDTO
-                    {
-                        IdentificationFieldName = e.IdentificationFieldName,
-                        IdentificationValue = e.IdentificationValue
-                    }).ToArray();
+                    var fields = g.Where(e => e.IdentificationFieldName != null)
+                                    .Select(e => new IdentificationFieldDTO
+                                    {
+                                        IdentificationFieldName = e.IdentificationFieldName,
+                                        IdentificationValue = e.IdentificationValue
+                                    }).ToArray();
 
                     var e = g.First();
                     return new AnimalDTO()
@@ -59,7 +44,6 @@ public class AnimalDTO
                         Id = e.Id,
                         TagNumber = e.TagNumber,
                         BirthDate = e.BirthDate,
-                        Type = e.Type,
                         Breed = e.Breed,
                         GroupName = e.GroupName,
                         Status = e.Status,
@@ -67,13 +51,6 @@ public class AnimalDTO
                         OriginLocation = e.OriginLocation,
                         MotherTagNumber = e.MotherTagNumber,
                         FatherTagNumber = e.FatherTagNumber,
-                        DateOfReceipt = e.DateOfReceipt,
-                        DateOfDisposal = e.DateOfDisposal,
-                        ReasonOfDisposal = e.ReasonOfDisposal,
-                        Consumption = e.Consumption,
-                        LiveWeightAtDisposal = e.LiveWeightAtDisposal,
-                        LastWeightDate = e.LastWeightDate,
-                        LastWeightWeight = e.LastWeightWeight,
                         IdentificationFields = fields
                     };
                 })

@@ -143,9 +143,6 @@
         <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.BirthDate">
             <example>2023-12-31</example>
         </member>
-        <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.Type">
-            <example>Корова</example>
-        </member>
         <member name="P:CAT.Controllers.DTO.UpdateAnimalDTO.Status">
             <example>Активное</example>
         </member>

@@ -412,17 +412,16 @@ namespace CAT.Services
                     не удалось изменить номер Матери, т.к животного с заданной биркой не найдено. Операция отменена.");
             }
             
-            _db.UpdateAnimal(updateInfo!.Id, updateInfo.TagNumber, updateInfo.Type, updateInfo.Breed, mother?.Id,
-                father?.Id, updateInfo.Status, updateInfo.GroupID, updateInfo.Origin, updateInfo.OriginLocation,
-                updateInfo.BirthDate, updateInfo.DateOfReceipt, updateInfo.DateOfDisposal, updateInfo.ReasonOfDisposal,
-                updateInfo.Consumption, updateInfo.LiveWeightAtDisposal, updateInfo.LastWeightDate, updateInfo.LastWeightWeight,
-                null, null);
+            _db.UpdateAnimal(id: updateInfo!.Id, tag: updateInfo.TagNumber, breed: updateInfo.Breed, motherId: mother?.Id,
+                fatherId: father?.Id, status: updateInfo.Status, groupId: updateInfo.GroupID, origin: updateInfo.Origin,
+                originLoc: updateInfo.OriginLocation, birthDate: updateInfo.BirthDate);
 
             if (updateInfo.IdentificationFields != null)
                 foreach (var field in updateInfo.IdentificationFields)
                 {
-                    _db.UpdateAnimal(id: updateInfo.Id, identificationFieldName: field.IdentificationFieldName,
-                        identificationValue: field.IdentificationValue);
+                    if (field.IdentificationValue != null)
+                        _db.UpdateAnimal(id: updateInfo.Id, identificationFieldName: field.IdentificationFieldName,
+                            identificationValue: field.IdentificationValue);
                 }
         }
     }
