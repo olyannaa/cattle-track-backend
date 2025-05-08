@@ -418,7 +418,7 @@ public partial class PostgresContext : DbContext
             {insemination.SpermManufacturer}, {insemination.BullId}, {insemination.EmbryoId}, {insemination.EmbryoManufacturer},
             {insemination.Technician}, {insemination.Notes})");
 
-    public void InsertPregnancy(PregnancyDTO pregnancy)
+    public void InsertPregnancy(InsertPregnancyDTO pregnancy)
         => Database.ExecuteSqlInterpolated($@"
         SELECT insert_pregnancy(
             {pregnancy.CowId}, {pregnancy.Date}, {pregnancy.Status}, {pregnancy.ExpectedCalvingDate})");
@@ -440,10 +440,6 @@ public partial class PostgresContext : DbContext
     public IQueryable<CowInseminationDTO> GetPregnancyByOrganization(Guid organizationId)
         => CowInseminations
             .FromSqlRaw(@"SELECT * FROM get_pregnancy_by_organization({0})", organizationId);
-
-    public void InsertPregnancy(InsertPregnancyDTO dto)
-        => Database.ExecuteSqlInterpolated($@"SELECT insert_pregnancy({dto.CowId}, {dto.Date},
-                                           Подлежит проверке, {dto.ExpectedCalvingDate})");
     public void InsertCalving(InsertCalvingDTO dto, Guid calfId)
         => Database.ExecuteSqlInterpolated($@"
         SELECT insert_calving({dto.CowId}, {dto.Date}, {dto.Complication}, {dto.Type}, {dto.Veterinar}, 
