@@ -64,7 +64,6 @@ namespace CAT.Controllers
             {
                 CowId = dto.CowId,
                 Date = dto.Date,
-                Status = dto.Status,
                 ExpectedCalvingDate = dto.ExpectedCalvingDate
             };
             _animalService.InsertPregnancy(pregnancy);
