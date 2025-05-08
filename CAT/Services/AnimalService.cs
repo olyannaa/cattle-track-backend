@@ -456,7 +456,7 @@ namespace CAT.Services
             // 2. Получаем ID теленка (после сохранения)
             var calfId = _db.Animals
                 .AsNoTracking()
-                .Where(x => x.TagNumber == dto.CalfTagNumber)
+                .Where(x => x.TagNumber == dto.CalfTagNumber && x.BirthDate == dto.Date)
                 .Select(x => x.Id)
                 .FirstOrDefault();
 
@@ -479,7 +479,7 @@ namespace CAT.Services
             // 4. Получаем ID отела
             var calvingId = _db.Calvings
                 .AsNoTracking()
-                .Where(x => x.CowId == dto.CowId && x.Type == dto.Type && x.Complication == dto.Complication)
+                .Where(x => x.CowId == dto.CowId && x.Type == dto.Type && x.Complication == dto.Complication && x.Date == dto.Date)
                 .Select(x => x.Id)
                 .FirstOrDefault();
 

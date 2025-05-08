@@ -450,8 +450,8 @@ public partial class PostgresContext : DbContext
             {dto.Treatments}, {dto.Pathology}, {calfId.ToString()})");
 
     public void InsertAnimalWeight(InsertAnimalWeightDTO dto)
-    => Database.ExecuteSqlInterpolated($@"
-        INSERT INTO weights (id, animal_id, date, weight, method, notes)
-        VALUES ({dto.Id}, {dto.CalfId}, {dto.Date}, {dto.Weight}, {dto.Method}, {dto.Notes})");
+        => Database.ExecuteSqlInterpolated($@"
+            INSERT INTO weights (id, animal_id, date, weight, method, notes)
+            VALUES ({dto.Id}, {dto.CalfId}, {dto.Date}, {dto.Weight}, {dto.Method}, {dto.Notes})");
 
 }
