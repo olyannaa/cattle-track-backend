@@ -4,6 +4,7 @@
     {
         public Guid CowId { get; set; }               
         public DateOnly Date { get; set; }
+        public string? Status { get; set; }
         public string InseminationType { get; set; }  
         public string? SpermBatch { get; set; }       
         public string? SpermManufacturer { get; set; }
