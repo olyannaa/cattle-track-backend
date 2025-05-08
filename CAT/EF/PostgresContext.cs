@@ -39,6 +39,8 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<GroupType> GroupTypes { get; set; }
     public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
     public virtual DbSet<CowInseminationDTO> CowInseminations { get; set; }
+    public virtual DbSet<Calving> Calvings { get; set; }
+    public virtual DbSet<Weight> Weights { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -441,10 +443,15 @@ public partial class PostgresContext : DbContext
 
     public void InsertPregnancy(InsertPregnancyDTO dto)
         => Database.ExecuteSqlInterpolated($@"SELECT insert_pregnancy({dto.CowId}, {dto.Date},
-                                           {dto.Status}, {dto.ExpectedCalvingDate})");
-    public void InsertCalving(InsertCalvingDTO dto)
+                                           Подлежит проверке, {dto.ExpectedCalvingDate})");
+    public void InsertCalving(InsertCalvingDTO dto, Guid calfId)
         => Database.ExecuteSqlInterpolated($@"
         SELECT insert_calving({dto.CowId}, {dto.Date}, {dto.Complication}, {dto.Type}, {dto.Veterinar}, 
-            {dto.Treatments}, {dto.Pathology}, {dto.CalfId})");
+            {dto.Treatments}, {dto.Pathology}, {calfId.ToString()})");
+
+    public void InsertAnimalWeight(InsertAnimalWeightDTO dto)
+    => Database.ExecuteSqlInterpolated($@"
+        INSERT INTO weights (id, animal_id, date, weight, method, notes)
+        VALUES ({dto.Id}, {dto.CalfId}, {dto.Date}, {dto.Weight}, {dto.Method}, {dto.Notes})");
 
 }

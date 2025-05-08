@@ -426,6 +426,8 @@ namespace CAT.Services
                     InseminationType = x.InseminationType,
                     InseminationDate = x.InseminationDate,
                     BullId = x.BullId,
+                    CowTagNumber = x.CowTagNumber,
+                    BullTagNumber = x.BullTagNumber,
                     Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate.ToString() ?? "дата неизвестна"}), быком №{(x.BullTagNumber != null ? x.BullTagNumber : "*")}"
                 })
                 .ToList();
@@ -434,7 +436,66 @@ namespace CAT.Services
         public void InsertPregnancy(InsertPregnancyDTO dto)
              => _db.InsertPregnancy(dto);
 
-        public void InsertCalving(InsertCalvingDTO dto)
-            => _db.InsertCalving(dto);
+        public Guid InsertCalving(InsertCalvingDTO dto, Guid organizationId)
+        {
+            // 1. Создаем теленка
+            var calf = new Animal
+            {
+                TagNumber = dto.CalfTagNumber,
+                BirthDate = dto.Date,
+                Type = dto.Type,
+                Id = Guid.NewGuid(),
+                OrganizationId = organizationId,
+                Breed = null,
+                MotherId = dto.CowId,
+                FatherId = dto.BullId,
+                Status = "Активное",
+            };
+            _db.InsertAnimal(calf);
+
+            // 2. Получаем ID теленка (после сохранения)
+            var calfId = _db.Animals
+                .AsNoTracking()
+                .Where(x => x.TagNumber == dto.CalfTagNumber)
+                .Select(x => x.Id)
+                .FirstOrDefault();
+
+            if (calfId == Guid.Empty)
+                throw new Exception("Не удалось создать теленка");
+
+            // 3. Создаем запись об отеле
+            var calvingDto = new InsertCalvingDTO
+            {
+                CowId = dto.CowId,
+                Date = dto.Date,
+                Complication = dto.Complication,
+                Type = dto.Type,
+                Veterinar = dto.Veterinar,
+                Treatments = dto.Treatments,
+                Pathology = dto.Pathology,
+            };
+            _db.InsertCalving(calvingDto, calfId);
+
+            // 4. Получаем ID отела
+            var calvingId = _db.Calvings
+                .AsNoTracking()
+                .Where(x => x.CowId == dto.CowId && x.Type == dto.Type && x.Complication == dto.Complication)
+                .Select(x => x.Id)
+                .FirstOrDefault();
+
+            // 5. Создаем запись о весе теленка
+            var weightDto = new InsertAnimalWeightDTO
+            {
+                Id = calvingId,
+                CalfId = calfId,
+                Date = dto.Date,
+                Weight = dto.Weight,
+                Method = dto.Method,
+                Notes = dto.Notes
+            };
+            _db.InsertAnimalWeight(weightDto);
+
+            return calvingId;
+        }
     }
 }
