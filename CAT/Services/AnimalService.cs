@@ -448,14 +448,7 @@ namespace CAT.Services
                 FatherId = dto.BullId,
                 Status = "Активное",
             };
-            _db.InsertAnimal(calf);
-
-            // 2. Получаем ID теленка (после сохранения)
-            var calfId = _db.Animals
-                .AsNoTracking()
-                .Where(x => x.TagNumber == dto.CalfTagNumber && x.BirthDate == dto.Date)
-                .Select(x => x.Id)
-                .FirstOrDefault();
+            var calfId = _db.InsertAnimalWithId(calf);
 
             if (calfId == Guid.Empty)
                 throw new Exception("Не удалось создать теленка");
@@ -471,26 +464,21 @@ namespace CAT.Services
                 Treatments = dto.Treatments,
                 Pathology = dto.Pathology,
             };
-            _db.InsertCalving(calvingDto, calfId);
-
-            // 4. Получаем ID отела
-            var calvingId = _db.Calvings
-                .AsNoTracking()
-                .Where(x => x.CowId == dto.CowId && x.Type == dto.Type && x.Complication == dto.Complication && x.Date == dto.Date)
-                .Select(x => x.Id)
-                .FirstOrDefault();
-
-            // 5. Создаем запись о весе теленка
-            var weightDto = new InsertAnimalWeightDTO
+            var calvingId = _db.InsertCalving(calvingDto, calfId);
+            if (dto.Type == "Живой")
             {
-                Id = calvingId,
-                CalfId = calfId,
-                Date = dto.Date,
-                Weight = dto.Weight,
-                Method = dto.Method,
-                Notes = dto.Notes
-            };
-            _db.InsertAnimalWeight(weightDto);
+                var weightDto = new InsertAnimalWeightDTO
+                {
+                    Id = calvingId,
+                    CalfId = calfId,
+                    Date = dto.Date,
+                    Weight = dto.Weight,
+                    Method = dto.Method,
+                    Notes = dto.Notes
+                };
+                _db.InsertAnimalWeight(weightDto);
+            }
+            
 
             return calvingId;
         }

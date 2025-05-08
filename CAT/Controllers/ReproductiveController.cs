@@ -111,7 +111,7 @@ namespace CAT.Controllers
         /// <response code="400">Неверные данные отёла</response>
         /// <response code="401">Не авторизован</response>
         [HttpPost, Route("calving")]
-        //[OrgValidationTypeFilter(checkOrg: true)]
+        [OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> InsertCalving([FromBody] InsertCalvingDTO dto, [FromHeader] Guid organizationId)
         {
             var id = _animalService.InsertCalving(dto, organizationId);
