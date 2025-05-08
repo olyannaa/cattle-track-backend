@@ -409,9 +409,6 @@ namespace CAT.Services
         public void InsertInsemination(InseminationDTO dto)
             => _db.InsertInsemination(dto);
 
-        public void InsertPregnancy(PregnancyDTO dto)
-            => _db.InsertPregnancy(dto);
-
         public void InsertCalving(CalvingDTO dto)
             => _db.InsertCalving(dto);
         public IEnumerable<CowInseminationDTO> GetPregnancies(Guid organizationId)

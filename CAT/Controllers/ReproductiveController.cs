@@ -60,7 +60,7 @@ namespace CAT.Controllers
         public async Task<IActionResult> InsertInsemination([FromBody] InseminationDTO dto)
         {
             _animalService.InsertInsemination(dto);
-            var pregnancy = new PregnancyDTO
+            var pregnancy = new InsertPregnancyDTO
             {
                 CowId = dto.CowId,
                 Date = dto.Date,
@@ -97,6 +97,7 @@ namespace CAT.Controllers
         [HttpPost, Route("pregnancy")]
         public async Task<IActionResult> InsertPregnancy([FromBody] InsertPregnancyDTO dto)
         {
+            dto.ExpectedCalvingDate = dto.Date.AddDays(285);
             _animalService.InsertPregnancy(dto);
             return Ok(new { Message = "Результат проверки сохранён!" });
         }
@@ -110,7 +111,7 @@ namespace CAT.Controllers
         /// <response code="400">Неверные данные отёла</response>
         /// <response code="401">Не авторизован</response>
         [HttpPost, Route("calving")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> InsertCalving([FromBody] InsertCalvingDTO dto, [FromHeader] Guid organizationId)
         {
             var id = _animalService.InsertCalving(dto, organizationId);
