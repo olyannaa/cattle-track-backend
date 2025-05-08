@@ -311,7 +311,17 @@ public partial class PostgresContext : DbContext
                                        {animal.Breed}, {animal.MotherId}, {animal.FatherId}, {animal.Status},
                                        {animal.GroupId}, {animal.Origin}, {animal.OriginLocation}
                                        )");
+    public Guid InsertAnimalWithId(Animal animal)
+    {
+        Database.ExecuteSqlInterpolated($@"
+        SELECT insert_animal_return_id(
+            {animal.Id}, {animal.OrganizationId}, {animal.TagNumber},
+            {animal.BirthDate}, {animal.Type},
+            {animal.Breed}, {animal.MotherId}, {animal.FatherId}, {animal.Status},
+            {animal.GroupId}, {animal.Origin}, {animal.OriginLocation})");
 
+        return animal.Id;
+    }
     public void InsertAnimalIdentification(Guid id, Guid fieldName, string fieldValue)
         => Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification({id}, {fieldName}, {fieldValue})");
 
@@ -440,10 +450,26 @@ public partial class PostgresContext : DbContext
     public IQueryable<CowInseminationDTO> GetPregnancyByOrganization(Guid organizationId)
         => CowInseminations
             .FromSqlRaw(@"SELECT * FROM get_pregnancy_by_organization({0})", organizationId);
-    public void InsertCalving(InsertCalvingDTO dto, Guid calfId)
-        => Database.ExecuteSqlInterpolated($@"
-        SELECT insert_calving({dto.CowId}, {dto.Date}, {dto.Complication}, {dto.Type}, {dto.Veterinar}, 
-            {dto.Treatments}, {dto.Pathology}, {calfId.ToString()})");
+    public Guid InsertCalving(InsertCalvingDTO dto, Guid calfId)
+    {
+        var connection = Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+            connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText = "SELECT insert_calving(@cowId, @date, @complication, @type, @veterinar, @treatments, @pathology, @calfId)";
+        command.Parameters.Add(new NpgsqlParameter("cowId", dto.CowId));
+        command.Parameters.Add(new NpgsqlParameter("date", dto.Date));
+        command.Parameters.Add(new NpgsqlParameter("complication", dto.Complication));
+        command.Parameters.Add(new NpgsqlParameter("type", dto.Type));
+        command.Parameters.Add(new NpgsqlParameter("veterinar", dto.Veterinar ?? (object)DBNull.Value));
+        command.Parameters.Add(new NpgsqlParameter("treatments", dto.Treatments ?? (object)DBNull.Value));
+        command.Parameters.Add(new NpgsqlParameter("pathology", dto.Pathology ?? (object)DBNull.Value));
+        command.Parameters.Add(new NpgsqlParameter("calfId", calfId.ToString()));
+
+        var newCalvingId = (Guid)command.ExecuteScalar();
+        return newCalvingId;
+    }
 
     public void InsertAnimalWeight(InsertAnimalWeightDTO dto)
         => Database.ExecuteSqlInterpolated($@"
