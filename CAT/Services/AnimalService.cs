@@ -381,20 +381,19 @@ namespace CAT.Services
             return animal.Id;
         }
 
-        public List<AnimalDTO> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo)
+        public IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo)
         {
-            return AnimalDTO.Parse(_db.GetAnimalsByOrgWithIF(organisationId, animalType, sortInfo));
+            return AnimalDTO.Parse(_db.GetAnimalsWithIFByOrg(organisationId, animalType, sortInfo));
         }
 
-        public List<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string animalType,
+        public IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string animalType,
             CensusSortInfoDTO sortInfo, int page = 1, bool isMoblile = default)
         {
             var take = isMoblile ? 5 : 10;
             var skip = (page - 1) * take;
             return GetAnimalCensus(organisationId, animalType, sortInfo)
                 .Skip(skip)
-                .Take(take)
-                .ToList();
+                .Take(take);
         }
 
         public void UpdateAnimal(UpdateAnimalDTO updateInfo)
