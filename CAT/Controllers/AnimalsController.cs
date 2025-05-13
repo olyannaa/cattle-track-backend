@@ -48,8 +48,7 @@ namespace CAT.Controllers
         public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
         { 
             var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
-            var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice)
-                .ToList();
+            var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice);
             return Ok(census);
         }
         /// <summary>
@@ -94,10 +93,18 @@ namespace CAT.Controllers
                     if (dto.GroupID != null && !_orgService.CheckGroupById(organizationId, dto.GroupID))
                     {
                         transaction.Rollback();
-                        return BadRequest(new ErrorDTO("Одиного из животных не возможно добавить в группу, не пренадлежащую организации пользователя"));
+                        return BadRequest(new ErrorDTO("Одного из животных не возможно добавить в группу, не пренадлежащую организации пользователя"));
                     }
-                        
-                    _animalService.UpdateAnimal(dto);
+                    try
+                    {
+                        _animalService.UpdateAnimal(dto);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO(ex.Message));
+                    }
+                    
                 }
                 transaction.Commit();
             }

@@ -24,7 +24,7 @@ namespace CAT.Services
         public List<GroupInfoDTO>? GetGroupsInfo(Guid org_id)
         {
             return _db.GetOrgGroups(org_id)
-                .Select(x => new GroupInfoDTO() { Id = x.Id, Name = x.Name})
+                .Select(x => new GroupInfoDTO() { Id = x.Id, Name = x.Name })
                 .ToList();
 
         }
@@ -339,7 +339,7 @@ namespace CAT.Services
             return true;
         }
 
-        
+
 
         private void AddIdentificationFields(List<(AnimalCSVInfoDTO animal, Guid animalId)> addedAnimals,
             Guid org_id, ref ImportAnimalsInfo importInfo)
@@ -380,24 +380,52 @@ namespace CAT.Services
             if (animal == null) return null;
             return animal.Id;
         }
-        
-        public IEnumerable<AnimalCensus> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo)
+
+        public IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo)
         {
-            return _db.GetAnimalsByOrgAndType(organisationId, animalType, sortInfo);
+            return AnimalDTO.Parse(_db.GetAnimalsWithIFByOrg(organisationId, animalType, sortInfo));
         }
 
-        public IEnumerable<AnimalCensus> GetAnimalCensusByPage(Guid organisationId, string animalType,
+        public IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string animalType,
             CensusSortInfoDTO sortInfo, int page = 1, bool isMoblile = default)
         {
             var take = isMoblile ? 5 : 10;
             var skip = (page - 1) * take;
-            return _db.GetAnimalsWithPagintaion(organisationId, animalType, sortInfo, skip, take);
+            return GetAnimalCensus(organisationId, animalType, sortInfo)
+                .Skip(skip)
+                .Take(take);
         }
 
         public void UpdateAnimal(UpdateAnimalDTO updateInfo)
         {
-            _db.UpdateAnimal(updateInfo.Id, updateInfo.TagNumber,
-                null, updateInfo.GroupID, updateInfo.BirthDate, updateInfo.Status);
+            var animal = _db.Animals.First(e => e.Id == updateInfo.Id);
+            var father = updateInfo.FatherTagNumber is not null ? _db.Animals.FirstOrDefault(e => e.TagNumber == updateInfo.FatherTagNumber) : null;
+            var mother = updateInfo.MotherTagNumber is not null ? _db.Animals.FirstOrDefault(e => e.TagNumber == updateInfo.MotherTagNumber) : null;
+
+            if (updateInfo.FatherTagNumber is not null && father is null)
+            {
+                throw new Exception(message: $@"Для животного с номером бирки {animal.TagNumber}
+                    не удалось изменить номер Отца, т.к животного с заданной биркой не найдено. Не удалось сохранить таблицу.");
+            }
+
+            if (updateInfo.MotherTagNumber is not null && mother is null)
+            {
+                throw new Exception(message: $@"Для животного с номером бирки {animal.TagNumber}
+                    не удалось изменить номер Матери, т.к животного с заданной биркой не найдено. Не удалось сохранить таблицу.");
+            }
+            
+            _db.UpdateAnimal(id: updateInfo!.Id, tag: updateInfo.TagNumber, breed: updateInfo.Breed, motherId: mother?.Id,
+                fatherId: father?.Id, status: updateInfo.Status, groupId: updateInfo.GroupID, origin: updateInfo.Origin,
+                originLoc: updateInfo.OriginLocation, birthDate: updateInfo.BirthDate);
+
+            if (updateInfo.IdentificationFields != null)
+                foreach (var field in updateInfo.IdentificationFields)
+                {
+                    if (field.IdentificationValue != null)
+                        _db.UpdateAnimal(id: updateInfo.Id, identificationFieldName: field.IdentificationFieldName,
+                            identificationValue: field.IdentificationValue);
+                }
         }
     }
 }
+
