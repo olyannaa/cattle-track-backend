@@ -259,9 +259,11 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
-    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, CensusSortInfoDTO? sort)
+    public IEnumerable<IGrouping<Guid, AnimalCensus>> GetAnimalsByOrgWithIF(Guid organizationId, string type, CensusSortInfoDTO? sort)
     {
-        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_with_if_by_organization({organizationId})").Where(e => e.Type == type);
+        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_with_if_by_organization({organizationId})");
+
+        if (type != null) query = query.Where(e => e.Type == type);
 
         if (sort is not null && sort.Active) query = query.Where(e => e.Status == "Активное");
         
@@ -274,13 +276,7 @@ public partial class PostgresContext : DbContext
         {
             query = query.OrderBy(e => e.TagNumber);
         }
-        return query;
-    }
-
-    public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, CensusSortInfoDTO? sortInfo, int skip = default, int take = default)
-    {
-
-        return GetAnimalsByOrgAndType(organizationId, type, sortInfo).Skip(skip).Take(take);
+        return query.AsEnumerable().GroupBy(e => e.Id);
     }
 
     public int UpdateAnimal(Guid id, string? tag = default, string? type = default, string? breed = default, Guid? motherId = default,

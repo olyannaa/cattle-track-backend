@@ -24,37 +24,36 @@ public class AnimalDTO
 
     public string? FatherTagNumber { get; init; }
 
-    public IdentificationFieldDTO[]? IdentificationFields { get; init; }
+    public List<IdentificationFieldDTO>? IdentificationFields { get; init; }
 
-    public static AnimalDTO[] Parse(IEnumerable<AnimalCensus> census)
+    public static List<AnimalDTO> Parse(IEnumerable<IGrouping<Guid, AnimalCensus>> census)
     {
-        return census.GroupBy(e => e.Id)
-            .Select(g =>
-                {
-                    var fields = g.Where(e => e.IdentificationFieldName != null)
-                                    .Select(e => new IdentificationFieldDTO
-                                    {
-                                        IdentificationFieldName = e.IdentificationFieldName,
-                                        IdentificationValue = e.IdentificationValue
-                                    }).ToArray();
-
-                    var e = g.First();
-                    return new AnimalDTO()
+        return census.Select(g =>
                     {
-                        Id = e.Id,
-                        TagNumber = e.TagNumber,
-                        BirthDate = e.BirthDate,
-                        Breed = e.Breed,
-                        GroupName = e.GroupName,
-                        Status = e.Status,
-                        Origin = e.Origin,
-                        OriginLocation = e.OriginLocation,
-                        MotherTagNumber = e.MotherTagNumber,
-                        FatherTagNumber = e.FatherTagNumber,
-                        IdentificationFields = fields
-                    };
-                })
-            .ToArray();
+                        var fields = g.Where(e => e.IdentificationFieldName != null)
+                                        .Select(e => new IdentificationFieldDTO
+                                        {
+                                            IdentificationFieldName = e.IdentificationFieldName,
+                                            IdentificationValue = e.IdentificationValue
+                                        }).ToList();
+
+                        var e = g.First();
+                        return new AnimalDTO()
+                        {
+                            Id = e.Id,
+                            TagNumber = e.TagNumber,
+                            BirthDate = e.BirthDate,
+                            Breed = e.Breed,
+                            GroupName = e.GroupName,
+                            Status = e.Status,
+                            Origin = e.Origin,
+                            OriginLocation = e.OriginLocation,
+                            MotherTagNumber = e.MotherTagNumber,
+                            FatherTagNumber = e.FatherTagNumber,
+                            IdentificationFields = fields
+                        };
+                    })
+                    .ToList();
     }
 }
 

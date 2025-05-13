@@ -49,7 +49,7 @@ namespace CAT.Controllers
         { 
             var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
             var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice);
-            return Ok(AnimalDTO.Parse(census));
+            return Ok(census);
         }
         /// <summary>
         /// Информация о списке животных для пагинации
@@ -63,7 +63,7 @@ namespace CAT.Controllers
         {
             var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
             var sortInfo = new CensusSortInfoDTO{Active = dto.Active ?? default};
-            var count = _animalService.GetAnimalCensus(organizationId, dto.Type, sortInfo).GroupBy(e => e.Id).Count();
+            var count = _animalService.GetAnimalCensus(organizationId, dto.Type, sortInfo).Count();
             return Ok(new PaginationDTO{AnimalCount = count, EntriesPerPage = entries});
         }
 
