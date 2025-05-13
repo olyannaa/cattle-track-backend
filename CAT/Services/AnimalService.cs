@@ -411,7 +411,7 @@ namespace CAT.Services
 
         public void InsertCalving(CalvingDTO dto)
             => _db.InsertCalving(dto);
-        public IEnumerable<CowInseminationDTO> GetPregnancies(Guid organizationId)
+        public IEnumerable<CowInseminationDTO> GetPregnanciesForInsert(Guid organizationId)
         {
             return _db.GetPregnancyByOrganization(organizationId)
                 .Where(x => x.Status == "Подлежит проверке")
@@ -430,8 +430,32 @@ namespace CAT.Services
                 .ToList();
         }
 
+        public IEnumerable<CowInseminationDTO> GetPregnanciesForCalving(Guid organizationId)
+        {
+            var res = _db.GetPregnancyByOrganization(organizationId);
+            return res
+                .Where(x => x.Status == "Стельная")
+                .Select(x => new CowInseminationDTO
+                {
+                    OrganizationId = x.OrganizationId,
+                    CowId = x.CowId,
+                    Status = x.Status,
+                    InseminationType = x.InseminationType,
+                    InseminationDate = x.InseminationDate,
+                    BullId = x.BullId,
+                    CowTagNumber = x.CowTagNumber,
+                    BullTagNumber = x.BullTagNumber,
+                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate.ToString() ?? "дата неизвестна"})"
+                })
+                .ToList();
+        }
+
         public void InsertPregnancy(InsertPregnancyDTO dto)
-             => _db.InsertPregnancy(dto);
+        {
+            if (dto.Status == "Яловая" || dto.Status == "Стельная")
+                _db.DeletePregnancyByCow(dto.CowId);
+            _db.InsertPregnancy(dto);
+        }
 
         public Guid InsertCalving(InsertCalvingDTO dto, Guid organizationId)
         {
@@ -478,8 +502,8 @@ namespace CAT.Services
                 };
                 _db.InsertAnimalWeight(weightDto);
             }
-            
 
+            _db.DeletePregnancyByCow(dto.CowId);
             return calvingId;
         }
     }

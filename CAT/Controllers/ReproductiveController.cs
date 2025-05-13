@@ -64,7 +64,7 @@ namespace CAT.Controllers
             {
                 CowId = dto.CowId,
                 Date = dto.Date,
-                Status = "На проверке",
+                Status = "Подлежит проверке",
                 ExpectedCalvingDate = dto.ExpectedCalvingDate
             };
             _animalService.InsertPregnancy(pregnancy);
@@ -72,7 +72,7 @@ namespace CAT.Controllers
         }
 
         /// <summary>
-        /// Получение списка беременностей организации
+        /// Получение списка стельностей для страницы "Стельность"
         /// </summary>
         /// <param name="organizationId">Идентификатор организации</param>
         /// <returns>Список беременностей</returns>
@@ -81,9 +81,24 @@ namespace CAT.Controllers
         /// <response code="401">Не авторизован</response>
         [HttpGet, Route("pregnancy")]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public async Task<IActionResult> GetPregnancies([FromHeader] Guid organizationId)
+        public async Task<IActionResult> GetPregnanciesForInsertPregnancy([FromHeader] Guid organizationId)
         {
-            return Ok(_animalService.GetPregnancies(organizationId));
+            return Ok(_animalService.GetPregnanciesForInsert(organizationId));
+        }
+
+        /// <summary>
+        /// Получение списка стельностей для страницы "Отёлы"
+        /// </summary>
+        /// <param name="organizationId">Идентификатор организации</param>
+        /// <returns>Список беременностей</returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Неверный идентификатор организации</response>
+        /// <response code="401">Не авторизован</response>
+        [HttpGet, Route("calving")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public async Task<IActionResult> GetPregnanciesForInsertCalving([FromHeader] Guid organizationId)
+        {
+            return Ok(_animalService.GetPregnanciesForCalving(organizationId));
         }
 
         /// <summary>

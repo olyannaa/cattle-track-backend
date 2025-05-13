@@ -444,7 +444,7 @@ public partial class PostgresContext : DbContext
     public int DeleteInseminationByCow(Guid cowId)
         => Database.ExecuteSqlInterpolated($"SELECT delete_insemination_by_cow({cowId})");
 
-    public int DeletePregnancyByCow(Guid cowId)
+    public void DeletePregnancyByCow(Guid cowId)
         => Database.ExecuteSqlInterpolated($"SELECT delete_pregnancy_by_cow({cowId})");
 
     public IQueryable<CowInseminationDTO> GetPregnancyByOrganization(Guid organizationId)
