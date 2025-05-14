@@ -21,8 +21,14 @@ namespace CAT.Controllers.DTO
         public string? TagNumber { get; init; }
 
         /// <summary>
+        /// Только активные животные
+        /// </summary>
+        /// <example>true</example>
+        public bool? IsActive { get; init; }
+
+        /// <summary>
         /// Идентификация?
         /// </summary>
-        public Guid? IdentificationId { get; set; }
+        public IdentificationFieldIdDTO? IdentificationField { get; set; }
     }
 }

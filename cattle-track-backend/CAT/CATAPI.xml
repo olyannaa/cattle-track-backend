@@ -71,6 +71,28 @@
             <response code="200">Успешное выполнение</response>
             <response code="401">Не авторизован</response>
         </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetPagination(System.String,System.Guid)">
+            <summary>
+            Информация о списке ежедневных действий для пагинации
+            </summary>
+            <param name="type">Тип ежедневного действия</param>
+            <param name="organizationId">Id организации</param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetDailyActions(System.Guid,CAT.Controllers.DTO.DailyActionsDTO)">
+            <summary>
+            Возвращение списка ежедневных действий по типу с пагинацией
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetActiveAnimals(System.Guid,CAT.Controllers.DTO.DailyAnimalsFilterDTO)">
+            <summary>
+            Возвращает список активных животных, используя фильтры
+            </summary>
+            <param name="organizationId"></param>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
         <member name="P:CAT.Controllers.DTO.CensusCsvDTO.Type">
             <summary>
             Тип животного
@@ -107,13 +129,54 @@
             </summary>
             <example>true</example>
         </member>
+        <member name="P:CAT.Controllers.DTO.DailyActionsDTO.Type">
+            <summary>
+            Тип ежедневного действия
+            </summary>
+            <example>Осмотры</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyActionsDTO.Page">
+            <summary>
+            Номер страницы
+            </summary>
+            <example>1</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.GroupId">
+            <summary>
+            Id группы животного
+            </summary>
+            <example>e927c543-d2f4-44d6-bd3a-2e26b41e03ef</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.Type">
+            <summary>
+            Тип животного
+            </summary>
+            <example>Нетель</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.TagNumber">
+            <summary>
+            Номер животного
+            </summary>
+            <example>gh678</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.IsActive">
+            <summary>
+            Только активные животные
+            </summary>
+            <example>true</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.IdentificationField">
+            <summary>
+            Идентификация?
+            </summary>
+        </member>
         <member name="P:CAT.Controllers.DTO.LoginDTO.Login">
             <example>useruser</example>>
         </member>
         <member name="P:CAT.Controllers.DTO.LoginDTO.Password">
             <example>secure_password</example>>
         </member>
-        <member name="P:CAT.Controllers.DTO.PaginationDTO.AnimalCount">
+        <member name="P:CAT.Controllers.DTO.PaginationDTO.Count">
             <example>d9776ffe-58e9-4ec2-bb03-d1a3f57942b9</example>
         </member>
         <member name="P:CAT.Controllers.DTO.PaginationDTO.EntriesPerPage">

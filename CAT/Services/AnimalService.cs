@@ -421,21 +421,15 @@ namespace CAT.Services
             if (updateInfo.IdentificationFields != null)
                 foreach (var field in updateInfo.IdentificationFields)
                 {
-                    if (field.IdentificationValue != null)
-                        _db.UpdateAnimal(id: updateInfo.Id, identificationFieldName: field.IdentificationFieldName,
-                            identificationValue: field.IdentificationValue);
+                    if (field.Value != null)
+                        _db.UpdateAnimal(id: updateInfo.Id, identificationFieldName: field.Name,
+                            identificationValue: field.Value);
                 }
         }
 
-        public IEnumerable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filters)
+        public IEnumerable<ActiveAnimalDAL> GetAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filters)
         {
-            return _db.GetActiveAnimalsWithFilter(organizationId, filters);
+            return _db.GetAnimalsForActionsWithFilter(organizationId, filters);
         }
-
-        public IEnumerable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId)
-        {
-            return _db.GetActiveAnimals(organizationId);
-        }
-
     }
 }

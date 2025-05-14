@@ -64,7 +64,7 @@ namespace CAT.Controllers
             var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
             var sortInfo = new CensusSortInfoDTO{Active = dto.Active ?? default};
             var count = _animalService.GetAnimalCensus(organizationId, dto.Type, sortInfo).Count();
-            return Ok(new PaginationDTO{AnimalCount = count, EntriesPerPage = entries});
+            return Ok(new PaginationDTO{Count = count, EntriesPerPage = entries});
         }
 
         /// <summary>

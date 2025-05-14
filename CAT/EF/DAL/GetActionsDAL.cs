@@ -1,12 +1,10 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CAT.EF.DAL;
 
-[Table("daily_actions")]
-public partial class DailyAction
+public partial class GetActionsDAL
 {
-    [Column("id"), Key]
+    [Column("action_id")]
     public Guid Id { get; set; }
 
     [Column("animal_id")]
@@ -21,25 +19,31 @@ public partial class DailyAction
     [Column("performed_by")]
     public string? Actor { get; set; }
 
-    [Column("result")]
+    [Column("action_result")]
     public string? Result { get; set; }
 
-    [Column("medicine")]
+    [Column("action_medicine")]
     public string? Medicine { get; set; }
 
-    [Column("dose")]
+    [Column("action_dose")]
     public string? Dose { get; set; }
 
-    [Column("notes")]
+    [Column("action_notes")]
     public string? Notes { get; set; }
     
     [Column("old_group_id")]
     public Guid? OldGroupId { get; set; }
 
+    [Column("old_group_name")]
+    public string? OldGroupName { get; set; }
+
     [Column("new_group_id")]
     public Guid? NewGroupId { get; set; }
 
-    [Column("date")]
+    [Column("new_group_name")]
+    public string? NewGroupName { get; set; }
+
+    [Column("action_date")]
     public DateTime? Date { get; set; }
 
     [Column("next_action_date")]
@@ -47,13 +51,4 @@ public partial class DailyAction
 
     [Column("created_at")]
     public DateTime? CreatedAt { get; set;}
-
-    [ForeignKey("AnimalId"), NotMapped]
-    public virtual Animal? Animal { get; set; }
-
-    [ForeignKey("OldGroupId"), NotMapped]
-    public virtual Group? OldGroup { get; set; }
-
-    [ForeignKey("NewGroupId"), NotMapped]
-    public virtual Group? NewGroup { get; set; }
 }

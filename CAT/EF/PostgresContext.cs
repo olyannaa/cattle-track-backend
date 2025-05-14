@@ -36,12 +36,17 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<RolesPermission> RolesPermissions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
     public virtual DbSet<Insemination> Inseminations { get; set; }
 
     public virtual DbSet<DailyAction> DailyActions { get; set; }
 
+    public virtual DbSet<Research> Researches { get; set; }
+
     public virtual DbSet<GroupType> GroupTypes { get; set; }
+
     public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -272,11 +277,11 @@ public partial class PostgresContext : DbContext
         if (type != null) query = query.Where(e => e.Type == type);
 
         if (sort is not null && sort.Active) query = query.Where(e => e.Status == "Активное");
-        
+
         if (sort is not null && sort.Column is not null)
         {
-                query = sort.Descending ? query.OrderByDescending(p => EntityFramework.Property<AnimalCensus>(p, sort.Column))
-                                        : query.OrderBy(p => EntityFramework.Property<AnimalCensus>(p, sort.Column));
+            query = sort.Descending ? query.OrderByDescending(p => EntityFramework.Property<AnimalCensus>(p, sort.Column))
+                                    : query.OrderBy(p => EntityFramework.Property<AnimalCensus>(p, sort.Column));
         }
         else
         {
@@ -285,56 +290,40 @@ public partial class PostgresContext : DbContext
         return query.AsEnumerable().GroupBy(e => e.Id);
     }
 
-    public IQueryable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId)
+    public IQueryable<ActiveAnimalDAL> GetAnimalsForActionsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filter)
     {
-        return Database.SqlQuery<ActiveAnimalDAL>($"SELECT * FROM get_active_animals({organizationId})");
-    }
+        var orgAnimals = Animals.Where(e => e.OrganizationId == organizationId);
 
-    public IQueryable<ActiveAnimalDAL> GetActiveAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filter)
-    {
-        var orgAnimals = GetActiveAnimalsWithFilterBase(organizationId);
+        if (filter.IsActive ?? false)
+            orgAnimals = orgAnimals.Where(e => e.Status == "Активное");
+
         if (filter.GroupId != null)
             orgAnimals = orgAnimals.Where(e => e.GroupId == filter.GroupId);
+
         if (filter.Type != null)
             orgAnimals = orgAnimals.Where(e => e.Type == filter.Type);
+
         if (filter.TagNumber != null)
             orgAnimals = orgAnimals.Where(e => e.TagNumber == filter.TagNumber);
-        //if (filter.IdentificationId != null)
-        //    orgAnimals = orgAnimals.Include(e => e.)
-        // ToDo: идентификации
 
-        return orgAnimals.Include(e => e.Group).Select(e => new ActiveAnimalDAL
-            {
-                Id = e.Id,
-                TagNumber = e.TagNumber,
-                Type = e.Type,
-                Status = e.Status,
-                GroupName = e.Group.Name
-            });
-    }
+        var field = filter.IdentificationField;
+        if (field != null)
+        {
+            var animalIds = AnimalIdentifications.Where(e => e.FieldId == field.Id && e.Value == field.Value)
+                                                .Select(e => e.AnimalId)
+                                                .ToList();
+            orgAnimals = orgAnimals.Where(e => animalIds.Contains(e.Id));
+        }
 
-    private IQueryable<Animal> GetActiveAnimalsWithFilterBase(Guid organizationId)
-    {
-        return Animals.Where(e => e.OrganizationId == organizationId && e.Status == "Активное");
-    }
-
-    public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
-    {
-        if (type == "Осмотры")
-            return GetDailyActionsBase(organizationId, type).SelectInspection();
-        if (type == "Вакцинации и обработки")
-            return GetDailyActionsBase(organizationId, type).SelectVaccination();
-        if (type == "Лечение")
-            return GetDailyActionsBase(organizationId, type).SelectTreatment();
-        if (type == "Перевод")
-            return GetDailyActionsBase(organizationId, type).SelectTransfer();
-        if (type == "Выбраковка")
-            return GetDailyActionsBase(organizationId, type).SelectCulling();
-        if (type == "Исследования")
-            return null;
-        if (type == "Присвоение номеров")
-            return GetDailyActionsBase(organizationId, type).SelectIdentification();
-        return null;
+        return orgAnimals.Include(e => e.Group)
+                        .Select(e => new ActiveAnimalDAL
+                        {
+                            Id = e.Id,
+                            TagNumber = e.TagNumber,
+                            Type = e.Type,
+                            Status = e.Status,
+                            GroupName = e.Group.Name
+                        });
     }
 
     public IQueryable<dynamic>? GetDailyActionsWithPagination(Guid organizationId, string type, int skip = default, int take = default)
@@ -342,8 +331,20 @@ public partial class PostgresContext : DbContext
         return GetDailyActions(organizationId, type)?.Skip(skip)?.Take(take);
     }
 
+    public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
+    {
+        IQueryable<dynamic> query;
+
+        if (type == "Исследования")
+            query = Database.SqlQuery<GetResearchDAL>($"SELECT * FROM get_research_by_organization({organizationId})");
+        else
+            query = Database.SqlQuery<GetActionsDAL>($"SELECT * FROM get_actions_by_organization_and_type({organizationId},{type})");
+
+        return query;
+    }
+
     public int UpdateAnimal(Guid id, string? tag = default, string? type = default, string? breed = default, Guid? motherId = default,
-        Guid? fatherId = default, string? status = default,  Guid? groupId = default, string? origin = default, string? originLoc = default,
+        Guid? fatherId = default, string? status = default, Guid? groupId = default, string? origin = default, string? originLoc = default,
         DateOnly? birthDate = default, DateOnly? dateOfReceipt = default, DateOnly? dateOfDisposal = default, string? reasonOfDisposal = default,
         string? consumption = default, double? liveWeightAtDisposal = default, DateOnly? lastWeightDate = default,
         string? lastWeightWeight = default, string? identificationFieldName = default, string? identificationValue = default)
@@ -355,15 +356,6 @@ public partial class PostgresContext : DbContext
 
     }
 
-    private IQueryable<DailyAction> GetDailyActionsBase(Guid organizationId, string type)
-    {
-        return DailyActions.Include(e => e.Animal)
-                            .Include(e => e.OldGroup)
-                            .Include(e => e.NewGroup)
-                            .Where(e => e.Animal!.OrganizationId == organizationId)
-                            .Where(e => e.ActionType == type);
-    }
-    
     public IQueryable<IdentificationInfoDTO>? GetOrgIdentifications(Guid org_id)
         => IdentificationFields.FromSqlRaw(@"SELECT * FROM get_identification_fields({0})", org_id)
                                 .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.FieldName });
