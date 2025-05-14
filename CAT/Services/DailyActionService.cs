@@ -25,6 +25,26 @@ namespace CAT.Services
             return _db.GetDailyActionsWithPagination(organizationId, type, skip, take);
         }
 
+        public void DeleteDailyAction(Guid dailyActionId)
+        {
+            var dailyAction = _db.DailyActions.SingleOrDefault(e => e.Id == dailyActionId);
+
+            if (dailyAction == null)
+            {
+                var research = _db.Researches.SingleOrDefault(e => e.Id == dailyActionId);
+
+                if (research == null)
+                    throw new Exception(message: $"Ошибка. Не удалось удалить ежедневное действие, т.к его не существует.");
+
+                _db.Researches.Remove(research);
+                _db.SaveChanges();
+                return;
+            }
+                
+            _db.DailyActions.Remove(dailyAction);
+            _db.SaveChanges();
+        }
+
         private static (int skip, int take) ComputePagination(bool isMobile, int page)
         {
             var take = isMobile ? 5 : 10;

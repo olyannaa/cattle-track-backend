@@ -19,17 +19,19 @@ namespace CAT.Controllers
         private readonly IAnimalService _animalService;
         private readonly IAuthService _authService;
         private readonly PostgresContext _db;
-
         private readonly IDailyActionService _daService;
+
+        private readonly IOrganizationService _orgService;
 
         public DailyActionsController(IAnimalService animalService,
             IAuthService authService, PostgresContext postgresContext,
-            IDailyActionService daService)
+            IDailyActionService daService, IOrganizationService orgService)
         {
             _animalService = animalService;
             _authService = authService;
             _db = postgresContext;
             _daService = daService;
+            _orgService = orgService;
         }
         
         /// <summary>
@@ -71,6 +73,40 @@ namespace CAT.Controllers
         public IActionResult GetActiveAnimals([FromHeader] Guid organizationId, [FromBody] DailyAnimalsFilterDTO dto)
         {
             return Ok(_animalService.GetAnimalsWithFilter(organizationId, dto));
+        }
+
+        /// <summary>
+        /// Удаляет ежедневные действия
+        /// </summary>
+        /// <param name="organizationId"></param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult DeleteDailyAction([FromHeader] Guid organizationId, [FromBody] Guid[] actionIds)
+        {
+            using (var transaction = _db.Database.BeginTransaction())
+            {
+                foreach(var actionId in actionIds)
+                {
+                    if (!_orgService.CheckDailyActionById(organizationId, actionId))
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO("Одно из ежедневных действий не приналежит организации пользователя"));
+                    }
+                    try
+                    {
+                        _daService.DeleteDailyAction(actionId);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO(ex.Message));
+                    }
+                }
+                transaction.Commit();
+            }
+            return Ok();
         }
     }
 }

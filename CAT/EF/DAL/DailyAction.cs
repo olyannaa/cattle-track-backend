@@ -48,12 +48,12 @@ public partial class DailyAction
     [Column("created_at")]
     public DateTime? CreatedAt { get; set;}
 
-    [ForeignKey("AnimalId"), NotMapped]
+    [ForeignKey("AnimalId")]
     public virtual Animal? Animal { get; set; }
 
-    [ForeignKey("OldGroupId"), NotMapped]
+    [ForeignKey("OldGroupId")]
     public virtual Group? OldGroup { get; set; }
 
-    [ForeignKey("NewGroupId"), NotMapped]
+    [ForeignKey("NewGroupId")]
     public virtual Group? NewGroup { get; set; }
 }
