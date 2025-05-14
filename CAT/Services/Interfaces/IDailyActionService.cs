@@ -8,5 +8,6 @@ namespace CAT.Services.Interfaces
         public IEnumerable<dynamic> GetDailyActionsByPage(Guid organizationId, string type,
                                                              int page = 1, bool isMoblile = default);
         public void DeleteDailyAction(Guid dailyActionId);
+        public void CreateDailyAction(Guid organizationId, CreateDailyActionDTO dto);
     }
 }

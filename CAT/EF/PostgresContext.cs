@@ -343,6 +343,21 @@ public partial class PostgresContext : DbContext
         return query;
     }
 
+    public int InsertDailyAction(Guid id, Guid animalId = default, string? actionType = default, string? actionSubtype = default,
+        DateOnly? date = default, string? performedBy = default, string? result = default, string? medicine = default,
+        string? dose = default, string? notes = default, DateOnly? nextActionDate = default, Guid? oldGroupId = default, Guid? newGroupId = default)
+    {
+        return Database.ExecuteSqlInterpolated($@"SELECT insert_daily_action({id},{animalId},{actionType},{actionSubtype},{date},
+            {performedBy},{result},{medicine},{dose},{notes},{nextActionDate},{oldGroupId},{newGroupId})");
+    }
+
+    public int InsertResearch(Guid id, Guid orgId, Guid animalId = default, string? name = default, string? materialType = default,
+        DateOnly? collectionDate = default, string? collectedBy = default, string? result = default, string? notes = default)
+    {
+        return Database.ExecuteSqlInterpolated($@"SELECT insert_research({id},{orgId},{animalId},{name},
+            {materialType},{collectionDate},{collectedBy},{result},{notes})");
+    }
+
     public int UpdateAnimal(Guid id, string? tag = default, string? type = default, string? breed = default, Guid? motherId = default,
         Guid? fatherId = default, string? status = default, Guid? groupId = default, string? origin = default, string? originLoc = default,
         DateOnly? birthDate = default, DateOnly? dateOfReceipt = default, DateOnly? dateOfDisposal = default, string? reasonOfDisposal = default,

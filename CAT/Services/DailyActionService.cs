@@ -40,9 +40,32 @@ namespace CAT.Services
                 _db.SaveChanges();
                 return;
             }
-                
+
             _db.DailyActions.Remove(dailyAction);
             _db.SaveChanges();
+        }
+
+        public void CreateDailyAction(Guid organizationId, CreateDailyActionDTO dto)
+        {
+            var guid = Guid.NewGuid();
+            if (dto.Type == "Исследования")
+                _db.InsertResearch(guid, organizationId, dto.AnimalId, dto.ResearchName, dto.MaterialType, dto.Date, dto.PerformedBy, dto.Result, dto.Notes);
+            else
+            {
+                _db.InsertDailyAction(guid, dto.AnimalId, dto.Type, dto.Subtype, dto.Date,
+                                    dto.PerformedBy, dto.Result, dto.Medicine, dto.Dose,
+                                    dto.Notes, dto.NextDate, dto.OldGroupId, dto.NewGroupId);
+            }
+            
+            if (dto.Type == "Присвоение номеров")
+                _db.UpdateAnimal(dto.AnimalId, identificationFieldName: dto.Subtype,
+                    identificationValue: dto.IdentificationValue);
+
+            if (dto.Type == "Перевод")
+                _db.UpdateAnimal(dto.AnimalId, groupId: dto.NewGroupId);
+
+            if (dto.Type == "Выбраковка")
+                _db.UpdateAnimal(dto.AnimalId, status: "Выбывшее");
         }
 
         private static (int skip, int take) ComputePagination(bool isMobile, int page)

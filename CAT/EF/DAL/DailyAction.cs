@@ -13,13 +13,13 @@ public partial class DailyAction
     public Guid? AnimalId { get; set; }
 
     [Column("action_type")]
-    public string? ActionType { get; set; }
+    public string? Type { get; set; }
 
     [Column("action_subtype")]
-    public string? ActionSubtype { get; set; }
+    public string? Subtype { get; set; }
 
     [Column("performed_by")]
-    public string? Actor { get; set; }
+    public string? PerformedBy { get; set; }
 
     [Column("result")]
     public string? Result { get; set; }
@@ -40,10 +40,10 @@ public partial class DailyAction
     public Guid? NewGroupId { get; set; }
 
     [Column("date")]
-    public DateTime? Date { get; set; }
+    public DateOnly? Date { get; set; }
 
     [Column("next_action_date")]
-    public DateTime? NextDate { get; set;}
+    public DateOnly? NextDate { get; set;}
 
     [Column("created_at")]
     public DateTime? CreatedAt { get; set;}

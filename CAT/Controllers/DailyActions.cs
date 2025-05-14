@@ -65,12 +65,12 @@ namespace CAT.Controllers
         /// <summary>
         /// Возвращает список активных животных, используя фильтры
         /// </summary>
-        /// <param name="organizationId"></param>
+        /// <param name="organizationId">Id организации</param>
         /// <param name="dto"></param>
         /// <returns></returns>
-        [HttpPost, Route("animals")]
+        [HttpGet, Route("animals")]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetActiveAnimals([FromHeader] Guid organizationId, [FromBody] DailyAnimalsFilterDTO dto)
+        public IActionResult GetActiveAnimals([FromHeader] Guid organizationId, [FromQuery] DailyAnimalsFilterDTO dto)
         {
             return Ok(_animalService.GetAnimalsWithFilter(organizationId, dto));
         }
@@ -78,8 +78,8 @@ namespace CAT.Controllers
         /// <summary>
         /// Удаляет ежедневные действия
         /// </summary>
-        /// <param name="organizationId"></param>
-        /// <param name="dto"></param>
+        /// <param name="organizationId">Id организации</param>
+        /// <param name="actionIds"></param>
         /// <returns></returns>
         [HttpDelete]
         [OrgValidationTypeFilter(checkOrg: true)]
@@ -97,6 +97,50 @@ namespace CAT.Controllers
                     try
                     {
                         _daService.DeleteDailyAction(actionId);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO(ex.Message));
+                    }
+                }
+                transaction.Commit();
+            }
+            return Ok();
+        }
+
+        /// <summary>
+        /// Создаёт ежедневное действие
+        /// </summary>
+        /// <param name="organizationId"></param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult CreateDailyAction([FromHeader] Guid organizationId, [FromBody] CreateDailyActionDTO[] dtoArray)
+        {
+            using (var transaction = _db.Database.BeginTransaction())
+            {
+                foreach(var dto in dtoArray)
+                {
+                    if (!_orgService.CheckAnimalById(organizationId, dto.AnimalId))
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO("Один из животных не приналежит организации пользователя."));
+                    }
+                    if (dto.NewGroupId != null && !_orgService.CheckGroupById(organizationId, dto.NewGroupId))
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO("Для одного из животных указана группа, не пренадлежащая организации пользователя."));
+                    }
+                    if (dto.OldGroupId != null && !_orgService.CheckGroupById(organizationId, dto.OldGroupId))
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO("Для одного из животных указана группа, не пренадлежащая организации пользователя."));
+                    }
+                    try
+                    {
+                        _daService.CreateDailyAction(organizationId, dto);
                     }
                     catch (Exception ex)
                     {
