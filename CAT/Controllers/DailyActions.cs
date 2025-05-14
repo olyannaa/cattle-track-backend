@@ -44,7 +44,7 @@ namespace CAT.Controllers
         {
             var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
             var count = _db.GetDailyActions(organizationId, type)?.Count();
-            return Ok(new PaginationDTO{Count = count ?? default, EntriesPerPage = entries});
+            return Ok(new PaginationDTO{AnimalCount = count ?? default, EntriesPerPage = entries});
         }
         
         /// <summary>

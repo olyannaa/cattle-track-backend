@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using CAT.Controllers.DTO;
 using CAT.EF.DAL;
@@ -258,6 +258,8 @@ public partial class PostgresContext : DbContext
         OnModelCreatingPartial(modelBuilder);
     }
 
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
     public string? GetUserInfo(string login, string hashedPass)
     {
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
@@ -281,7 +283,6 @@ public partial class PostgresContext : DbContext
             query = query.OrderBy(e => e.TagNumber);
         }
         return query.AsEnumerable().GroupBy(e => e.Id);
-        return Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})");
     }
 
     public IQueryable<ActiveAnimalDAL> GetActiveAnimals(Guid organizationId)
@@ -315,35 +316,6 @@ public partial class PostgresContext : DbContext
     private IQueryable<Animal> GetActiveAnimalsWithFilterBase(Guid organizationId)
     {
         return Animals.Where(e => e.OrganizationId == organizationId && e.Status == "Активное");
-    }
-
-    public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, int skip = default, int take = default)
-    {
-        return GetAnimalsByOrgAndType(organizationId, type).Skip(skip).Take(take);
-    }
-
-    public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
-    {
-        if (type == "Осмотры")
-            return GetDailyActionsBase(organizationId, type).SelectInspection();
-        if (type == "Вакцинации и обработки")
-            return GetDailyActionsBase(organizationId, type).SelectVaccination();
-        if (type == "Лечение")
-            return GetDailyActionsBase(organizationId, type).SelectTreatment();
-        if (type == "Перевод")
-            return GetDailyActionsBase(organizationId, type).SelectTransfer();
-        if (type == "Выбраковка")
-            return GetDailyActionsBase(organizationId, type).SelectCulling();
-        if (type == "Исследования")
-            return null;
-        if (type == "Присвоение номеров")
-            return GetDailyActionsBase(organizationId, type).SelectIdentification();
-        return null;
-    }
-
-    public IQueryable<dynamic>? GetDailyActionsWithPagination(Guid organizationId, string type, int skip = default, int take = default)
-    {
-        return GetDailyActions(organizationId, type)?.Skip(skip)?.Take(take);
     }
 
     public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
@@ -381,15 +353,6 @@ public partial class PostgresContext : DbContext
             {reasonOfDisposal},{consumption},{liveWeightAtDisposal},{lastWeightDate},{lastWeightWeight},{identificationFieldName},
             {identificationValue})");
 
-    }
-
-    private IQueryable<DailyAction> GetDailyActionsBase(Guid organizationId, string type)
-    {
-        return DailyActions.Include(e => e.Animal)
-                            .Include(e => e.OldGroup)
-                            .Include(e => e.NewGroup)
-                            .Where(e => e.Animal!.OrganizationId == organizationId)
-                            .Where(e => e.ActionType == type);
     }
 
     private IQueryable<DailyAction> GetDailyActionsBase(Guid organizationId, string type)
