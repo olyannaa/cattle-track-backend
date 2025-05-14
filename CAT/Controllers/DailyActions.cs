@@ -110,7 +110,7 @@ namespace CAT.Controllers
         }
 
         /// <summary>
-        /// Создаёт ежедневное действие
+        /// Создаёт ежедневные действия
         /// </summary>
         /// <param name="organizationId"></param>
         /// <param name="dto"></param>
