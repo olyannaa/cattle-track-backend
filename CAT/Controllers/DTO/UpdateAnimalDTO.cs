@@ -16,7 +16,19 @@ namespace CAT.Controllers.DTO
         /// <example>2023-12-31</example>
         public DateOnly? BirthDate { get; init; }
 
+        public string? Breed { get; init; }
+
         /// <example>Активное</example>
         public string? Status { get; init; }
+
+        public string? Origin { get; init; }
+
+        public string? OriginLocation { get; init; }
+
+        public string? MotherTagNumber { get; init; }
+
+        public string? FatherTagNumber { get; init; }
+
+        public IdentificationFieldDTO[]? IdentificationFields{ get; init; }
     }
 }

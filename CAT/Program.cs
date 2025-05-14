@@ -20,12 +20,18 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 builder.Services.AddCors();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<YandexS3Service>();
+builder.Services.AddScoped<IAnimalService, AnimalService>();
+builder.Services.AddScoped<ICSVService, CSVService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAuthService, CookiesAuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ICSVService, CSVService>();
-builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddScoped<IDailyActionService, DailyActionService>();
 builder.Services.AddSingleton<CustomCookieAuthenticationEvents>();
 builder.Services.AddScoped<OrgValidationFilter>();
@@ -47,7 +53,10 @@ builder.Services.AddAuthorization();
 
 var connectionString = builder.Configuration.GetConnectionString("PostgresDB");
 builder.Services.AddDbContext<PostgresContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString)
+               .UseLoggerFactory(LoggerFactory.Create(builder =>
+                   builder.AddFilter(level => level >= LogLevel.Warning))));
+
 
 var app = builder.Build();
 

@@ -1,20 +1,67 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using System.Formats.Asn1;
 using System.Globalization;
 using System.IO;
 using CAT.Services.Interfaces;
+using CAT.Controllers.DTO;
+using CsvHelper.Configuration.Attributes;
+using System.Reflection;
 
 namespace CAT.Services
 {
     public class CSVService : ICSVService
     {
+        CsvConfiguration Config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            MissingFieldFound = null, // Игнорировать отсутствующие поля
+            HeaderValidated = null,   // Отключить проверку заголовков
+            PrepareHeaderForMatch = args => args.Header.Trim(), // Убрать лишние пробелы
+            Delimiter = ";"
+        };
         public IEnumerable<T> ReadCSV<T>(Stream file)
         {
             var reader = new StreamReader(file);
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture) { Delimiter = ";", HasHeaderRecord = false };
-            var csv = new CsvReader(reader, config);
+            var csv = new CsvReader(reader, Config);
+            csv.Read();
+            csv.ReadHeader();
             var records = csv.GetRecords<T>();
+
+            return records;
+        }
+
+        public IEnumerable<AnimalCSVInfoDTO> ReadAnimalCSV(Stream file)
+        {
+            var reader = new StreamReader(file);
+            var csv = new CsvReader(reader, Config);
+            var records = new List<AnimalCSVInfoDTO>();
+
+            csv.Read();
+            csv.ReadHeader();
+
+            // список известных столбцов
+            var knownHeaders = typeof(AnimalCSVInfoDTO)
+                .GetProperties()
+                .SelectMany(prop => prop.GetCustomAttributes<NameAttribute>())
+                .Select(attr => attr.Names)
+                .SelectMany(names => names)
+                .ToHashSet();
+
+            while (csv.Read())
+            {
+                var animal = csv.GetRecord<AnimalCSVInfoDTO>();
+                animal.AdditionalFields = new Dictionary<string, string>();
+
+                foreach (var header in csv.HeaderRecord)
+                {
+                    if (!knownHeaders.Contains(header))
+                    {
+                        animal.AdditionalFields[header] = csv.GetField(header);
+                    }
+                }
+
+                records.Add(animal);
+            }
+
             return records;
         }
 
@@ -31,6 +78,15 @@ namespace CAT.Services
                 stream.Position = 0;
                 return stream.ToArray();
             }
+        }
+
+        public string GetFileName(string input)
+        {
+            var time = DateTime.UtcNow.ToString("dd-MM-yyyyTHH-mm-ss");
+            if (input == "Корова") input = "Cows";
+            else if (input == "Бык" || input == "Бычок") input = "Bulls";
+            else if (input == "Телка" || input == "Нетель") input = "Heifers";
+            return $"{input} {time}.csv";
         }
     }
 }

@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CAT.Controllers.DTO;
 using CAT.EF.DAL;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-
+using Npgsql;
+using EntityFramework = Microsoft.EntityFrameworkCore.EF;
+using NpgsqlTypes;
 namespace CAT.EF;
 
 public partial class PostgresContext : DbContext
@@ -35,9 +36,12 @@ public partial class PostgresContext : DbContext
     public virtual DbSet<RolesPermission> RolesPermissions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Insemination> Inseminations { get; set; }
 
     public virtual DbSet<DailyAction> DailyActions { get; set; }
 
+    public virtual DbSet<GroupType> GroupTypes { get; set; }
+    public virtual DbSet<GroupRaw> GroupsRaw { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -138,7 +142,6 @@ public partial class PostgresContext : DbContext
                 .ValueGeneratedNever()
                 .HasColumnName("id");
             entity.Property(e => e.FieldName).HasColumnName("field_name");
-            entity.Property(e => e.FieldOrder).HasColumnName("field_order");
             entity.Property(e => e.OrganizationId).HasColumnName("organization_id");
 
             entity.HasOne(d => d.Organization).WithMany(p => p.IdentificationFields)
@@ -243,6 +246,14 @@ public partial class PostgresContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("users_role_id_fkey");
         });
+        modelBuilder.Entity<GroupType>()
+            .Property(e => e.Id)
+            .HasColumnName("id");
+
+        modelBuilder.Entity<GroupType>()
+            .Property(e => e.Name)
+            .HasColumnName("name");
+        modelBuilder.Entity<GroupRaw>().HasNoKey().ToView(null);
 
         OnModelCreatingPartial(modelBuilder);
     }
@@ -252,8 +263,24 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
-    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, int skip = default, int take = default)
+    public IEnumerable<IGrouping<Guid, AnimalCensus>> GetAnimalsWithIFByOrg(Guid organizationId, string type, CensusSortInfoDTO? sort)
     {
+        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_with_if_by_organization({organizationId})");
+
+        if (type != null) query = query.Where(e => e.Type == type);
+
+        if (sort is not null && sort.Active) query = query.Where(e => e.Status == "Активное");
+        
+        if (sort is not null && sort.Column is not null)
+        {
+                query = sort.Descending ? query.OrderByDescending(p => EntityFramework.Property<AnimalCensus>(p, sort.Column))
+                                        : query.OrderBy(p => EntityFramework.Property<AnimalCensus>(p, sort.Column));
+        }
+        else
+        {
+            query = query.OrderBy(e => e.TagNumber);
+        }
+        return query.AsEnumerable().GroupBy(e => e.Id);
         return Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})");
     }
 
@@ -319,9 +346,41 @@ public partial class PostgresContext : DbContext
         return GetDailyActions(organizationId, type)?.Skip(skip)?.Take(take);
     }
 
-    public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
+    public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
     {
-        return Database.ExecuteSql($"SELECT update_animal({id},{tag},{type},{groupId},{birthDate},{status})");
+        if (type == "Осмотры")
+            return GetDailyActionsBase(organizationId, type).SelectInspection();
+        if (type == "Вакцинации и обработки")
+            return GetDailyActionsBase(organizationId, type).SelectVaccination();
+        if (type == "Лечение")
+            return GetDailyActionsBase(organizationId, type).SelectTreatment();
+        if (type == "Перевод")
+            return GetDailyActionsBase(organizationId, type).SelectTransfer();
+        if (type == "Выбраковка")
+            return GetDailyActionsBase(organizationId, type).SelectCulling();
+        if (type == "Исследования")
+            return null;
+        if (type == "Присвоение номеров")
+            return GetDailyActionsBase(organizationId, type).SelectIdentification();
+        return null;
+    }
+
+    public IQueryable<dynamic>? GetDailyActionsWithPagination(Guid organizationId, string type, int skip = default, int take = default)
+    {
+        return GetDailyActions(organizationId, type)?.Skip(skip)?.Take(take);
+    }
+
+    public int UpdateAnimal(Guid id, string? tag = default, string? type = default, string? breed = default, Guid? motherId = default,
+        Guid? fatherId = default, string? status = default,  Guid? groupId = default, string? origin = default, string? originLoc = default,
+        DateOnly? birthDate = default, DateOnly? dateOfReceipt = default, DateOnly? dateOfDisposal = default, string? reasonOfDisposal = default,
+        string? consumption = default, double? liveWeightAtDisposal = default, DateOnly? lastWeightDate = default,
+        string? lastWeightWeight = default, string? identificationFieldName = default, string? identificationValue = default)
+    {
+        return Database.ExecuteSqlInterpolated($@"SELECT update_animal_data_with_if({id},{tag},{type},{breed},
+            {motherId},{fatherId},{status},{groupId},{origin},{originLoc},{birthDate},{dateOfReceipt},{dateOfDisposal},
+            {reasonOfDisposal},{consumption},{liveWeightAtDisposal},{lastWeightDate},{lastWeightWeight},{identificationFieldName},
+            {identificationValue})");
+
     }
 
     private IQueryable<DailyAction> GetDailyActionsBase(Guid organizationId, string type)
@@ -333,7 +392,104 @@ public partial class PostgresContext : DbContext
                             .Where(e => e.ActionType == type);
     }
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
+    private IQueryable<DailyAction> GetDailyActionsBase(Guid organizationId, string type)
+    {
+        return DailyActions.Include(e => e.Animal)
+                            .Include(e => e.OldGroup)
+                            .Include(e => e.NewGroup)
+                            .Where(e => e.Animal!.OrganizationId == organizationId)
+                            .Where(e => e.ActionType == type);
+    }
     
+    public IQueryable<IdentificationInfoDTO>? GetOrgIdentifications(Guid org_id)
+        => IdentificationFields.FromSqlRaw(@"SELECT * FROM get_identification_fields({0})", org_id)
+                                .Select(x => new IdentificationInfoDTO { Id = x.Id, Name = x.FieldName });
+
+    public IQueryable<Group>? GetOrgGroups(Guid org_id)
+        => Groups.FromSqlRaw(@"SELECT * FROM get_groups({0})", org_id);
+
+    public void InsertAnimal(Animal animal)
+        => Database.ExecuteSqlInterpolated($@"SELECT insert_animal(
+                                       {animal.Id}, {animal.OrganizationId}, {animal.TagNumber},
+                                       {animal.BirthDate}, {animal.Type},
+                                       {animal.Breed}, {animal.MotherId}, {animal.FatherId}, {animal.Status},
+                                       {animal.GroupId}, {animal.Origin}, {animal.OriginLocation}
+                                       )");
+
+    public void InsertAnimalIdentification(Guid id, Guid fieldName, string fieldValue)
+        => Database.ExecuteSqlInterpolated($@"SELECT insert_animal_identification({id}, {fieldName}, {fieldValue})");
+
+    public void IfNetelInsertReproduction(Guid animalId, DateOnly? inseminationDate,
+                                      DateOnly? expectedCalvingDate, string inseminationType,
+                                      string spermBatch, string technician, string notes)
+    => Database.ExecuteSqlInterpolated($@"SELECT if_netel_insert_insemination_and_pregnancy({animalId},
+                                {inseminationDate}, {expectedCalvingDate}, {inseminationType},
+                                {spermBatch}, {technician}, {notes}, {"Подлежит проверке"})");
+
+    public void AddIdentificationField(string fieldName, Guid organizationId)
+        => Database.ExecuteSqlInterpolated($@"SELECT add_identification_field({fieldName}, {organizationId})");
+
+    public void DeleteIdentification(Guid identificationId)
+        => Database.ExecuteSqlInterpolated($@"SELECT delete_identification_field({identificationId})");
+
+    public void AddGroupType(Guid organizationId, string name)
+        => Database.ExecuteSqlInterpolated($@"SELECT add_group_type({name}, {organizationId})");
+
+    public IQueryable<GroupType> GetGroupTypes(Guid organizationId)
+        => GroupTypes.FromSqlRaw(@"SELECT * FROM get_group_types_by_organization({0})", organizationId);
+
+    public void DeleteGroupType(Guid typeId)
+        => Database.ExecuteSqlInterpolated($@"SELECT delete_group_type({typeId})");
+
+    public void AddGroup(Guid organizationId, string name, Guid? typeId, string? description = "", string? location = "")
+        => Database.ExecuteSqlInterpolated($@"SELECT add_group({organizationId}, {name}, {typeId}, {description}, {location})");
+
+    public IQueryable<GroupRaw> GetGroupsByOrganization(Guid organizationId)
+       => GroupsRaw.FromSqlRaw(@"SELECT * FROM get_groups_by_organization({0})", organizationId);
+
+    public void DeleteGroup(Guid groupId)
+        => Database.ExecuteSqlInterpolated($@"SELECT delete_group({groupId})");
+
+    public void EditGroup(Guid groupId, Guid organizationId, string groupName, Guid? typeId, string? description = "", string? location = "")
+        => Database.ExecuteSqlInterpolated($@"SELECT update_group({groupId},{organizationId}, {groupName}, {typeId}, {description}, {location})");
+    public Guid InsertAnimalToDatabase(Guid org_id, AnimalCSVInfoDTO animal,
+                    (DateOnly? birthDate, DateOnly? dateOfReceipt, DateOnly? dateOfDisposal,
+                     DateOnly? lastWeightDate, double? lastWeightAtDisposal) parsedData,
+                    Guid? motherId, Guid? fatherId, string originLocation)
+    {
+
+
+        var parameters = new[]
+         {
+                new NpgsqlParameter("@p_organization_id", org_id),
+                new NpgsqlParameter("@p_tag_number", animal.TagNumber),
+                new NpgsqlParameter("@p_birth_date", parsedData.birthDate ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_type", animal.Type ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_breed", animal.Breed ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_mother_id", motherId ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_father_id", fatherId ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_status", animal.Status),
+                new NpgsqlParameter("@p_group_id", DBNull.Value),
+                new NpgsqlParameter("@p_origin", string.Empty),
+                new NpgsqlParameter("@p_origin_location", originLocation ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_consumption", animal.Сonsumption ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_date_of_receipt", parsedData.dateOfReceipt ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_date_of_disposal", parsedData.dateOfDisposal ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_last_weight_weight", animal.LastWeightWeight ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_live_weight_at_disposal", parsedData.lastWeightAtDisposal ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_last_weigh_date", parsedData.lastWeightDate ?? (object)DBNull.Value) { NpgsqlDbType = NpgsqlDbType.Date },
+                new NpgsqlParameter("@p_reason_of_disposal", animal.ReasonOfDisposal ?? (object)DBNull.Value)
+            };
+
+        Database.ExecuteSqlRaw(@"SELECT FROM insert_animal_from_csv(
+                @p_organization_id, @p_tag_number, @p_birth_date, @p_type, 
+                @p_breed, @p_mother_id, @p_father_id, @p_status, 
+                @p_group_id, @p_origin, @p_origin_location, @p_consumption, 
+                @p_date_of_receipt, @p_date_of_disposal, @p_last_weight_weight, 
+                @p_live_weight_at_disposal, @p_last_weigh_date, @p_reason_of_disposal)", parameters);
+        var createdAnimal = Animals
+            .FirstOrDefault(a => a.OrganizationId == org_id && a.TagNumber == animal.TagNumber);
+
+        return createdAnimal.Id;
+    }
 }
