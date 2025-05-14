@@ -10,6 +10,7 @@ namespace CAT.Controllers.DTO
         /// </summary>
         /// <example>Осмотры</example>
         [Required]
+        [IsIn("Осмотры", "Вакцинации и обработки", "Лечение", "Перевод", "Выбраковка", "Исследования", "Присвоение номеров")]
         public string? Type { get; init; }
 
         /// <summary>

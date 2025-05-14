@@ -1,3 +1,5 @@
+using CAT.Logic;
+
 namespace CAT.Controllers.DTO
 {
     public class DailyAnimalsFilterDTO
@@ -12,6 +14,7 @@ namespace CAT.Controllers.DTO
         /// Тип животного
         /// </summary>
         /// <example>Нетель</example>
+        [IsIn("Корова", "Бык", "Бычок", "Нетель", "Телка")]
         public string? Type { get; init; }
 
         /// <summary>
