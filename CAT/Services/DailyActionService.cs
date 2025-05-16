@@ -64,8 +64,8 @@ namespace CAT.Services
             if (dto.Type == "Перевод")
                 _db.UpdateAnimal(dto.AnimalId, groupId: dto.NewGroupId);
 
-            if (dto.Type == "Выбраковка")
-                _db.UpdateAnimal(dto.AnimalId, status: "Выбывшее");
+            if (dto.Type == "Выбытие")
+                _db.UpdateAnimal(dto.AnimalId, status: "Выбывшее", reasonOfDisposal: dto.Subtype);
         }
 
         private static (int skip, int take) ComputePagination(bool isMobile, int page)
