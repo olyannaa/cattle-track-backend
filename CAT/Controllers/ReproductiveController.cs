@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CAT.Controllers
 {
-    [Route("api/[controller]"), Authorize]
+    [Route("api/[controller]")]
     [ApiController]
     public class ReproductiveController : ControllerBase
     {
@@ -27,7 +27,7 @@ namespace CAT.Controllers
         /// <response code="400">Неверный идентификатор организации</response>
         /// <response code="401">Не авторизован</response>
         [HttpGet, Route("cow")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> GetAllCows([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetCows(organizationId));
@@ -42,7 +42,7 @@ namespace CAT.Controllers
         /// <response code="400">Неверный идентификатор организации</response>
         /// <response code="401">Не авторизован</response>
         [HttpGet, Route("bull")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> GetAllBulls([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetBulls(organizationId));
@@ -80,7 +80,7 @@ namespace CAT.Controllers
         /// <response code="400">Неверный идентификатор организации</response>
         /// <response code="401">Не авторизован</response>
         [HttpGet, Route("pregnancy")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> GetPregnanciesForInsertPregnancy([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetPregnanciesForInsert(organizationId));
@@ -95,7 +95,7 @@ namespace CAT.Controllers
         /// <response code="400">Неверный идентификатор организации</response>
         /// <response code="401">Не авторизован</response>
         [HttpGet, Route("calving")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> GetPregnanciesForInsertCalving([FromHeader] Guid organizationId)
         {
             return Ok(_animalService.GetPregnanciesForCalving(organizationId));
@@ -126,7 +126,7 @@ namespace CAT.Controllers
         /// <response code="400">Неверные данные отёла</response>
         /// <response code="401">Не авторизован</response>
         [HttpPost, Route("calving")]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        //[OrgValidationTypeFilter(checkOrg: true)]
         public async Task<IActionResult> InsertCalving([FromBody] InsertCalvingDTO dto, [FromHeader] Guid organizationId)
         {
             var id = _animalService.InsertCalving(dto, organizationId);
