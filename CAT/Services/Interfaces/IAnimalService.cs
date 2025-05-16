@@ -13,5 +13,6 @@ namespace CAT.Services.Interfaces
         public ImportAnimalsInfo ImportAnimalsFromCSV(List<AnimalCSVInfoDTO> animals, Guid org_id);
         IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo);
         IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo, int page = 1, bool isMoblile = default);
+        Dictionary<string, int> GetMainPageInfo(Guid organizationId);
     }
 }
