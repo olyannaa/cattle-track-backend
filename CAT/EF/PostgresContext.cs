@@ -465,7 +465,7 @@ public partial class PostgresContext : DbContext
         command.Parameters.Add(new NpgsqlParameter("veterinar", dto.Veterinar ?? (object)DBNull.Value));
         command.Parameters.Add(new NpgsqlParameter("treatments", dto.Treatments ?? (object)DBNull.Value));
         command.Parameters.Add(new NpgsqlParameter("pathology", dto.Pathology ?? (object)DBNull.Value));
-        command.Parameters.Add(new NpgsqlParameter("calfId", calfId.ToString()));
+        command.Parameters.Add(new NpgsqlParameter("calfId", calfId));
 
         var newCalvingId = (Guid)command.ExecuteScalar();
         return newCalvingId;

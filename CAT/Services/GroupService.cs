@@ -28,7 +28,7 @@ namespace CAT.Services
                 {
                     Id = g.Id,
                     Name = g.Name,
-                    TypeId = g.TypeId,
+                    TypeId = g.Type.Id,
                     TypeName = g.Type.Name,
                     Description = g.Description,
                     Location = g.Location

@@ -411,12 +411,21 @@ namespace CAT.Services
 
         public void InsertCalving(CalvingDTO dto)
             => _db.InsertCalving(dto);
+
         public IEnumerable<CowInseminationDTO> GetPregnanciesForInsert(Guid organizationId)
         {
-            return _db.GetPregnancyByOrganization(organizationId)
+            var pregnancies = _db.GetPregnancyByOrganization(organizationId)
                 .Where(x => x.Status == "Подлежит проверке")
-                .Select(x => new CowInseminationDTO
+                .ToList();
+
+            var result = new List<CowInseminationDTO>();
+            var id = 0;
+
+            foreach (var x in pregnancies)
+            {
+                result.Add(new CowInseminationDTO
                 {
+                    Id = ++id,
                     OrganizationId = x.OrganizationId,
                     CowId = x.CowId,
                     Status = x.Status,
@@ -425,18 +434,27 @@ namespace CAT.Services
                     BullId = x.BullId,
                     CowTagNumber = x.CowTagNumber,
                     BullTagNumber = x.BullTagNumber,
-                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate.ToString() ?? "дата неизвестна"}), быком №{(x.BullTagNumber != null ? x.BullTagNumber : "*")}"
-                })
-                .ToList();
+                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate?.ToString("dd.MM.yyyy") ?? "дата неизвестна"}), быком №{(x.BullTagNumber ?? "*")}"
+                });
+            }
+
+            return result;
         }
 
         public IEnumerable<CowInseminationDTO> GetPregnanciesForCalving(Guid organizationId)
         {
-            var res = _db.GetPregnancyByOrganization(organizationId);
-            return res
+            var res = _db.GetPregnancyByOrganization(organizationId)
                 .Where(x => x.Status == "Стельная")
-                .Select(x => new CowInseminationDTO
+                .ToList();
+
+            var result = new List<CowInseminationDTO>();
+            var id = 0;
+
+            foreach (var x in res)
+            {
+                result.Add(new CowInseminationDTO
                 {
+                    Id = ++id,
                     OrganizationId = x.OrganizationId,
                     CowId = x.CowId,
                     Status = x.Status,
@@ -445,9 +463,11 @@ namespace CAT.Services
                     BullId = x.BullId,
                     CowTagNumber = x.CowTagNumber,
                     BullTagNumber = x.BullTagNumber,
-                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate.ToString() ?? "дата неизвестна"})"
-                })
-                .ToList();
+                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate?.ToString("dd.MM.yyyy") ?? "дата неизвестна"})"
+                });
+            }
+
+            return result;
         }
 
         public void InsertPregnancy(InsertPregnancyDTO dto)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CAT.EF.DAL;
 
@@ -11,6 +12,7 @@ public partial class Group
 
     public string Name { get; set; } = null!;
 
+    [Column("type_id")]
     public Guid? TypeId { get; set; }
 
     public string? Description { get; set; }
