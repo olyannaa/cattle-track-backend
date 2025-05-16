@@ -8,6 +8,8 @@ namespace CAT.Controllers.DTO
     [ExcludeFromCodeCoverage]
     public class CowInseminationDTO
     {
+        [NotMapped]
+        public int Id { get; set; }
         [Column("organization_id")]
         public Guid OrganizationId { get; set; }
 
