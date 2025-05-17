@@ -472,8 +472,7 @@ namespace CAT.Services
 
         public void InsertPregnancy(InsertPregnancyDTO dto)
         {
-            if (dto.Status == "Яловая" || dto.Status == "Стельная")
-                _db.DeletePregnancyByCow(dto.CowId);
+            _db.DeletePregnancyByCow(dto.CowId);
             _db.InsertPregnancy(dto);
         }
 
@@ -497,7 +496,7 @@ namespace CAT.Services
             if (calfId == Guid.Empty)
                 throw new Exception("Не удалось создать теленка");
 
-            // 3. Создаем запись об отеле
+            // 3. Создаем запись об отеле 
             var calvingDto = new InsertCalvingDTO
             {
                 CowId = dto.CowId,
