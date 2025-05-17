@@ -89,6 +89,30 @@
             <summary>
             Возвращает список активных животных, используя фильтры
             </summary>
+            <param name="organizationId">Id организации</param>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.DeleteDailyAction(System.Guid,System.Guid[])">
+            <summary>
+            Удаляет ежедневные действия
+            </summary>
+            <param name="organizationId">Id организации</param>
+            <param name="actionIds"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.DeleteResearch(System.Guid,System.Guid[])">
+            <summary>
+            Удаляет ежедневные действия (исследования)
+            </summary>
+            <param name="organizationId">Id организации</param>
+            <param name="researchIds"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.CreateDailyAction(System.Guid,CAT.Controllers.DTO.CreateDailyActionDTO[])">
+            <summary>
+            Создаёт ежедневные действия
+            </summary>
             <param name="organizationId"></param>
             <param name="dto"></param>
             <returns></returns>
@@ -128,6 +152,12 @@
             Сортировать ли по убыванию
             </summary>
             <example>true</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.CreateDailyActionDTO.Type">
+            <summary>
+            Тип ежедневного действия
+            </summary>
+            <example>Осмотры</example>
         </member>
         <member name="P:CAT.Controllers.DTO.DailyActionsDTO.Type">
             <summary>

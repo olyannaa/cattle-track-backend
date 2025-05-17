@@ -1,10 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CAT.EF.DAL;
 
+[Table("research")]
 public partial class Research
 {
-    [Column("id")]
+    [Column("id"), Key]
     public Guid Id { get; set; }
 
     [Column("animal_id")]
@@ -26,11 +28,11 @@ public partial class Research
     public DateTime? CollectedBy { get; set; }
 
     [Column("result")]
-    public string? Result { get; set;}
+    public string? Result { get; set; }
 
     [Column("notes")]
-    public string? Notes { get; set;}
+    public string? Notes { get; set; }
 
     [Column("created_at")]
-    public DateTime? CreatedAt { get; set;}
+    public DateTime? CreatedAt { get; set; }
 }

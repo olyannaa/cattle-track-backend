@@ -30,6 +30,15 @@ namespace CAT.Services
                 .Animal?.OrganizationId == orgId;
         }
 
+        public bool CheckResearchById(Guid orgId, Guid? researchId)
+        {
+            if (researchId == null) return false;
+            return _db.Researches
+                .Where(x => x.Id == researchId)
+                .SingleOrDefault()?
+                .OrganizationId == orgId;
+        }
+
         public bool CheckGroupById(Guid orgId, Guid? groupId)
         {
             if (groupId == null) return false;

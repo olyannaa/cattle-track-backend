@@ -82,7 +82,7 @@ namespace CAT.Controllers
         /// <param name="actionIds"></param>
         /// <returns></returns>
         [HttpDelete]
-        [OrgValidationTypeFilter(checkOrg: true)]
+        [OrgValidationTypeFilter(checkOrg: true, checkAdmin: true)]
         public IActionResult DeleteDailyAction([FromHeader] Guid organizationId, [FromBody] Guid[] actionIds)
         {
             using (var transaction = _db.Database.BeginTransaction())
@@ -97,6 +97,40 @@ namespace CAT.Controllers
                     try
                     {
                         _daService.DeleteDailyAction(actionId);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO(ex.Message));
+                    }
+                }
+                transaction.Commit();
+            }
+            return Ok();
+        }
+
+        /// <summary>
+        /// Удаляет ежедневные действия (исследования)
+        /// </summary>
+        /// <param name="organizationId">Id организации</param>
+        /// <param name="researchIds"></param>
+        /// <returns></returns>
+        [HttpDelete, Route("researches")]
+        [OrgValidationTypeFilter(checkOrg: true, checkAdmin: true)]
+        public IActionResult DeleteResearch([FromHeader] Guid organizationId, [FromBody] Guid[] researchIds)
+        {
+            using (var transaction = _db.Database.BeginTransaction())
+            {
+                foreach(var researchId in researchIds)
+                {
+                    if (!_orgService.CheckResearchById(organizationId, researchId))
+                    {
+                        transaction.Rollback();
+                        return BadRequest(new ErrorDTO("Одно из ежедневных действий не приналежит организации пользователя"));
+                    }
+                    try
+                    {
+                        _daService.DeleteResearch(researchId);
                     }
                     catch (Exception ex)
                     {

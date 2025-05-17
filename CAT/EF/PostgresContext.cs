@@ -462,4 +462,10 @@ public partial class PostgresContext : DbContext
 
         return createdAnimal.Id;
     }
+
+    public int DeleteDailyAction(Guid actionId)
+        => Database.ExecuteSqlInterpolated($@"SELECT delete_daily_action({actionId})");
+
+    public int DeleteResearch(Guid researchId)
+        => Database.ExecuteSqlInterpolated($@"SELECT delete_research({researchId})");
 }

@@ -9,5 +9,6 @@ namespace CAT.Services.Interfaces
         bool CheckAnimalById(Guid orgId, Guid? animalId);
         bool CheckGroupById(Guid orgId, Guid? groupId);
         bool CheckDailyActionById(Guid orgId, Guid? actionId);
+        bool CheckResearchById(Guid orgId, Guid? researchId);
     }
 }

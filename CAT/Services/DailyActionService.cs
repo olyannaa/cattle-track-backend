@@ -27,22 +27,18 @@ namespace CAT.Services
 
         public void DeleteDailyAction(Guid dailyActionId)
         {
-            var dailyAction = _db.DailyActions.SingleOrDefault(e => e.Id == dailyActionId);
+            var result = _db.DeleteDailyAction(dailyActionId);
 
-            if (dailyAction == null)
-            {
-                var research = _db.Researches.SingleOrDefault(e => e.Id == dailyActionId);
+            if (result == 0)
+                throw new Exception(message: $"Ошибка. Не удалось удалить ежедневное действие, т.к его не существует.");
+        }
+        
+        public void DeleteResearch(Guid researchId)
+        {
+            var result = _db.DeleteResearch(researchId);
 
-                if (research == null)
-                    throw new Exception(message: $"Ошибка. Не удалось удалить ежедневное действие, т.к его не существует.");
-
-                _db.Researches.Remove(research);
-                _db.SaveChanges();
-                return;
-            }
-
-            _db.DailyActions.Remove(dailyAction);
-            _db.SaveChanges();
+            if (result == 0)
+                throw new Exception(message: $"Ошибка. Не удалось удалить ежедневное действие, т.к его не существует.");
         }
 
         public void CreateDailyAction(Guid organizationId, CreateDailyActionDTO dto)
@@ -56,7 +52,7 @@ namespace CAT.Services
                                     dto.PerformedBy, dto.Result, dto.Medicine, dto.Dose,
                                     dto.Notes, dto.NextDate, dto.OldGroupId, dto.NewGroupId);
             }
-            
+
             if (dto.Type == "Присвоение номеров")
                 _db.UpdateAnimal(dto.AnimalId, identificationFieldName: dto.Subtype,
                     identificationValue: dto.IdentificationValue);
