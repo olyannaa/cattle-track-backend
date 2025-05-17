@@ -1,7 +1,8 @@
-using Amazon.Runtime.Telemetry;
+﻿using Amazon.Runtime.Telemetry;
 using CAT.Controllers.DTO;
 using CAT.EF;
 using CAT.EF.DAL;
+using CAT.Logic;
 using CAT.Models;
 using CAT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -389,8 +390,7 @@ namespace CAT.Services
         public IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string animalType,
             CensusSortInfoDTO sortInfo, int page = 1, bool isMoblile = default)
         {
-            var take = isMoblile ? 5 : 10;
-            var skip = (page - 1) * take;
+            var (skip, take) = ControllersLogic.ComputePagination(isMoblile, page);
             return GetAnimalCensus(organisationId, animalType, sortInfo)
                 .Skip(skip)
                 .Take(take);
@@ -427,9 +427,9 @@ namespace CAT.Services
                 }
         }
 
-        public IEnumerable<ActiveAnimalDAL> GetAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filters)
+        public IEnumerable<ActiveAnimalDAL> GetAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO dto)
         {
-            return _db.GetAnimalsForActionsWithFilter(organizationId, filters);
+            return _db.GetAnimalsForActionsWithFilter(organizationId, dto);
         }
     }
 }

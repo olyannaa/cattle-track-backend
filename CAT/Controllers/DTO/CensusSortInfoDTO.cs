@@ -2,7 +2,7 @@
 using CAT.Logic;
 
 namespace CAT.Controllers.DTO;
-public class CensusSortInfoDTO
+public class CensusSortInfoDTO : BaseSortInfoDTO
 {
         /// <summary>
         /// Отображать ли только активных животных
@@ -18,11 +18,5 @@ public class CensusSortInfoDTO
                 "OriginLocation", "MotherTagNumber", "FatherTagNumber", "DateOfReceipt",
                 "DateOfDisposal", "ReasonOfDisposal", "Consumption", "LiveWeihtAtDisposal",
                 "LastWeightDate", "LastWeightWeight", "IdentificationFieldName", "IdentificationValue")]
-        public string? Column { get; init; } = default;
-
-        /// <summary>
-        /// Сортировать ли по убыванию
-        /// </summary>
-        /// <example>true</example>
-        public bool Descending { get; init; } = default;
+        public override string? Column { get; init; } = default;
 }

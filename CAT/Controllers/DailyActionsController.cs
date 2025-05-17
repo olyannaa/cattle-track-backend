@@ -58,7 +58,7 @@ namespace CAT.Controllers
         public IActionResult GetDailyActions([FromHeader] Guid organizationId, [FromQuery] DailyActionsDTO dto)
         {
             var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
-            var dailyActions = _daService.GetDailyActionsByPage(organizationId, dto.Type, dto.Page, isMobileDevice)?.ToList();
+            var dailyActions = _daService.GetDailyActionsByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice)?.ToList();
             return Ok(dailyActions);
         }
 
@@ -70,7 +70,7 @@ namespace CAT.Controllers
         /// <returns></returns>
         [HttpGet, Route("animals")]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetActiveAnimals([FromHeader] Guid organizationId, [FromQuery] DailyAnimalsFilterDTO dto)
+        public IActionResult GetAnimalsForDA([FromHeader] Guid organizationId, [FromQuery] DailyAnimalsFilterDTO dto)
         {
             return Ok(_animalService.GetAnimalsWithFilter(organizationId, dto));
         }

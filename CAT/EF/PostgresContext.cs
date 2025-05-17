@@ -290,23 +290,23 @@ public partial class PostgresContext : DbContext
         return query.AsEnumerable().GroupBy(e => e.Id);
     }
 
-    public IQueryable<ActiveAnimalDAL> GetAnimalsForActionsWithFilter(Guid organizationId, DailyAnimalsFilterDTO filter)
+    public IQueryable<ActiveAnimalDAL> GetAnimalsForActionsWithFilter(Guid organizationId, DailyAnimalsFilterDTO dto)
     {
         var orgAnimals = Animals.Where(e => e.OrganizationId == organizationId);
 
-        if (filter.IsActive ?? false)
+        if (dto.IsActive ?? false)
             orgAnimals = orgAnimals.Where(e => e.Status == "Активное");
 
-        if (filter.GroupId != null)
-            orgAnimals = orgAnimals.Where(e => e.GroupId == filter.GroupId);
+        if (dto.GroupId != null)
+            orgAnimals = orgAnimals.Where(e => e.GroupId == dto.GroupId);
 
-        if (filter.Type != null)
-            orgAnimals = orgAnimals.Where(e => e.Type == filter.Type);
+        if (dto.Type != null)
+            orgAnimals = orgAnimals.Where(e => e.Type == dto.Type);
 
-        if (filter.TagNumber != null)
-            orgAnimals = orgAnimals.Where(e => e.TagNumber == filter.TagNumber);
+        if (dto.TagNumber != null)
+            orgAnimals = orgAnimals.Where(e => e.TagNumber == dto.TagNumber);
 
-        var field = filter.IdentificationField;
+        var field = dto.IdentificationField;
         if (field != null)
         {
             var animalIds = AnimalIdentifications.Where(e => e.FieldId == field.Id && e.Value == field.Value)
@@ -315,7 +315,7 @@ public partial class PostgresContext : DbContext
             orgAnimals = orgAnimals.Where(e => animalIds.Contains(e.Id));
         }
 
-        return orgAnimals.Include(e => e.Group)
+        var result = orgAnimals.Include(e => e.Group)
                         .Select(e => new ActiveAnimalDAL
                         {
                             Id = e.Id,
@@ -324,14 +324,17 @@ public partial class PostgresContext : DbContext
                             Status = e.Status,
                             GroupName = e.Group.Name
                         });
+
+        return Sort(result, dto.SortInfo);
     }
 
-    public IQueryable<dynamic>? GetDailyActionsWithPagination(Guid organizationId, string type, int skip = default, int take = default)
+    public IQueryable<dynamic>? GetDailyActionsWithPagination(Guid organizationId, string type,
+        DailyActionsSortInfoDTO sort, int skip = default, int take = default)
     {
-        return GetDailyActions(organizationId, type)?.Skip(skip)?.Take(take);
+        return GetDailyActions(organizationId, type, sort)?.Skip(skip)?.Take(take);
     }
 
-    public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type)
+    public IQueryable<dynamic> GetDailyActions(Guid organizationId, string type, DailyActionsSortInfoDTO? sort = default)
     {
         IQueryable<dynamic> query;
 
@@ -339,6 +342,8 @@ public partial class PostgresContext : DbContext
             query = Database.SqlQuery<GetResearchDAL>($"SELECT * FROM get_research_by_organization({organizationId})");
         else
             query = Database.SqlQuery<GetActionsDAL>($"SELECT * FROM get_actions_by_organization_and_type({organizationId},{type})");
+
+        query = Sort(query, sort as BaseSortInfoDTO);
 
         return query;
     }
@@ -468,4 +473,15 @@ public partial class PostgresContext : DbContext
 
     public int DeleteResearch(Guid researchId)
         => Database.ExecuteSqlInterpolated($@"SELECT delete_research({researchId})");
+
+    private IQueryable<T> Sort<T>(IQueryable<T> query, BaseSortInfoDTO? sort = default)
+    {
+        if (sort is not null && sort.Column is not null)
+        {
+            query = sort.Descending ? query.OrderByDescending(p => EntityFramework.Property<T>(p, sort.Column))
+                                    : query.OrderBy(p => EntityFramework.Property<T>(p, sort.Column));
+        }
+
+        return query;
+    }
 }

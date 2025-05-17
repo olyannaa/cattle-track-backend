@@ -19,5 +19,7 @@ namespace CAT.Controllers.DTO
         /// <example>1</example>
         [Required, GreaterThan(0)]
         public int Page { get; init; }
+
+        public DailyActionsSortInfoDTO? SortInfo { get; init; }
     }
 }

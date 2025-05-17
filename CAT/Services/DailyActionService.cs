@@ -1,6 +1,7 @@
 using CAT.Controllers.DTO;
 using CAT.EF;
 using CAT.EF.DAL;
+using CAT.Logic;
 using CAT.Services.Interfaces;
 
 namespace CAT.Services
@@ -14,15 +15,16 @@ namespace CAT.Services
             _db = postgresContext;
         }
 
-        public IEnumerable<dynamic> GetDailyActions(Guid organizationId, string type)
+        public IEnumerable<dynamic> GetDailyActions(Guid organizationId, string type, DailyActionsSortInfoDTO sort)
         {
-            return _db.GetDailyActions(organizationId, type);
+            return _db.GetDailyActions(organizationId, type, sort);
         }
 
-        public IEnumerable<dynamic>? GetDailyActionsByPage(Guid organizationId, string type, int page = 1, bool isMoblile = default)
+        public IEnumerable<dynamic>? GetDailyActionsByPage(Guid organizationId, string type,
+            DailyActionsSortInfoDTO sort, int page = 1, bool isMoblile = default)
         {
-            var (skip, take) = ComputePagination(isMoblile, page);
-            return _db.GetDailyActionsWithPagination(organizationId, type, skip, take);
+            var (skip, take) = ControllersLogic.ComputePagination(isMoblile, page);
+            return _db.GetDailyActionsWithPagination(organizationId, type, sort, skip, take);
         }
 
         public void DeleteDailyAction(Guid dailyActionId)
@@ -62,13 +64,6 @@ namespace CAT.Services
 
             if (dto.Type == "Выбытие")
                 _db.UpdateAnimal(animalId, status: "Выбывшее", reasonOfDisposal: dto.Subtype);
-        }
-
-        private static (int skip, int take) ComputePagination(bool isMobile, int page)
-        {
-            var take = isMobile ? 5 : 10;
-            var skip = (page - 1) * take;
-            return (skip, take);
         }
     }
 }

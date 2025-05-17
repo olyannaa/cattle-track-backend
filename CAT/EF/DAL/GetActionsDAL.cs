@@ -11,13 +11,13 @@ public partial class GetActionsDAL
     public Guid? AnimalId { get; set; }
 
     [Column("action_type")]
-    public string? ActionType { get; set; }
+    public string? Type { get; set; }
 
     [Column("action_subtype")]
-    public string? ActionSubtype { get; set; }
+    public string? Subtype { get; set; }
 
     [Column("performed_by")]
-    public string? Actor { get; set; }
+    public string? PerformedBy { get; set; }
 
     [Column("action_result")]
     public string? Result { get; set; }
