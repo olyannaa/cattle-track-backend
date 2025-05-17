@@ -151,13 +151,13 @@ namespace CAT.Controllers
         /// <returns></returns>
         [HttpPost]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult CreateDailyAction([FromHeader] Guid organizationId, [FromBody] CreateDailyActionDTO[] dtoArray)
+        public IActionResult CreateDailyAction([FromHeader] Guid organizationId, [FromBody] CreateDailyActionDTO dto)
         {
             using (var transaction = _db.Database.BeginTransaction())
             {
-                foreach(var dto in dtoArray)
+                foreach(var animalId in dto.AnimalIds)
                 {
-                    if (!_orgService.CheckAnimalById(organizationId, dto.AnimalId))
+                    if (!_orgService.CheckAnimalById(organizationId, animalId))
                     {
                         transaction.Rollback();
                         return BadRequest(new ErrorDTO("Один из животных не приналежит организации пользователя."));
@@ -174,7 +174,7 @@ namespace CAT.Controllers
                     }
                     try
                     {
-                        _daService.CreateDailyAction(organizationId, dto);
+                        _daService.CreateDailyAction(organizationId, dto, animalId);
                     }
                     catch (Exception ex)
                     {

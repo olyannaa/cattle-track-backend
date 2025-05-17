@@ -109,7 +109,7 @@
             <param name="researchIds"></param>
             <returns></returns>
         </member>
-        <member name="M:CAT.Controllers.DailyActionsController.CreateDailyAction(System.Guid,CAT.Controllers.DTO.CreateDailyActionDTO[])">
+        <member name="M:CAT.Controllers.DailyActionsController.CreateDailyAction(System.Guid,CAT.Controllers.DTO.CreateDailyActionDTO)">
             <summary>
             Создаёт ежедневные действия
             </summary>
