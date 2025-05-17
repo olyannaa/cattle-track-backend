@@ -15,7 +15,7 @@ namespace CAT.Logic
         public override bool IsValid(object? value)
         {
             var str = value as string;
-            return str != null && _values.Contains(value);
+            return (value is null || str != null) && _values.Contains(value);
         }
     }
 }
