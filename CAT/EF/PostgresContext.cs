@@ -278,15 +278,8 @@ public partial class PostgresContext : DbContext
 
         if (sort is not null && sort.Active) query = query.Where(e => e.Status == "Активное");
 
-        if (sort is not null && sort.Column is not null)
-        {
-            query = sort.Descending ? query.OrderByDescending(p => EntityFramework.Property<AnimalCensus>(p, sort.Column))
-                                    : query.OrderBy(p => EntityFramework.Property<AnimalCensus>(p, sort.Column));
-        }
-        else
-        {
-            query = query.OrderBy(e => e.TagNumber);
-        }
+        query = Sort(query, sort);
+
         return query.AsEnumerable().GroupBy(e => e.Id);
     }
 
@@ -343,7 +336,7 @@ public partial class PostgresContext : DbContext
         else
             query = Database.SqlQuery<GetActionsDAL>($"SELECT * FROM get_actions_by_organization_and_type({organizationId},{type})");
 
-        query = Sort(query, sort as BaseSortInfoDTO);
+        query = Sort(query, sort);
 
         return query;
     }
