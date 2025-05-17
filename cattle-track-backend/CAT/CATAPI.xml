@@ -85,12 +85,20 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:CAT.Controllers.DailyActionsController.GetAnimalsForDA(System.Guid,CAT.Controllers.DTO.DailyAnimalsFilterDTO)">
+        <member name="M:CAT.Controllers.DailyActionsController.GetAnimalsForDA(System.Guid,CAT.Controllers.DTO.DailyAnimalsDTO)">
             <summary>
-            Возвращает список активных животных, используя фильтры
+            Возвращает список животных для ЕД, используя фильтры
             </summary>
             <param name="organizationId">Id организации</param>
             <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetPagination(CAT.Controllers.DTO.DailyAnimalsFilterDTO,System.Guid)">
+            <summary>
+            Информация о списке животных для пагинации
+            </summary>
+            <param name="type">Тип животного</param>
+            <param name="organizationId">Id организации</param>
             <returns></returns>
         </member>
         <member name="M:CAT.Controllers.DailyActionsController.DeleteDailyAction(System.Guid,System.Guid[])">

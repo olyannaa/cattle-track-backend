@@ -33,7 +33,5 @@ namespace CAT.Controllers.DTO
         /// Идентификация?
         /// </summary>
         public IdentificationFieldIdDTO? IdentificationField { get; init; }
-
-        public DailyAnimalsSortInfoDTO? SortInfo { get; init; }
     }
 }

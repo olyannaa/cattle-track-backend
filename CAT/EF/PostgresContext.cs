@@ -283,23 +283,23 @@ public partial class PostgresContext : DbContext
         return query.AsEnumerable().GroupBy(e => e.Id);
     }
 
-    public IQueryable<ActiveAnimalDAL> GetAnimalsForActionsWithFilter(Guid organizationId, DailyAnimalsFilterDTO dto)
+    public IQueryable<ActiveAnimalDAL> GetAnimalsForActionsWithFilter(Guid organizationId, DailyAnimalsDTO dto)
     {
         var orgAnimals = Animals.Where(e => e.OrganizationId == organizationId);
 
-        if (dto.IsActive ?? false)
+        if (dto.Filter.IsActive ?? false)
             orgAnimals = orgAnimals.Where(e => e.Status == "Активное");
 
-        if (dto.GroupId != null)
-            orgAnimals = orgAnimals.Where(e => e.GroupId == dto.GroupId);
+        if (dto.Filter.GroupId != null)
+            orgAnimals = orgAnimals.Where(e => e.GroupId == dto.Filter.GroupId);
 
-        if (dto.Type != null)
-            orgAnimals = orgAnimals.Where(e => e.Type == dto.Type);
+        if (dto.Filter.Type != null)
+            orgAnimals = orgAnimals.Where(e => e.Type == dto.Filter.Type);
 
-        if (dto.TagNumber != null)
-            orgAnimals = orgAnimals.Where(e => e.TagNumber == dto.TagNumber);
+        if (dto.Filter.TagNumber != null)
+            orgAnimals = orgAnimals.Where(e => e.TagNumber == dto.Filter.TagNumber);
 
-        var field = dto.IdentificationField;
+        var field = dto.Filter.IdentificationField;
         if (field != null)
         {
             var animalIds = AnimalIdentifications.Where(e => e.FieldId == field.Id && e.Value == field.Value)

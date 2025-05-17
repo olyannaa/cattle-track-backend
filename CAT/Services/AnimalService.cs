@@ -427,8 +427,18 @@ namespace CAT.Services
                 }
         }
 
-        public IEnumerable<ActiveAnimalDAL> GetAnimalsWithFilter(Guid organizationId, DailyAnimalsFilterDTO dto)
+        public IEnumerable<ActiveAnimalDAL> GetAnimalsForDA(Guid organizationId, DailyAnimalsDTO dto,
+            int? page = default, bool isMoblile = default)
         {
+            if (page != null)
+            {
+                var (skip, take) = ControllersLogic.ComputePagination(isMoblile, page ?? 1);
+                return _db.GetAnimalsForActionsWithFilter(organizationId, dto)
+                            .Skip(skip)
+                            .Take(take);
+
+            }
+            
             return _db.GetAnimalsForActionsWithFilter(organizationId, dto);
         }
     }

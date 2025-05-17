@@ -63,16 +63,32 @@ namespace CAT.Controllers
         }
 
         /// <summary>
-        /// Возвращает список активных животных, используя фильтры
+        /// Возвращает список животных для ЕД, используя фильтры
         /// </summary>
         /// <param name="organizationId">Id организации</param>
         /// <param name="dto"></param>
         /// <returns></returns>
         [HttpGet, Route("animals")]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetAnimalsForDA([FromHeader] Guid organizationId, [FromQuery] DailyAnimalsFilterDTO dto)
+        public IActionResult GetAnimalsForDA([FromHeader] Guid organizationId, [FromQuery] DailyAnimalsDTO dto)
         {
-            return Ok(_animalService.GetAnimalsWithFilter(organizationId, dto));
+            var isMobile = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
+            return Ok(_animalService.GetAnimalsForDA(organizationId, dto, dto.Page, isMobile));
+        }
+
+        /// <summary>
+        /// Информация о списке животных для пагинации
+        /// </summary>
+        /// <param name="type">Тип животного</param>
+        /// <param name="organizationId">Id организации</param>
+        /// <returns></returns>
+        [HttpGet, Route("animals/pagination-info")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetPagination([FromQuery] DailyAnimalsFilterDTO dto, [FromHeader] Guid organizationId)
+        {
+            var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
+            var count = _animalService.GetAnimalsForDA(organizationId, new DailyAnimalsDTO { Filter = dto }).Count();
+            return Ok(new PaginationDTO{Count = count, EntriesPerPage = entries});
         }
 
         /// <summary>
@@ -92,7 +108,7 @@ namespace CAT.Controllers
                     if (!_orgService.CheckDailyActionById(organizationId, actionId))
                     {
                         transaction.Rollback();
-                        return BadRequest(new ErrorDTO("Одно из ежедневных действий не приналежит организации пользователя"));
+                        return BadRequest(new ErrorDTO("Одно из ежедневных действий не принадлежит организации пользователя"));
                     }
                     try
                     {
@@ -126,7 +142,7 @@ namespace CAT.Controllers
                     if (!_orgService.CheckResearchById(organizationId, researchId))
                     {
                         transaction.Rollback();
-                        return BadRequest(new ErrorDTO("Одно из ежедневных действий не приналежит организации пользователя"));
+                        return BadRequest(new ErrorDTO("Одно из ежедневных действий не принадлежит организации пользователя"));
                     }
                     try
                     {
@@ -160,7 +176,7 @@ namespace CAT.Controllers
                     if (!_orgService.CheckAnimalById(organizationId, animalId))
                     {
                         transaction.Rollback();
-                        return BadRequest(new ErrorDTO("Один из животных не приналежит организации пользователя."));
+                        return BadRequest(new ErrorDTO("Один из животных не принадлежит организации пользователя."));
                     }
                     if (dto.NewGroupId != null && !_orgService.CheckGroupById(organizationId, dto.NewGroupId))
                     {
