@@ -315,6 +315,7 @@ public partial class PostgresContext : DbContext
                             TagNumber = e.TagNumber,
                             Type = e.Type,
                             Status = e.Status,
+                            GroupId = e.GroupId,
                             GroupName = e.Group.Name
                         });
 

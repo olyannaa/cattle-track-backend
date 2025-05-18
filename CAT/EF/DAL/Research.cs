@@ -25,7 +25,7 @@ public partial class Research
     public DateTime? CollectionDate { get; set; }
 
     [Column("collected_by")]
-    public DateTime? CollectedBy { get; set; }
+    public string? CollectedBy { get; set; }
 
     [Column("result")]
     public string? Result { get; set; }

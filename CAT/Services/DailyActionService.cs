@@ -43,27 +43,27 @@ namespace CAT.Services
                 throw new Exception(message: $"Ошибка. Не удалось удалить ежедневное действие, т.к его не существует.");
         }
 
-        public void CreateDailyAction(Guid organizationId, CreateDailyActionDTO dto, Guid animalId)
+        public void CreateDailyAction(Guid organizationId, CreateDailyActionDTO dto)
         {
             var guid = Guid.NewGuid();
             if (dto.Type == "Исследования")
-                _db.InsertResearch(guid, organizationId, animalId, dto.ResearchName, dto.MaterialType, dto.Date, dto.PerformedBy, dto.Result, dto.Notes);
+                _db.InsertResearch(guid, organizationId, dto.AnimalId, dto.ResearchName, dto.MaterialType, dto.Date, dto.PerformedBy, dto.Result, dto.Notes);
             else
             {
-                _db.InsertDailyAction(guid, animalId, dto.Type, dto.Subtype, dto.Date,
+                _db.InsertDailyAction(guid, dto.AnimalId, dto.Type, dto.Subtype, dto.Date,
                                     dto.PerformedBy, dto.Result, dto.Medicine, dto.Dose,
                                     dto.Notes, dto.NextDate, dto.OldGroupId, dto.NewGroupId);
             }
 
             if (dto.Type == "Присвоение номеров")
-                _db.UpdateAnimal(animalId, identificationFieldName: dto.Subtype,
+                _db.UpdateAnimal(dto.AnimalId, identificationFieldName: dto.Subtype,
                     identificationValue: dto.IdentificationValue);
 
             if (dto.Type == "Перевод")
-                _db.UpdateAnimal(animalId, groupId: dto.NewGroupId);
+                _db.UpdateAnimal(dto.AnimalId, groupId: dto.NewGroupId);
 
             if (dto.Type == "Выбытие")
-                _db.UpdateAnimal(animalId, status: "Выбывшее", reasonOfDisposal: dto.Subtype);
+                _db.UpdateAnimal(dto.AnimalId, status: "Выбывшее", reasonOfDisposal: dto.Subtype);
         }
     }
 }

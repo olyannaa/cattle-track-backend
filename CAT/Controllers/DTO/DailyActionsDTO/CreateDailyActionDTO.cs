@@ -5,7 +5,7 @@ namespace CAT.Controllers.DTO
 {
     public class CreateDailyActionDTO
     {
-        public Guid[] AnimalIds { get; init; }
+        public Guid AnimalId { get; init; }
 
         /// <summary>
         /// Тип ежедневного действия

@@ -15,7 +15,7 @@
         </member>
         <member name="M:CAT.Controllers.AnimalsController.GetAnimalInfo(System.Guid,System.Guid)">
             <summary>
-            Возвращение списка животных по типу с пагинацией
+            Возвращение информации о животном
             </summary>
             <returns></returns>
             <response code="200">Успешное выполнение</response>
@@ -126,12 +126,12 @@
             <param name="researchIds"></param>
             <returns></returns>
         </member>
-        <member name="M:CAT.Controllers.DailyActionsController.CreateDailyAction(System.Guid,CAT.Controllers.DTO.CreateDailyActionDTO)">
+        <member name="M:CAT.Controllers.DailyActionsController.CreateDailyAction(System.Guid,CAT.Controllers.DTO.CreateDailyActionDTO[])">
             <summary>
             Создаёт ежедневные действия
             </summary>
             <param name="organizationId"></param>
-            <param name="dto"></param>
+            <param name="dtoArray"></param>
             <returns></returns>
         </member>
         <member name="P:CAT.Controllers.DTO.BaseSortInfoDTO.Column">

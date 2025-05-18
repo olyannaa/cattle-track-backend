@@ -15,6 +15,8 @@ public partial class ActiveAnimalDAL
     [Column("status")]
     public string? Status { get; set; }
 
+    public Guid? GroupId { get; set; }
+
     [Column("group_name")]
     public string? GroupName { get; set; }
 }

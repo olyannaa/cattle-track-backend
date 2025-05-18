@@ -9,6 +9,6 @@ namespace CAT.Services.Interfaces
                                                              int page = 1, bool isMoblile = default);
         public void DeleteDailyAction(Guid dailyActionId);
         public void DeleteResearch(Guid researchId);
-        public void CreateDailyAction(Guid organizationId, CreateDailyActionDTO dto, Guid animalId);
+        public void CreateDailyAction(Guid organizationId, CreateDailyActionDTO dto);
     }
 }

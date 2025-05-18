@@ -1,3 +1,4 @@
+using System.Xml;
 using CAT.Controllers.DTO;
 using CAT.EF;
 using CAT.EF.DAL;
@@ -163,17 +164,17 @@ namespace CAT.Controllers
         /// Создаёт ежедневные действия
         /// </summary>
         /// <param name="organizationId"></param>
-        /// <param name="dto"></param>
+        /// <param name="dtoArray"></param>
         /// <returns></returns>
         [HttpPost]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult CreateDailyAction([FromHeader] Guid organizationId, [FromBody] CreateDailyActionDTO dto)
+        public IActionResult CreateDailyAction([FromHeader] Guid organizationId, [FromBody] CreateDailyActionDTO[] dtoArray)
         {
             using (var transaction = _db.Database.BeginTransaction())
             {
-                foreach(var animalId in dto.AnimalIds)
+                foreach(var dto in dtoArray)
                 {
-                    if (!_orgService.CheckAnimalById(organizationId, animalId))
+                    if (!_orgService.CheckAnimalById(organizationId, dto.AnimalId))
                     {
                         transaction.Rollback();
                         return BadRequest(new ErrorDTO("Один из животных не принадлежит организации пользователя."));
@@ -190,7 +191,7 @@ namespace CAT.Controllers
                     }
                     try
                     {
-                        _daService.CreateDailyAction(organizationId, dto, animalId);
+                        _daService.CreateDailyAction(organizationId, dto);
                     }
                     catch (Exception ex)
                     {
