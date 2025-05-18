@@ -267,9 +267,11 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
-    public IQueryable<AnimalCensus> GetAnimalsByOrgAndType(Guid organizationId, string type, CensusSortInfoDTO? sort)
+    public IEnumerable<IGrouping<Guid, AnimalCensus>> GetAnimalsWithIFByOrg(Guid organizationId, string type, CensusSortInfoDTO? sort)
     {
-        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId},{type})");
+        var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_with_if_by_organization({organizationId})");
+
+        if (type != null) query = query.Where(e => e.Type == type);
 
         if (sort is not null && sort.Active) query = query.Where(e => e.Status == "Активное");
         
@@ -282,18 +284,20 @@ public partial class PostgresContext : DbContext
         {
             query = query.OrderBy(e => e.TagNumber);
         }
-        return query;
+        return query.AsEnumerable().GroupBy(e => e.Id);
     }
 
-    public IQueryable<AnimalCensus> GetAnimalsWithPagintaion(Guid organizationId, string type, CensusSortInfoDTO? sortInfo, int skip = default, int take = default)
+    public int UpdateAnimal(Guid id, string? tag = default, string? type = default, string? breed = default, Guid? motherId = default,
+        Guid? fatherId = default, string? status = default,  Guid? groupId = default, string? origin = default, string? originLoc = default,
+        DateOnly? birthDate = default, DateOnly? dateOfReceipt = default, DateOnly? dateOfDisposal = default, string? reasonOfDisposal = default,
+        string? consumption = default, double? liveWeightAtDisposal = default, DateOnly? lastWeightDate = default,
+        string? lastWeightWeight = default, string? identificationFieldName = default, string? identificationValue = default)
     {
+        return Database.ExecuteSqlInterpolated($@"SELECT update_animal_data_with_if({id},{tag},{type},{breed},
+            {motherId},{fatherId},{status},{groupId},{origin},{originLoc},{birthDate},{dateOfReceipt},{dateOfDisposal},
+            {reasonOfDisposal},{consumption},{liveWeightAtDisposal},{lastWeightDate},{lastWeightWeight},{identificationFieldName},
+            {identificationValue})");
 
-        return GetAnimalsByOrgAndType(organizationId, type, sortInfo).Skip(skip).Take(take);
-    }
-
-    public int UpdateAnimal(Guid id, string? tag, string? type, Guid? groupId, DateOnly? birthDate, string? status)
-    {
-        return Database.ExecuteSql($"SELECT update_animal({id},{tag},{type},{groupId},{birthDate},{status})");
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

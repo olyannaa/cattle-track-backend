@@ -15,7 +15,9 @@ public class CensusSortInfoDTO
         /// </summary>
         /// <example>TagNumber</example>
         [IsIn("TagNumber", "BirthDate", "Breed", "GroupName", "Status", "Origin",
-                "OriginLocation", "MotherTagNumber", "FatherTagNumber")]
+                "OriginLocation", "MotherTagNumber", "FatherTagNumber", "DateOfReceipt",
+                "DateOfDisposal", "ReasonOfDisposal", "Consumption", "LiveWeihtAtDisposal",
+                "LastWeightDate", "LastWeightWeight", "IdentificationFieldName", "IdentificationValue")]
         public string? Column { get; init; } = default;
 
         /// <summary>
