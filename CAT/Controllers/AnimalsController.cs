@@ -180,5 +180,15 @@ namespace CAT.Controllers
         {
             return Ok(_animalService.GetIdentificationsFields(organizationId));
         }
+
+        /// <summary>
+        /// Получает словарь с количеством животных каждого типа организации.
+        /// </summary>
+        [HttpGet, Route("main-info")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetMainPageInfo([FromHeader] Guid organizationId)
+        {
+            return Ok(_animalService.GetMainPageInfo(organizationId));
+        }
     }
 }

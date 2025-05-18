@@ -426,6 +426,25 @@ namespace CAT.Services
                             identificationValue: field.IdentificationValue);
                 }
         }
+
+        public Dictionary<string, int> GetMainPageInfo(Guid organizationId)
+        {
+            var resultDict = new Dictionary<string, int>();
+            var animalTypes = new List<string>() { "Корова", "Нетель", "Телка", "Бычок", "Бык" };
+
+            int totalCount = 0;
+
+            foreach (var type in animalTypes)
+            {
+                int count = _db.GetAnimalsByOrganization(organizationId, type);
+                resultDict.Add(type, count);
+                totalCount += count;
+            }
+
+            resultDict.Add("Общее количество", totalCount);
+
+            return resultDict;
+        }
     }
 }
 
