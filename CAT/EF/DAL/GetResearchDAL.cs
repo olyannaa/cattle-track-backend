@@ -10,6 +10,9 @@ public partial class GetResearchDAL
     [Column("animal_id")]
     public Guid? AnimalId { get; set; }
 
+    [Column("animal_tag_number")]
+    public string? TagNumber { get; set; }
+
     [Column("organization_id")]
     public Guid? OrganizationId { get; set; }
 

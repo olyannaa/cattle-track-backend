@@ -10,6 +10,9 @@ public partial class GetActionsDAL
     [Column("animal_id")]
     public Guid? AnimalId { get; set; }
 
+    [Column("animal_tag_number")]
+    public string? TagNumber { get; set; }
+
     [Column("action_type")]
     public string? Type { get; set; }
 
