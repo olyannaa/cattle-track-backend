@@ -216,5 +216,75 @@
             </summary>
             <param name="identificationId">ID поля</param>
         </member>
+        <member name="M:CAT.Controllers.ReproductiveController.GetAllCows(System.Guid)">
+            <summary>
+            Получение списка всех коров организации
+            </summary>
+            <param name="organizationId">Идентификатор организации</param>
+            <returns>Список коров</returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="400">Неверный идентификатор организации</response>
+            <response code="401">Не авторизован</response>
+        </member>
+        <member name="M:CAT.Controllers.ReproductiveController.GetAllBulls(System.Guid)">
+            <summary>
+            Получение списка всех быков организации
+            </summary>
+            <param name="organizationId">Идентификатор организации</param>
+            <returns>Список быков</returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="400">Неверный идентификатор организации</response>
+            <response code="401">Не авторизован</response>
+        </member>
+        <member name="M:CAT.Controllers.ReproductiveController.InsertInsemination(CAT.Controllers.DTO.InseminationDTO)">
+            <summary>
+            Регистрация осеменения с автоматическим созданием записи о беременности
+            </summary>
+            <param name="dto">Данные осеменения</param>
+            <returns>Результат операции</returns>
+            <response code="200">Осеменение успешно зарегистрировано</response>
+            <response code="400">Неверные данные осеменения</response>
+            <response code="401">Не авторизован</response>
+        </member>
+        <member name="M:CAT.Controllers.ReproductiveController.GetPregnanciesForInsertPregnancy(System.Guid)">
+            <summary>
+            Получение списка стельностей для страницы "Стельность"
+            </summary>
+            <param name="organizationId">Идентификатор организации</param>
+            <returns>Список беременностей</returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="400">Неверный идентификатор организации</response>
+            <response code="401">Не авторизован</response>
+        </member>
+        <member name="M:CAT.Controllers.ReproductiveController.GetPregnanciesForInsertCalving(System.Guid)">
+            <summary>
+            Получение списка стельностей для страницы "Отёлы"
+            </summary>
+            <param name="organizationId">Идентификатор организации</param>
+            <returns>Список беременностей</returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="400">Неверный идентификатор организации</response>
+            <response code="401">Не авторизован</response>
+        </member>
+        <member name="M:CAT.Controllers.ReproductiveController.InsertPregnancy(CAT.Controllers.DTO.InsertPregnancyDTO)">
+            <summary>
+            Создание записи о беременности (ручной ввод)
+            </summary>
+            <param name="dto">Данные беременности</param>
+            <returns>Результат операции</returns>
+            <response code="200">Беременность успешно зарегистрирована</response>
+            <response code="400">Неверные данные беременности</response>
+            <response code="401">Не авторизован</response>
+        </member>
+        <member name="M:CAT.Controllers.ReproductiveController.InsertCalving(CAT.Controllers.DTO.InsertCalvingDTO,System.Guid)">
+            <summary>
+            Регистрация нового отёла
+            </summary>
+            <param name="dto">Данные отёла</param>
+            <returns>Результат операции с информацией о матери и дате</returns>
+            <response code="200">Отёл успешно зарегистрирован</response>
+            <response code="400">Неверные данные отёла</response>
+            <response code="401">Не авторизован</response>
+        </member>
     </members>
 </doc>

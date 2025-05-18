@@ -12,7 +12,7 @@ namespace CAT.EF.DAL
         [Column("cow_id")]
         public Guid CowId { get; set; }
         [Column("date")]
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         [Column("complication")]
         public string Complication { get; set; }
         [Column("type")]
