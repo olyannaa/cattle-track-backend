@@ -426,6 +426,133 @@ namespace CAT.Services
                             identificationValue: field.IdentificationValue);
                 }
         }
+
+        public IEnumerable<CowDTO> GetCows(Guid organizationId)
+            => _db.GetCowsByOrganization(organizationId).ToList();
+
+        public IEnumerable<BullDTO> GetBulls(Guid organizationId)
+            => _db.GetBullsByOrganization(organizationId).ToList();
+
+        public void InsertInsemination(InseminationDTO dto)
+            => _db.InsertInsemination(dto);
+
+        public void InsertCalving(CalvingDTO dto)
+            => _db.InsertCalving(dto);
+
+        public IEnumerable<CowInseminationDTO> GetPregnanciesForInsert(Guid organizationId)
+        {
+            var pregnancies = _db.GetPregnancyByOrganization(organizationId)
+                .Where(x => x.Status == "Подлежит проверке")
+                .ToList();
+
+            var result = new List<CowInseminationDTO>();
+            var id = 0;
+
+            foreach (var x in pregnancies)
+            {
+                result.Add(new CowInseminationDTO
+                {
+                    Id = ++id,
+                    OrganizationId = x.OrganizationId,
+                    CowId = x.CowId,
+                    Status = x.Status,
+                    InseminationType = x.InseminationType,
+                    InseminationDate = x.InseminationDate,
+                    BullId = x.BullId,
+                    CowTagNumber = x.CowTagNumber,
+                    BullTagNumber = x.BullTagNumber,
+                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate?.ToString("dd.MM.yyyy") ?? "дата неизвестна"}), быком №{(x.BullTagNumber ?? "*")}"
+                });
+            }
+
+            return result;
+        }
+
+        public IEnumerable<CowInseminationDTO> GetPregnanciesForCalving(Guid organizationId)
+        {
+            var res = _db.GetPregnancyByOrganization(organizationId)
+                .Where(x => x.Status == "Стельная")
+                .ToList();
+
+            var result = new List<CowInseminationDTO>();
+            var id = 0;
+
+            foreach (var x in res)
+            {
+                result.Add(new CowInseminationDTO
+                {
+                    Id = ++id,
+                    OrganizationId = x.OrganizationId,
+                    CowId = x.CowId,
+                    Status = x.Status,
+                    InseminationType = x.InseminationType,
+                    InseminationDate = x.InseminationDate,
+                    BullId = x.BullId,
+                    CowTagNumber = x.CowTagNumber,
+                    BullTagNumber = x.BullTagNumber,
+                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate?.ToString("dd.MM.yyyy") ?? "дата неизвестна"})"
+                });
+            }
+
+            return result;
+        }
+
+        public void InsertPregnancy(InsertPregnancyDTO dto)
+        {
+            _db.DeletePregnancyByCow(dto.CowId);
+            _db.DeleteInseminationByCow(dto.CowId);
+            _db.InsertPregnancy(dto);
+        }
+
+        public Guid InsertCalving(InsertCalvingDTO dto, Guid organizationId)
+        {
+            // 1. Создаем теленка
+            var calf = new Animal
+            {
+                TagNumber = dto.CalfTagNumber,
+                BirthDate = dto.Date,
+                Type = dto.Method,
+                Id = Guid.NewGuid(),
+                OrganizationId = organizationId,
+                Breed = null,
+                MotherId = dto.CowId,
+                FatherId = dto.BullId,
+                Status = "Активное",
+            };
+            var calfId = _db.InsertAnimalWithId(calf);
+
+            if (calfId == Guid.Empty)
+                throw new Exception("Не удалось создать теленка");
+
+            // 3. Создаем запись об отеле 
+            var calvingDto = new InsertCalvingDTO
+            {
+                CowId = dto.CowId,
+                Date = dto.Date,
+                Complication = dto.Complication,
+                Type = dto.Type,
+                Veterinar = dto.Veterinar,
+                Treatments = dto.Treatments,
+                Pathology = dto.Pathology,
+            };
+            var calvingId = _db.InsertCalving(calvingDto, calfId);
+            if (dto.Type == "Живой")
+            {
+                var weightDto = new InsertAnimalWeightDTO
+                {
+                    Id = calvingId,
+                    CalfId = calfId,
+                    Date = dto.Date,
+                    Weight = dto.Weight,
+                    Method = "",
+                    Notes = dto.Notes
+                };
+                _db.InsertAnimalWeight(weightDto);
+            }
+            _db.DeleteInseminationByCow(dto.CowId);
+            _db.DeletePregnancyByCow(dto.CowId);
+            return calvingId;
+        }
     }
 }
 
