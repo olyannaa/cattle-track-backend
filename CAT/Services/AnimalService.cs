@@ -473,6 +473,7 @@ namespace CAT.Services
         public void InsertPregnancy(InsertPregnancyDTO dto)
         {
             _db.DeletePregnancyByCow(dto.CowId);
+            _db.DeleteInseminationByCow(dto.CowId);
             _db.InsertPregnancy(dto);
         }
 
@@ -483,7 +484,7 @@ namespace CAT.Services
             {
                 TagNumber = dto.CalfTagNumber,
                 BirthDate = dto.Date,
-                Type = dto.Type,
+                Type = dto.Method,
                 Id = Guid.NewGuid(),
                 OrganizationId = organizationId,
                 Breed = null,
@@ -516,12 +517,12 @@ namespace CAT.Services
                     CalfId = calfId,
                     Date = dto.Date,
                     Weight = dto.Weight,
-                    Method = dto.Method,
+                    Method = "",
                     Notes = dto.Notes
                 };
                 _db.InsertAnimalWeight(weightDto);
             }
-
+            _db.DeleteInseminationByCow(dto.CowId);
             _db.DeletePregnancyByCow(dto.CowId);
             return calvingId;
         }
