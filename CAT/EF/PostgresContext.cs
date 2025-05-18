@@ -467,6 +467,21 @@ public partial class PostgresContext : DbContext
     public int DeleteResearch(Guid researchId)
         => Database.ExecuteSqlInterpolated($@"SELECT delete_research({researchId})");
 
+    public IQueryable<string?> GetIdentificationValues(Guid identificationId, Guid orgId, IdentificationValuesFilterDTO? filter = default)
+    {
+        var query = AnimalIdentifications.Include(e => e.Animal)
+                                        .Where(e => e.Animal.OrganizationId == orgId)
+                                        .Where(e => e.FieldId == identificationId);
+
+        if (filter is not null)
+        {
+            if (filter.GroupId != null) query = query.Where(e => e.Animal.GroupId == filter.GroupId);
+            if (filter.Type != null) query = query.Where(e => e.Animal.Type == filter.Type);
+            if (filter.IsActive ?? false) query = query.Where(e => e.Animal.Status == "Активное");
+        }
+        return query.Select(e => e.Value);
+    }
+
     private IQueryable<T> Sort<T>(IQueryable<T> query, BaseSortInfoDTO? sort = default)
     {
         if (sort is not null && sort.Column is not null)

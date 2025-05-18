@@ -214,6 +214,29 @@
             Идентификация?
             </summary>
         </member>
+        <member name="P:CAT.Controllers.DTO.IdentificationValuesDTO.IdentificationId">
+            <summary>
+            Id группы животного
+            </summary>
+        </member>
+        <member name="P:CAT.Controllers.DTO.IdentificationValuesFilterDTO.GroupId">
+            <summary>
+            Id группы животного
+            </summary>
+            <example>e927c543-d2f4-44d6-bd3a-2e26b41e03ef</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.IdentificationValuesFilterDTO.Type">
+            <summary>
+            Тип животного
+            </summary>
+            <example>Нетель</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.IdentificationValuesFilterDTO.IsActive">
+            <summary>
+            Только активные животные
+            </summary>
+            <example>true</example>
+        </member>
         <member name="P:CAT.Controllers.DTO.LoginDTO.Login">
             <example>useruser</example>>
         </member>
@@ -307,6 +330,12 @@
         <member name="M:CAT.Controllers.GroupsController.GetAllIdentificationFields(System.Guid)">
             <summary>
             Получить список всех полей идентификации по организации.
+            </summary>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupsController.GetIdentificationValues(System.Guid,CAT.Controllers.DTO.IdentificationValuesDTO)">
+            <summary>
+            Получить список всех значений по полю идентификации организации.
             </summary>
             <param name="organizationId">ID организации</param>
         </member>
