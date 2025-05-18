@@ -3,7 +3,7 @@
     public class InsertCalvingDTO
     {
         public Guid CowId { get; set; }
-        public Guid BullId { get; set; }
+        public Guid? BullId { get; set; }
         public string CowTagNumber { get; set; }
         public DateOnly Date { get; set; }
         public string Complication { get; set; }
