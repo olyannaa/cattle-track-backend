@@ -403,9 +403,8 @@ public partial class PostgresContext : DbContext
         return createdAnimal.Id;
     }
 
-    public int GetAnimalsByOrganization(Guid organizationId, string type)
-         => Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId}, {type})").Count();
-
+    public int GetAnimalsCountByOrganization(Guid organizationId, string type)
+         => Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_by_org_and_type({organizationId}, {type})").Where(e => e.Status == "Активное").Count();
 
 
     public IQueryable<CowDTO> GetCowsByOrganization(Guid organizationId)

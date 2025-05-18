@@ -436,7 +436,7 @@ namespace CAT.Services
 
             foreach (var type in animalTypes)
             {
-                int count = _db.GetAnimalsByOrganization(organizationId, type);
+                int count = _db.GetAnimalsCountByOrganization(organizationId, type);
                 resultDict.Add(type, count);
                 totalCount += count;
             }
