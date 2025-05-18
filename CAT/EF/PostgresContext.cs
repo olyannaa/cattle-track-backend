@@ -479,7 +479,7 @@ public partial class PostgresContext : DbContext
             if (filter.Type != null) query = query.Where(e => e.Animal.Type == filter.Type);
             if (filter.IsActive ?? false) query = query.Where(e => e.Animal.Status == "Активное");
         }
-        return query.Select(e => e.Value);
+        return query.Select(e => e.Value).Where(e => e != String.Empty);
     }
 
     private IQueryable<T> Sort<T>(IQueryable<T> query, BaseSortInfoDTO? sort = default)
