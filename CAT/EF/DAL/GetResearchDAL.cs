@@ -23,10 +23,10 @@ public partial class GetResearchDAL
     public string? MaterialType { get; set; }
 
     [Column("collection_date")]
-    public DateTime? CollectionDate { get; set; }
+    public DateOnly? CollectionDate { get; set; }
 
     [Column("collected_by")]
-    public DateTime? CollectedBy { get; set; }
+    public string? CollectedBy { get; set; }
 
     [Column("research_result")]
     public string? Result { get; set;}
