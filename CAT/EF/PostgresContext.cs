@@ -270,7 +270,7 @@ public partial class PostgresContext : DbContext
         return Database.SqlQuery<string>($"SELECT get_user_info({login},{hashedPass}) AS \"Value\"").SingleOrDefault();
     }
 
-    public IEnumerable<IGrouping<Guid, AnimalCensus>> GetAnimalsWithIFByOrg(Guid organizationId, string type, CensusSortInfoDTO? sort)
+    public IEnumerable<IGrouping<Guid, AnimalCensus>> GetAnimalsWithIFByOrg(Guid organizationId, string? type = default, CensusSortInfoDTO? sort = default)
     {
         var query = Database.SqlQuery<AnimalCensus>($"SELECT * FROM get_animals_with_if_by_organization({organizationId})");
 

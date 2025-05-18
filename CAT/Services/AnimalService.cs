@@ -382,13 +382,14 @@ namespace CAT.Services
             return animal.Id;
         }
 
-        public IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo)
+        public IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string? animalType = default,
+            CensusSortInfoDTO? sortInfo = default)
         {
             return AnimalDTO.Parse(_db.GetAnimalsWithIFByOrg(organisationId, animalType, sortInfo));
         }
 
-        public IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string animalType,
-            CensusSortInfoDTO sortInfo, int page = 1, bool isMoblile = default)
+        public IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string? animalType = default,
+            CensusSortInfoDTO? sortInfo = default, int page = 1, bool isMoblile = default)
         {
             var (skip, take) = ControllersLogic.ComputePagination(isMoblile, page);
             return GetAnimalCensus(organisationId, animalType, sortInfo)
@@ -440,6 +441,11 @@ namespace CAT.Services
             }
             
             return _db.GetAnimalsForActionsWithFilter(organizationId, dto);
+        }
+
+        public AnimalDTO? GetAnimalInfo(Guid organizationId, Guid animalId)
+        {
+            return GetAnimalCensus(organizationId).FirstOrDefault(e => e.Id == animalId);
         }
     }
 }

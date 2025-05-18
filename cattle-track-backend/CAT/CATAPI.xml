@@ -13,6 +13,15 @@
             <response code="400">Неверно введённые данные</response>
             <response code="401">Не авторизован</response>
         </member>
+        <member name="M:CAT.Controllers.AnimalsController.GetAnimalInfo(System.Guid,System.Guid)">
+            <summary>
+            Возвращение списка животных по типу с пагинацией
+            </summary>
+            <returns></returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="400">Неверно введённые данные</response>
+            <response code="401">Не авторизован</response>
+        </member>
         <member name="M:CAT.Controllers.AnimalsController.GetPagination(CAT.Controllers.DTO.PaginationQueryDTO,System.Guid)">
             <summary>
             Информация о списке животных для пагинации

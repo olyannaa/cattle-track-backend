@@ -46,10 +46,28 @@ namespace CAT.Controllers
         [HttpGet]
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetListOfCattle([FromQuery] CensusQueryDTO dto, [FromHeader] Guid organizationId)
-        { 
+        {
             var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
             var census = _animalService.GetAnimalCensusByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice);
             return Ok(census);
+        }
+
+        /// <summary>
+        /// Возвращение информации о животном
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Успешное выполнение</response>
+        /// <response code="400">Неверно введённые данные</response>
+        /// <response code="401">Не авторизован</response>
+        [HttpGet, Route("{animalId}")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetAnimalInfo([FromRoute] Guid animalId, [FromHeader] Guid organizationId)
+        {
+            if (!_orgService.CheckAnimalById(organizationId, animalId))
+                return BadRequest(new ErrorDTO("Запрашиваемое животное не принадлежит организации пользователя"));
+
+            var animal = _animalService.GetAnimalInfo(organizationId, animalId);
+            return Ok(animal);
         }
         /// <summary>
         /// Информация о списке животных для пагинации
@@ -62,9 +80,9 @@ namespace CAT.Controllers
         public IActionResult GetPagination([FromQuery] PaginationQueryDTO dto, [FromHeader] Guid organizationId)
         {
             var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
-            var sortInfo = new CensusSortInfoDTO{Active = dto.Active ?? default};
+            var sortInfo = new CensusSortInfoDTO { Active = dto.Active ?? default };
             var count = _animalService.GetAnimalCensus(organizationId, dto.Type, sortInfo).Count();
-            return Ok(new PaginationDTO{Count = count, EntriesPerPage = entries});
+            return Ok(new PaginationDTO { Count = count, EntriesPerPage = entries });
         }
 
         /// <summary>
@@ -82,12 +100,12 @@ namespace CAT.Controllers
         {
             using (var transaction = _db.Database.BeginTransaction())
             {
-                foreach(var dto in dtoArray)
+                foreach (var dto in dtoArray)
                 {
                     if (!_orgService.CheckAnimalById(organizationId, dto.Id))
                     {
                         transaction.Rollback();
-                        return BadRequest(new ErrorDTO("Один из животных не приналежит организации пользователя"));
+                        return BadRequest(new ErrorDTO("Один из животных не принадлежит организации пользователя"));
                     }
 
                     if (dto.GroupID != null && !_orgService.CheckGroupById(organizationId, dto.GroupID))
@@ -104,7 +122,7 @@ namespace CAT.Controllers
                         transaction.Rollback();
                         return BadRequest(new ErrorDTO(ex.Message));
                     }
-                    
+
                 }
                 transaction.Commit();
             }
@@ -128,7 +146,7 @@ namespace CAT.Controllers
                 || body.SpermBatch == null || body.InseminationType == null))
                 return BadRequest(new { ErrorText = "Не все обязательные поля заполнены!" });
             _animalService.RegisterAnimal(body, organizationId);
-            return Ok(new { Message = "Животное успешно зарегистрировано!"});
+            return Ok(new { Message = "Животное успешно зарегистрировано!" });
         }
 
         /// <summary>
