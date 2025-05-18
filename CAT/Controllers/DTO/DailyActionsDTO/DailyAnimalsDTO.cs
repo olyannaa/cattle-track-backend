@@ -4,7 +4,7 @@ namespace CAT.Controllers.DTO
 {
     public class DailyAnimalsDTO
     {
-        public DailyAnimalsFilterDTO Filter { get; set; }
+        public DailyAnimalsFilterDTO? Filter { get; set; }
 
         public DailyAnimalsSortInfoDTO? SortInfo { get; init; }
 
