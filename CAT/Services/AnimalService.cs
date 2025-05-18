@@ -500,7 +500,6 @@ namespace CAT.Services
         public void InsertPregnancy(InsertPregnancyDTO dto)
         {
             _db.DeletePregnancyByCow(dto.CowId);
-            _db.DeleteInseminationByCow(dto.CowId);
             _db.InsertPregnancy(dto);
         }
 
