@@ -47,10 +47,10 @@ public partial class GetActionsDAL
     public string? NewGroupName { get; set; }
 
     [Column("action_date")]
-    public DateTime? Date { get; set; }
+    public DateOnly? Date { get; set; }
 
     [Column("next_action_date")]
-    public DateTime? NextDate { get; set;}
+    public DateOnly? NextDate { get; set;}
 
     [Column("created_at")]
     public DateTime? CreatedAt { get; set;}
