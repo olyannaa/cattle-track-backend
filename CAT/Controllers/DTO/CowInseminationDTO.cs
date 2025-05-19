@@ -25,7 +25,7 @@ namespace CAT.Controllers.DTO
         public string? InseminationType { get; set; }
 
         [Column("insemination_date")]
-        public DateTime? InseminationDate { get; set; }
+        public DateOnly? InseminationDate { get; set; }
 
         [Column("bull_id")]
         public Guid? BullId { get; set; } = Guid.Empty;
