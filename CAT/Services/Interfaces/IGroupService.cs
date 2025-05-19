@@ -15,5 +15,7 @@ namespace CAT.Services.Interfaces
         public bool DeleteGroup(Guid groupId);
         public void DeleteIdentification(Guid groupId);
         void EditGroup(EditGroupDTO dto, Guid organizationId);
+
+        public IEnumerable<string?> GetIdentificationValues(Guid identificationId, Guid orgId, IdentificationValuesFilterDTO? filter);
     }
 }

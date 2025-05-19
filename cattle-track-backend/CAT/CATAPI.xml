@@ -13,6 +13,15 @@
             <response code="400">Неверно введённые данные</response>
             <response code="401">Не авторизован</response>
         </member>
+        <member name="M:CAT.Controllers.AnimalsController.GetAnimalInfo(System.Guid,System.Guid)">
+            <summary>
+            Возвращение информации о животном
+            </summary>
+            <returns></returns>
+            <response code="200">Успешное выполнение</response>
+            <response code="400">Неверно введённые данные</response>
+            <response code="401">Не авторизован</response>
+        </member>
         <member name="M:CAT.Controllers.AnimalsController.GetPagination(CAT.Controllers.DTO.PaginationQueryDTO,System.Guid)">
             <summary>
             Информация о списке животных для пагинации
@@ -71,6 +80,72 @@
             <response code="200">Успешное выполнение</response>
             <response code="401">Не авторизован</response>
         </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetPagination(System.String,System.Guid)">
+            <summary>
+            Информация о списке ежедневных действий для пагинации
+            </summary>
+            <param name="type">Тип ежедневного действия</param>
+            <param name="organizationId">Id организации</param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetDailyActions(System.Guid,CAT.Controllers.DTO.DailyActionsDTO)">
+            <summary>
+            Возвращение списка ежедневных действий по типу с пагинацией
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetAnimalsForDA(System.Guid,CAT.Controllers.DTO.DailyAnimalsDTO)">
+            <summary>
+            Возвращает список животных для ЕД, используя фильтры
+            </summary>
+            <param name="organizationId">Id организации</param>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetPagination(CAT.Controllers.DTO.DailyAnimalsFilterDTO,System.Guid)">
+            <summary>
+            Информация о списке животных для пагинации
+            </summary>
+            <param name="type">Тип животного</param>
+            <param name="organizationId">Id организации</param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.DeleteDailyAction(System.Guid,System.Guid[])">
+            <summary>
+            Удаляет ежедневные действия
+            </summary>
+            <param name="organizationId">Id организации</param>
+            <param name="actionIds"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.DeleteResearch(System.Guid,System.Guid[])">
+            <summary>
+            Удаляет ежедневные действия (исследования)
+            </summary>
+            <param name="organizationId">Id организации</param>
+            <param name="researchIds"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.CreateDailyAction(System.Guid,CAT.Controllers.DTO.CreateDailyActionDTO[])">
+            <summary>
+            Создаёт ежедневные действия
+            </summary>
+            <param name="organizationId"></param>
+            <param name="dtoArray"></param>
+            <returns></returns>
+        </member>
+        <member name="P:CAT.Controllers.DTO.BaseSortInfoDTO.Column">
+            <summary>
+            Название колонки по сортировке
+            </summary>
+            <example>TagNumber</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.BaseSortInfoDTO.Descending">
+            <summary>
+            Сортировать ли по убыванию
+            </summary>
+            <example>true</example>
+        </member>
         <member name="P:CAT.Controllers.DTO.CensusCsvDTO.Type">
             <summary>
             Тип животного
@@ -101,9 +176,73 @@
             </summary>
             <example>TagNumber</example>
         </member>
-        <member name="P:CAT.Controllers.DTO.CensusSortInfoDTO.Descending">
+        <member name="P:CAT.Controllers.DTO.CreateDailyActionDTO.Type">
             <summary>
-            Сортировать ли по убыванию
+            Тип ежедневного действия
+            </summary>
+            <example>Осмотры</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyActionsDTO.Type">
+            <summary>
+            Тип ежедневного действия
+            </summary>
+            <example>Осмотры</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyActionsDTO.Page">
+            <summary>
+            Номер страницы
+            </summary>
+            <example>1</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.GroupId">
+            <summary>
+            Id группы животного
+            </summary>
+            <example>e927c543-d2f4-44d6-bd3a-2e26b41e03ef</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.Type">
+            <summary>
+            Тип животного
+            </summary>
+            <example>Нетель</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.TagNumber">
+            <summary>
+            Номер животного
+            </summary>
+            <example>gh678</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.IsActive">
+            <summary>
+            Только активные животные
+            </summary>
+            <example>true</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.DailyAnimalsFilterDTO.IdentificationField">
+            <summary>
+            Идентификация?
+            </summary>
+        </member>
+        <member name="P:CAT.Controllers.DTO.IdentificationValuesDTO.IdentificationId">
+            <summary>
+            Id группы животного
+            </summary>
+        </member>
+        <member name="P:CAT.Controllers.DTO.IdentificationValuesFilterDTO.GroupId">
+            <summary>
+            Id группы животного
+            </summary>
+            <example>e927c543-d2f4-44d6-bd3a-2e26b41e03ef</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.IdentificationValuesFilterDTO.Type">
+            <summary>
+            Тип животного
+            </summary>
+            <example>Нетель</example>
+        </member>
+        <member name="P:CAT.Controllers.DTO.IdentificationValuesFilterDTO.IsActive">
+            <summary>
+            Только активные животные
             </summary>
             <example>true</example>
         </member>
@@ -113,7 +252,7 @@
         <member name="P:CAT.Controllers.DTO.LoginDTO.Password">
             <example>secure_password</example>>
         </member>
-        <member name="P:CAT.Controllers.DTO.PaginationDTO.AnimalCount">
+        <member name="P:CAT.Controllers.DTO.PaginationDTO.Count">
             <example>d9776ffe-58e9-4ec2-bb03-d1a3f57942b9</example>
         </member>
         <member name="P:CAT.Controllers.DTO.PaginationDTO.EntriesPerPage">
@@ -200,6 +339,12 @@
         <member name="M:CAT.Controllers.GroupsController.GetAllIdentificationFields(System.Guid)">
             <summary>
             Получить список всех полей идентификации по организации.
+            </summary>
+            <param name="organizationId">ID организации</param>
+        </member>
+        <member name="M:CAT.Controllers.GroupsController.GetIdentificationValues(System.Guid,CAT.Controllers.DTO.IdentificationValuesDTO)">
+            <summary>
+            Получить список всех значений по полю идентификации организации.
             </summary>
             <param name="organizationId">ID организации</param>
         </member>

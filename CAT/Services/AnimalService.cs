@@ -2,6 +2,7 @@
 using CAT.Controllers.DTO;
 using CAT.EF;
 using CAT.EF.DAL;
+using CAT.Logic;
 using CAT.Models;
 using CAT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -381,16 +382,16 @@ namespace CAT.Services
             return animal.Id;
         }
 
-        public IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo)
+        public IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string? animalType = default,
+            CensusSortInfoDTO? sortInfo = default)
         {
             return AnimalDTO.Parse(_db.GetAnimalsWithIFByOrg(organisationId, animalType, sortInfo));
         }
 
-        public IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string animalType,
-            CensusSortInfoDTO sortInfo, int page = 1, bool isMoblile = default)
+        public IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string? animalType = default,
+            CensusSortInfoDTO? sortInfo = default, int page = 1, bool isMoblile = default)
         {
-            var take = isMoblile ? 5 : 10;
-            var skip = (page - 1) * take;
+            var (skip, take) = ControllersLogic.ComputePagination(isMoblile, page);
             return GetAnimalCensus(organisationId, animalType, sortInfo)
                 .Skip(skip)
                 .Take(take);
@@ -421,10 +422,30 @@ namespace CAT.Services
             if (updateInfo.IdentificationFields != null)
                 foreach (var field in updateInfo.IdentificationFields)
                 {
-                    if (field.IdentificationValue != null)
-                        _db.UpdateAnimal(id: updateInfo.Id, identificationFieldName: field.IdentificationFieldName,
-                            identificationValue: field.IdentificationValue);
+                    if (field.Value != null)
+                        _db.UpdateAnimal(id: updateInfo.Id, identificationFieldName: field.Name,
+                            identificationValue: field.Value);
                 }
+        }
+
+        public IEnumerable<ActiveAnimalDAL> GetAnimalsForDA(Guid organizationId, DailyAnimalsDTO dto,
+            int? page = default, bool isMoblile = default)
+        {
+            if (page != null)
+            {
+                var (skip, take) = ControllersLogic.ComputePagination(isMoblile, page ?? 1);
+                return _db.GetAnimalsForActionsWithFilter(organizationId, dto)
+                            .Skip(skip)
+                            .Take(take);
+
+            }
+            
+            return _db.GetAnimalsForActionsWithFilter(organizationId, dto);
+        }
+
+        public AnimalDTO? GetAnimalInfo(Guid organizationId, Guid animalId)
+        {
+            return GetAnimalCensus(organizationId).FirstOrDefault(e => e.Id == animalId);
         }
 
         public Dictionary<string, int> GetMainPageInfo(Guid organizationId)
@@ -573,4 +594,3 @@ namespace CAT.Services
         }
     }
 }
-

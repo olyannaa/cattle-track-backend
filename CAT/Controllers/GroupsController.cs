@@ -115,6 +115,17 @@ namespace CAT.Controllers
         }
 
         /// <summary>
+        /// Получить список всех значений по полю идентификации организации.
+        /// </summary>
+        /// <param name="organizationId">ID организации</param>
+        [HttpGet, Route("identification/values")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public async Task<IActionResult> GetIdentificationValues([FromHeader] Guid organizationId, [FromQuery] IdentificationValuesDTO dto)
+        {
+            return Ok(_groupService.GetIdentificationValues(dto.IdentificationId, organizationId, dto.Filter));
+        }
+
+        /// <summary>
         /// Создать новое поле идентификации.
         /// </summary>
         /// <param name="dto">Данные нового поля</param>

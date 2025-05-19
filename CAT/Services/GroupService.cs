@@ -83,5 +83,10 @@ namespace CAT.Services
 
         public void EditGroup(EditGroupDTO dto, Guid organizationId)
             => _db.EditGroup(dto.Id, organizationId, dto.Name, dto.TypeId, dto.Description, dto.Location);
+
+        public IEnumerable<string?> GetIdentificationValues(Guid identificationId, Guid orgId, IdentificationValuesFilterDTO? filter)
+        {
+            return _db.GetIdentificationValues(identificationId, orgId, filter);
+        }
     }
 }

@@ -29,6 +29,6 @@ namespace CAT.Controllers.DTO
 
         public string? FatherTagNumber { get; init; }
 
-        public IdentificationFieldDTO[]? IdentificationFields{ get; init; }
+        public IdentificationFieldNameDTO[]? IdentificationFields{ get; init; }
     }
 }

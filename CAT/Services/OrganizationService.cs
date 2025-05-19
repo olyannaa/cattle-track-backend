@@ -21,6 +21,24 @@ namespace CAT.Services
             return _db.Animals.Where(x => x.Id == animalId).SingleOrDefault()?.OrganizationId == orgId;
         }
 
+        public bool CheckDailyActionById(Guid orgId, Guid? actionId)
+        {
+            if (actionId == null) return false;
+            return _db.DailyActions.Include(e => e.Animal)
+                .Where(x => x.Id == actionId)
+                .SingleOrDefault()?
+                .Animal?.OrganizationId == orgId;
+        }
+
+        public bool CheckResearchById(Guid orgId, Guid? researchId)
+        {
+            if (researchId == null) return false;
+            return _db.Researches
+                .Where(x => x.Id == researchId)
+                .SingleOrDefault()?
+                .OrganizationId == orgId;
+        }
+
         public bool CheckGroupById(Guid orgId, Guid? groupId)
         {
             if (groupId == null) return false;

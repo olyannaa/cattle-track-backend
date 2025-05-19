@@ -11,8 +11,14 @@ namespace CAT.Services.Interfaces
         List<GroupInfoDTO>? GetGroupsInfo(Guid org_id);
         List<IdentificationInfoDTO>? GetIdentificationsFields(Guid org_id);
         public ImportAnimalsInfo ImportAnimalsFromCSV(List<AnimalCSVInfoDTO> animals, Guid org_id);
-        IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo);
-        IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string animalType, CensusSortInfoDTO sortInfo, int page = 1, bool isMoblile = default);
+        IEnumerable<AnimalDTO> GetAnimalCensus(Guid organisationId, string? animalType = default,
+                                                    CensusSortInfoDTO? sortInfo = default);
+        IEnumerable<AnimalDTO> GetAnimalCensusByPage(Guid organisationId, string? animalType = default,
+                                CensusSortInfoDTO? sortInfo = default, int page = 1, bool isMoblile = default);
+        IEnumerable<ActiveAnimalDAL> GetAnimalsForDA(Guid organizationId, DailyAnimalsDTO filters,
+                                    int? page = default, bool isMoblile = default);
+
+        AnimalDTO? GetAnimalInfo(Guid organizationId, Guid animalId);
         Dictionary<string, int> GetMainPageInfo(Guid organizationId);
         IEnumerable<CowDTO> GetCows(Guid organizationId);
         IEnumerable<BullDTO> GetBulls(Guid organizationId);

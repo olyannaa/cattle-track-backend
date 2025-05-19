@@ -37,6 +37,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IAuthService, CookiesAuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDailyActionService, DailyActionService>();
 builder.Services.AddSingleton<CustomCookieAuthenticationEvents>();
 builder.Services.AddScoped<OrgValidationFilter>();
 

@@ -24,17 +24,17 @@ public class AnimalDTO
 
     public string? FatherTagNumber { get; init; }
 
-    public List<IdentificationFieldDTO>? IdentificationFields { get; init; }
+    public List<IdentificationFieldNameDTO>? IdentificationFields { get; init; }
 
     public static List<AnimalDTO> Parse(IEnumerable<IGrouping<Guid, AnimalCensus>> census)
     {
         return census.Select(g =>
                     {
                         var fields = g.Where(e => e.IdentificationFieldName != null)
-                                        .Select(e => new IdentificationFieldDTO
+                                        .Select(e => new IdentificationFieldNameDTO
                                         {
-                                            IdentificationFieldName = e.IdentificationFieldName,
-                                            IdentificationValue = e.IdentificationValue
+                                            Name = e.IdentificationFieldName,
+                                            Value = e.IdentificationValue
                                         }).ToList();
 
                         var e = g.First();
@@ -55,10 +55,4 @@ public class AnimalDTO
                     })
                     .ToList();
     }
-}
-
-public class IdentificationFieldDTO
-{
-    public string? IdentificationFieldName { get; init; }
-    public string? IdentificationValue { get; init; }
 }
