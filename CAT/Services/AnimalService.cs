@@ -530,7 +530,7 @@ namespace CAT.Services
                     BullId = x.BullId,
                     CowTagNumber = x.CowTagNumber,
                     BullTagNumber = x.BullTagNumber,
-                    Name = $"№{x.CowTagNumber}, (осеменена {x.InseminationDate?.ToString("dd.MM.yyyy") ?? "дата неизвестна"})"
+                    Name = $"№{x.CowTagNumber}, (ожид. {x.InseminationDate.Value.AddDays(285)})"
                 });
             }
 
