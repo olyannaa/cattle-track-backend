@@ -73,7 +73,7 @@ namespace CAT.Controllers
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetAnimalsForDA([FromHeader] Guid organizationId, [FromQuery] DailyAnimalsDTO dto)
         {
-            var isMobile = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
+            var isMobile = true;
             return Ok(_animalService.GetAnimalsForDA(organizationId, dto, dto.Page, isMobile));
         }
 
@@ -87,7 +87,7 @@ namespace CAT.Controllers
         [OrgValidationTypeFilter(checkOrg: true)]
         public IActionResult GetPagination([FromQuery] DailyAnimalsFilterDTO dto, [FromHeader] Guid organizationId)
         {
-            var entries = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent) ? 5 : 10;
+            var entries = 5;
             var count = _animalService.GetAnimalsForDA(organizationId, new DailyAnimalsDTO { Filter = dto }).Count();
             return Ok(new PaginationDTO{Count = count, EntriesPerPage = entries});
         }
