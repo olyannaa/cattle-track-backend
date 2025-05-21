@@ -8,6 +8,8 @@ public class AnimalDTO
 
     public string TagNumber { get; init; } = null!;
 
+    public string? Type { get; init; }
+
     public DateOnly? BirthDate { get; init; }
 
     public string? Breed { get; init; }
@@ -44,6 +46,7 @@ public class AnimalDTO
                             TagNumber = e.TagNumber,
                             BirthDate = e.BirthDate,
                             Breed = e.Breed,
+                            Type = e.Type,
                             GroupName = e.GroupName,
                             Status = e.Status,
                             Origin = e.Origin,

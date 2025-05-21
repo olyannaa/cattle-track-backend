@@ -63,6 +63,11 @@
             Получает идентификационные поля для животных.
             </summary>
         </member>
+        <member name="M:CAT.Controllers.AnimalsController.GetMainPageInfo(System.Guid)">
+            <summary>
+            Получает словарь с количеством животных каждого типа организации.
+            </summary>
+        </member>
         <member name="M:CAT.Controllers.AuthController.Login(CAT.Controllers.DTO.LoginDTO)">
             <summary>
             Авторизация по логину и паролю на куках
