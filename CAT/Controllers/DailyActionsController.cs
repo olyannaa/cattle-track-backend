@@ -56,11 +56,25 @@ namespace CAT.Controllers
         /// <returns></returns>
         [HttpGet]
         [OrgValidationTypeFilter(checkOrg: true)]
-        public IActionResult GetDailyActions([FromHeader] Guid organizationId, [FromQuery] DailyActionsDTO dto)
+        public IActionResult GetDailyActions([FromHeader] Guid organizationId, [FromQuery] DailyActionsPaginationDTO dto)
         {
             var isMobileDevice = ControllersLogic.IsMobileDevice(Request.Headers.UserAgent);
             var dailyActions = _daService.GetDailyActionsByPage(organizationId, dto.Type, dto.SortInfo, dto.Page, isMobileDevice)?.ToList();
             return Ok(dailyActions);
+        }
+
+        /// <summary>
+        /// Возвращение списка id ежедневных действий по типу
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("ids")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetDailyActionsIds([FromHeader] Guid organizationId, [FromQuery] DailyActionsDTO dto)
+        {
+            var ids = _daService.GetDailyActions(organizationId, dto.Type, dto.SortInfo)?
+                                .Select(e => e.Id)
+                                .ToList();
+            return Ok(ids);
         }
 
         /// <summary>
@@ -75,6 +89,23 @@ namespace CAT.Controllers
         {
             var isMobile = true;
             return Ok(_animalService.GetAnimalsForDA(organizationId, dto, dto.Page, isMobile));
+        }
+
+         /// <summary>
+        /// Возвращает список id животных для ЕД, используя фильтры
+        /// </summary>
+        /// <param name="organizationId">Id организации</param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpGet, Route("animals/ids")]
+        [OrgValidationTypeFilter(checkOrg: true)]
+        public IActionResult GetAnimalsIdsForDA([FromHeader] Guid organizationId, [FromQuery] DailyAnimalsDTO dto)
+        {
+            var isMobile = true;
+            var ids = _animalService.GetAnimalsForDA(organizationId, dto, dto.Page, isMobile)
+                                    .Select(e => e.Id)
+                                    .ToList();
+            return Ok(ids);
         }
 
         /// <summary>

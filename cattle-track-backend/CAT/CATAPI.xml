@@ -93,15 +93,29 @@
             <param name="organizationId">Id организации</param>
             <returns></returns>
         </member>
-        <member name="M:CAT.Controllers.DailyActionsController.GetDailyActions(System.Guid,CAT.Controllers.DTO.DailyActionsDTO)">
+        <member name="M:CAT.Controllers.DailyActionsController.GetDailyActions(System.Guid,CAT.Controllers.DTO.DailyActionsPaginationDTO)">
             <summary>
             Возвращение списка ежедневных действий по типу с пагинацией
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetDailyActionsIds(System.Guid,CAT.Controllers.DTO.DailyActionsDTO)">
+            <summary>
+            Возвращение списка id ежедневных действий по типу с пагинацией
             </summary>
             <returns></returns>
         </member>
         <member name="M:CAT.Controllers.DailyActionsController.GetAnimalsForDA(System.Guid,CAT.Controllers.DTO.DailyAnimalsDTO)">
             <summary>
             Возвращает список животных для ЕД, используя фильтры
+            </summary>
+            <param name="organizationId">Id организации</param>
+            <param name="dto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:CAT.Controllers.DailyActionsController.GetAnimalsIdsForDA(System.Guid,CAT.Controllers.DTO.DailyAnimalsDTO)">
+            <summary>
+            Возвращает список id животных для ЕД, используя фильтры
             </summary>
             <param name="organizationId">Id организации</param>
             <param name="dto"></param>
@@ -193,7 +207,7 @@
             </summary>
             <example>Осмотры</example>
         </member>
-        <member name="P:CAT.Controllers.DTO.DailyActionsDTO.Page">
+        <member name="P:CAT.Controllers.DTO.DailyActionsPaginationDTO.Page">
             <summary>
             Номер страницы
             </summary>
